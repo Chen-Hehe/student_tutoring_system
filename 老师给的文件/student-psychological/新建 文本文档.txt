@@ -1,0 +1,32 @@
+## 已创建的页面
+### 基础页面
+- 首页 ( index.html ) - 平台介绍、功能展示和角色说明
+- 登录页面 ( login.html ) - 支持四种角色登录
+- 注册页面 ( register.html ) - 新用户注册
+- 忘记密码 ( forgot-password.html ) - 密码重置
+- 关于我们 ( about.html ) - 平台介绍和联系方式
+### 学生相关页面
+- 学生仪表盘 ( student-dashboard.html ) - 学习进度和任务管理
+- 教师选择 ( student-teacher-selection.html ) - 浏览和选择教师
+- 聊天页面 ( student-chat.html ) - 与教师沟通
+- 学习资源 ( student-resources.html ) - 下载学习资料
+- 心理支持 ( student-psychological.html ) - 心理咨询服务
+- AI推荐 ( student-ai-recommendation.html ) - 智能教师推荐
+- 匹配管理 ( student-match.html ) - 管理教师匹配
+### 教师相关页面
+- 教师仪表盘 ( teacher-dashboard.html ) - 学生管理和任务概览
+- 学生管理 ( teacher-student-management.html ) - 管理辅导学生
+- 聊天页面 ( teacher-chat.html ) - 与学生沟通
+- 资源管理 ( teacher-resources.html ) - 上传和管理教学资源
+- 心理支持 ( teacher-psychological.html ) - 学生心理状态管理
+- AI匹配 ( teacher-ai-match.html ) - 智能学生推荐
+- 匹配管理 ( teacher-match-management.html ) - 管理学生匹配
+### 家长相关页面
+- 家长仪表盘 ( parent-dashboard.html ) - 孩子学习和心理状态概览
+- 孩子管理 ( parent-child-management.html ) - 添加和管理孩子
+- 教师沟通 ( parent-teacher-communication.html ) - 与教师交流
+- 学习报告 ( parent-learning-report.html ) - 孩子学习情况报告
+- 心理状态 ( parent-psychological-status.html ) - 孩子心理状态评估
+- 匹配确认 ( parent-match-confirmation.html ) - 确认教师匹配
+### 管理员页面
+- 管理员仪表盘 ( admin-dashboard.html ) - 系统管理和统计

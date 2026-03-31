@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天沟通 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+        }
+        
+        .chat-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .chat-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .chat-item.active {
+            background-color: #e8f5e8;
+        }
+        
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .chat-item-name {
+            font-weight: bold;
+        }
+        
+        .chat-item-time {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .chat-item-message {
+            font-size: 0.9em;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        .chat-top-bar {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .chat-user-info h3 {
+            margin-bottom: 2px;
+        }
+        
+        .chat-user-status {
+            font-size: 0.8em;
+            color: #4CAF50;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message.received {
+            align-items: flex-start;
+        }
+        
+        .message.sent {
+            align-items: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+        
+        .message.received .message-content {
+            background: white;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message.sent .message-content {
+            background: #4CAF50;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            resize: none;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .chat-send-btn {
+            padding: 0 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .chat-sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>学生中心</h2>
+            <ul class="nav-menu">
+                <li><a href="student-dashboard.html">仪表盘</a></li>
+                <li><a href="student-teacher-selection.html">教师选择</a></li>
+                <li><a href="student-chat.html" class="active">聊天沟通</a></li>
+                <li><a href="student-resources.html">学习资源</a></li>
+                <li><a href="student-psychological.html">心理支持</a></li>
+                <li><a href="student-ai-recommendation.html">AI推荐</a></li>
+                <li><a href="student-match.html">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="chat-sidebar">
+                <div class="chat-header">聊天列表</div>
+                <div class="chat-list">
+                    <div class="chat-item active" onclick="selectChat('teacher1')">
+                        <div class="chat-item-header">
+                            <div class="chat-item-name">李老师</div>
+                            <div class="chat-item-time">10:30</div>
+                        </div>
+                        <div class="chat-item-message">好的，我们明天下午3点开始辅导</div>
+                    </div>
+                    <div class="chat-item" onclick="selectChat('parent1')">
+                        <div class="chat-item-header">
+                            <div class="chat-item-name">妈妈</div>
+                            <div class="chat-item-time">昨天</div>
+                        </div>
+                        <div class="chat-item-message">最近学习怎么样？</div>
+                    </div>
+                    <div class="chat-item" onclick="selectChat('teacher2')">
+                        <div class="chat-item-header">
+                            <div class="chat-item-name">王老师</div>
+                            <div class="chat-item-time">2天前</div>
+                        </div>
+                        <div class="chat-item-message">作文作业已经批改好了</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="chat-top-bar">
+                    <div class="chat-user-avatar">李</div>
+                    <div class="chat-user-info">
+                        <h3>李老师</h3>
+                        <div class="chat-user-status">在线</div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message received">
+                        <div class="message-content">你好，小明！最近数学学习怎么样？</div>
+                        <div class="message-time">10:00</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">老师好！我最近在学习分数的加减法，有些地方不太明白</div>
+                        <div class="message-time">10:15</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">没关系，我们可以在明天的辅导课上详细讲解。你可以先把不明白的地方记下来，明天我们一起解决</div>
+                        <div class="message-time">10:20</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">好的，谢谢老师！</div>
+                        <div class="message-time">10:25</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">好的，我们明天下午3点开始辅导</div>
+                        <div class="message-time">10:30</div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="输入消息...">
+                    <button class="chat-send-btn" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function selectChat(chatId) {
+            // 模拟选择聊天
+            console.log('Selected chat:', chatId);
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                const now = new Date();
+                const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+                
+                // 创建新消息元素
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message sent';
+                messageElement.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                // 添加到聊天记录
+                chatMessages.appendChild(messageElement);
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // 清空输入框
+                input.value = '';
+            }
+        }
+        
+        // 监听Enter键发送消息
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

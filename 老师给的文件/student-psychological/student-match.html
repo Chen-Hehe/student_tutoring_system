@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匹配管理 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #4CAF50;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .match-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .match-list {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .match-item {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .match-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .match-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .match-item-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .match-item-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .match-item-details {
+            margin-bottom: 15px;
+        }
+        
+        .match-item-details p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .match-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #bdbdbd;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .match-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .match-item-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>学生中心</h2>
+            <ul class="nav-menu">
+                <li><a href="student-dashboard.html">仪表盘</a></li>
+                <li><a href="student-teacher-selection.html">教师选择</a></li>
+                <li><a href="student-chat.html">聊天沟通</a></li>
+                <li><a href="student-resources.html">学习资源</a></li>
+                <li><a href="student-psychological.html">心理支持</a></li>
+                <li><a href="student-ai-recommendation.html">AI推荐</a></li>
+                <li><a href="student-match.html" class="active">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>匹配管理</h1>
+                <div class="user-info">
+                    <span>欢迎，小明</span>
+                    <div class="user-avatar">小</div>
+                </div>
+            </div>
+            
+            <div class="match-tabs">
+                <button class="tab-btn active" onclick="switchTab('sent')">我发送的请求</button>
+                <button class="tab-btn" onclick="switchTab('received')">我收到的邀请</button>
+                <button class="tab-btn" onclick="switchTab('matched')">已匹配</button>
+            </div>
+            
+            <div class="match-list" id="matchList">
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导请求 - 李老师（数学）</div>
+                        <span class="match-item-status status-pending">待家长确认</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 请求内容：我希望在数学方面得到辅导，特别是分数的加减法</p>
+                        <p>⏰ 发送时间：2026-03-30 09:30</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-secondary" onclick="cancelRequest(1)">取消请求</button>
+                    </div>
+                </div>
+                
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导请求 - 王老师（语文）</div>
+                        <span class="match-item-status status-approved">已匹配</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 请求内容：我希望在语文作文方面得到辅导</p>
+                        <p>⏰ 发送时间：2026-03-28 14:20</p>
+                        <p>✅ 确认时间：2026-03-29 10:15</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-primary" onclick="viewDetails(2)">查看详情</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            // 切换标签
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 模拟切换内容
+            console.log('Switching to tab:', tab);
+        }
+        
+        function cancelRequest(requestId) {
+            // 取消请求
+            if (confirm('确定要取消这个辅导请求吗？')) {
+                alert('辅导请求已取消');
+            }
+        }
+        
+        function viewDetails(matchId) {
+            // 查看详情
+            alert('查看匹配详情');
+        }
+    </script>
+</body>
+</html>

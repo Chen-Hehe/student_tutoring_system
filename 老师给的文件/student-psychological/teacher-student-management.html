@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #2196F3;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .search-form button {
+            padding: 12px 24px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-form button:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .student-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>教师中心</h2>
+            <ul class="nav-menu">
+                <li><a href="teacher-dashboard.html">仪表盘</a></li>
+                <li><a href="teacher-student-management.html" class="active">学生管理</a></li>
+                <li><a href="teacher-chat.html">聊天沟通</a></li>
+                <li><a href="teacher-resources.html">教学资源</a></li>
+                <li><a href="teacher-psychological.html">心理辅导</a></li>
+                <li><a href="teacher-ai-match.html">AI匹配</a></li>
+                <li><a href="teacher-match-management.html">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>学生管理</h1>
+                <div class="user-info">
+                    <span>欢迎，李老师</span>
+                    <div class="user-avatar">李</div>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <form class="search-form">
+                    <input type="text" placeholder="搜索学生姓名、年级...">
+                    <button type="submit">搜索</button>
+                </form>
+            </div>
+            
+            <div class="student-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>学生姓名</th>
+                            <th>年级</th>
+                            <th>科目</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>小明</td>
+                            <td>三年级</td>
+                            <td>数学</td>
+                            <td><span class="status-badge status-active">活跃</span></td>
+                            <td>
+                                <button class="btn btn-primary">沟通</button>
+                                <button class="btn btn-secondary">详情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>小红</td>
+                            <td>四年级</td>
+                            <td>语文</td>
+                            <td><span class="status-badge status-active">活跃</span></td>
+                            <td>
+                                <button class="btn btn-primary">沟通</button>
+                                <button class="btn btn-secondary">详情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>小刚</td>
+                            <td>五年级</td>
+                            <td>英语</td>
+                            <td><span class="status-badge status-pending">待确认</span></td>
+                            <td>
+                                <button class="btn btn-primary">确认</button>
+                                <button class="btn btn-secondary">详情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>小丽</td>
+                            <td>六年级</td>
+                            <td>数学</td>
+                            <td><span class="status-badge status-inactive">未激活</span></td>
+                            <td>
+                                <button class="btn btn-primary">激活</button>
+                                <button class="btn btn-secondary">详情</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

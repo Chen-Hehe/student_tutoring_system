@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI推荐 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #4CAF50;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .ai-intro {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .ai-intro h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .ai-intro p {
+            line-height: 1.6;
+        }
+        
+        .recommendation-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .recommendation-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .recommendation-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .recommendation-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .recommendation-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .teacher-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #E8F5E8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4CAF50;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .teacher-info h3 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        
+        .teacher-subject {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .match-score {
+            margin-bottom: 15px;
+        }
+        
+        .score-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 5px;
+        }
+        
+        .score-text {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .match-reason {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .btn-request {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-request:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .recommendation-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>学生中心</h2>
+            <ul class="nav-menu">
+                <li><a href="student-dashboard.html">仪表盘</a></li>
+                <li><a href="student-teacher-selection.html">教师选择</a></li>
+                <li><a href="student-chat.html">聊天沟通</a></li>
+                <li><a href="student-resources.html">学习资源</a></li>
+                <li><a href="student-psychological.html">心理支持</a></li>
+                <li><a href="student-ai-recommendation.html" class="active">AI推荐</a></li>
+                <li><a href="student-match.html">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>AI推荐</h1>
+                <div class="user-info">
+                    <span>欢迎，小明</span>
+                    <div class="user-avatar">小</div>
+                </div>
+            </div>
+            
+            <div class="ai-intro">
+                <h2>什么是AI推荐？</h2>
+                <p>我们的AI推荐系统会根据你的学习需求、年级、学习风格等信息，为你推荐最适合的教师。系统会分析教师的专业背景、教学经验、擅长科目等因素，为你匹配最理想的辅导老师。</p>
+            </div>
+            
+            <div class="recommendation-section">
+                <h2>为你推荐的教师</h2>
+                <div class="recommendation-list">
+                    <div class="recommendation-card">
+                        <div class="recommendation-header">
+                            <div class="teacher-avatar">李</div>
+                            <div class="teacher-info">
+                                <h3>李老师</h3>
+                                <div class="teacher-subject">数学教师</div>
+                            </div>
+                        </div>
+                        <div class="match-score">
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: 95%;"></div>
+                            </div>
+                            <div class="score-text">匹配度：95%</div>
+                        </div>
+                        <div class="match-reason">
+                            <strong>推荐理由：</strong>
+                            <ul>
+                                <li>擅长小学数学教学，特别是分数加减法</li>
+                                <li>有8年教学经验，适合辅导三年级学生</li>
+                                <li>教学风格温和，善于激发学生兴趣</li>
+                            </ul>
+                        </div>
+                        <button class="btn-request" onclick="requestTeacher(1)">发送辅导请求</button>
+                    </div>
+                    
+                    <div class="recommendation-card">
+                        <div class="recommendation-header">
+                            <div class="teacher-avatar">王</div>
+                            <div class="teacher-info">
+                                <h3>王老师</h3>
+                                <div class="teacher-subject">语文教师</div>
+                            </div>
+                        </div>
+                        <div class="match-score">
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: 88%;"></div>
+                            </div>
+                            <div class="score-text">匹配度：88%</div>
+                        </div>
+                        <div class="match-reason">
+                            <strong>推荐理由：</strong>
+                            <ul>
+                                <li>擅长小学语文和作文指导</li>
+                                <li>有5年教学经验，了解三年级学生的学习特点</li>
+                                <li>注重培养学生的阅读兴趣和写作能力</li>
+                            </ul>
+                        </div>
+                        <button class="btn-request" onclick="requestTeacher(2)">发送辅导请求</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function requestTeacher(teacherId) {
+            // 发送辅导请求
+            alert('辅导请求已发送，请等待老师和家长确认');
+            // 跳转到匹配管理页面
+            window.location.href = 'student-match.html';
+        }
+    </script>
+</body>
+</html>

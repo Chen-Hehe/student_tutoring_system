@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .nav button {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .nav button:hover {
+            background-color: #e8f5e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .hero {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .hero h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .hero p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .feature-card p {
+            line-height: 1.5;
+        }
+        
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+        
+        .roles {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .roles h2 {
+            color: #4CAF50;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+        
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .role-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        
+        .role-card:hover {
+            background: #e8f5e8;
+            transform: translateY(-3px);
+        }
+        
+        .role-card h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav button {
+                width: 200px;
+            }
+            
+            .hero {
+                padding: 20px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>乡村助学平台</h1>
+            <p class="subtitle">连接城市教师与乡村孩子的桥梁</p>
+            <div class="nav">
+                <button onclick="window.location.href='login.html'">登录</button>
+                <button onclick="window.location.href='register.html'">注册</button>
+                <button onclick="window.location.href='about.html'">关于我们</button>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <h2>让每个孩子都能接受优质教育</h2>
+            <p>乡村助学平台致力于解决教育公平问题，为乡村孩子提供优质的教育资源和心理支持。通过连接城市教师和乡村学生，我们希望能够缩小城乡教育差距，让每个孩子都能拥有平等的学习机会。</p>
+        </section>
+        
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>教学辅导</h3>
+                <p>城市教师为乡村学生提供一对一的教学辅导，帮助他们解决学习问题，提高学习成绩。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">❤️</div>
+                <h3>心理教育</h3>
+                <p>为留守儿童提供及时的心理干预和支持，帮助他们健康成长，建立积极的心态。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI智能匹配</h3>
+                <p>利用AI技术为学生匹配合适的教师，为教师筛选目标学生，提高教学效率和质量。</p>
+            </div>
+        </section>
+        
+        <section class="roles">
+            <h2>系统角色</h2>
+            <div class="role-cards">
+                <div class="role-card">
+                    <h3>教育教师</h3>
+                    <p>提供教学辅导和心理教育</p>
+                </div>
+                <div class="role-card">
+                    <h3>儿童/学生</h3>
+                    <p>接受教育辅导和心理支持</p>
+                </div>
+                <div class="role-card">
+                    <h3>家长/监护人</h3>
+                    <p>了解孩子的学习情况和心理状态</p>
+                </div>
+                <div class="role-card">
+                    <h3>管理员</h3>
+                    <p>管理系统用户和内容</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>&copy; 2026 乡村助学平台. 保留所有权利.</p>
+        </footer>
+    </div>
+</body>
+</html>

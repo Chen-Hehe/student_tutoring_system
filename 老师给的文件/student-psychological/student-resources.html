@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习资源 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #4CAF50;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .search-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .search-bar button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-bar button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-item label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .filter-item select {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .resource-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .resource-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .resource-icon {
+            font-size: 2.5em;
+            color: #4CAF50;
+        }
+        
+        .resource-info h3 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        
+        .resource-meta {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .resource-description {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .resource-tags {
+            margin-bottom: 15px;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #E8F5E8;
+            color: #4CAF50;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .btn-download {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>学生中心</h2>
+            <ul class="nav-menu">
+                <li><a href="student-dashboard.html">仪表盘</a></li>
+                <li><a href="student-teacher-selection.html">教师选择</a></li>
+                <li><a href="student-chat.html">聊天沟通</a></li>
+                <li><a href="student-resources.html" class="active">学习资源</a></li>
+                <li><a href="student-psychological.html">心理支持</a></li>
+                <li><a href="student-ai-recommendation.html">AI推荐</a></li>
+                <li><a href="student-match.html">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>学习资源</h1>
+                <div class="user-info">
+                    <span>欢迎，小明</span>
+                    <div class="user-avatar">小</div>
+                </div>
+            </div>
+            
+            <div class="search-filter">
+                <div class="search-bar">
+                    <input type="text" placeholder="搜索学习资源">
+                    <button>搜索</button>
+                </div>
+                <div class="filters">
+                    <div class="filter-item">
+                        <label>科目</label>
+                        <select>
+                            <option value="">全部科目</option>
+                            <option value="math">数学</option>
+                            <option value="chinese">语文</option>
+                            <option value="english">英语</option>
+                            <option value="physics">物理</option>
+                            <option value="chemistry">化学</option>
+                            <option value="biology">生物</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>资源类型</label>
+                        <select>
+                            <option value="">全部类型</option>
+                            <option value="document">文档</option>
+                            <option value="video">视频</option>
+                            <option value="audio">音频</option>
+                            <option value="presentation">演示文稿</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>年级</label>
+                        <select>
+                            <option value="">全部年级</option>
+                            <option value="primary">小学</option>
+                            <option value="middle">初中</option>
+                            <option value="high">高中</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">📄</div>
+                        <div class="resource-info">
+                            <h3>分数加减法练习</h3>
+                            <div class="resource-meta">数学 · 小学 · 文档</div>
+                        </div>
+                    </div>
+                    <div class="resource-description">
+                        包含分数加减法的详细讲解和练习题，适合小学三年级学生使用。
+                    </div>
+                    <div class="resource-tags">
+                        <span class="tag">分数</span>
+                        <span class="tag">加减法</span>
+                        <span class="tag">小学</span>
+                    </div>
+                    <button class="btn-download" onclick="downloadResource(1)">下载</button>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">🎥</div>
+                        <div class="resource-info">
+                            <h3>作文写作技巧</h3>
+                            <div class="resource-meta">语文 · 初中 · 视频</div>
+                        </div>
+                    </div>
+                    <div class="resource-description">
+                        详细讲解初中作文的写作技巧和方法，包括审题、立意、结构等方面。
+                    </div>
+                    <div class="resource-tags">
+                        <span class="tag">作文</span>
+                        <span class="tag">写作技巧</span>
+                        <span class="tag">初中</span>
+                    </div>
+                    <button class="btn-download" onclick="downloadResource(2)">下载</button>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">📄</div>
+                        <div class="resource-info">
+                            <h3>英语单词记忆方法</h3>
+                            <div class="resource-meta">英语 · 小学 · 文档</div>
+                        </div>
+                    </div>
+                    <div class="resource-description">
+                        介绍几种有效的英语单词记忆方法，帮助小学生快速掌握英语单词。
+                    </div>
+                    <div class="resource-tags">
+                        <span class="tag">英语</span>
+                        <span class="tag">单词记忆</span>
+                        <span class="tag">小学</span>
+                    </div>
+                    <button class="btn-download" onclick="downloadResource(3)">下载</button>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">🎥</div>
+                        <div class="resource-info">
+                            <h3>数学应用题解题思路</h3>
+                            <div class="resource-meta">数学 · 初中 · 视频</div>
+                        </div>
+                    </div>
+                    <div class="resource-description">
+                        详细讲解初中数学应用题的解题思路和方法，帮助学生提高解题能力。
+                    </div>
+                    <div class="resource-tags">
+                        <span class="tag">数学</span>
+                        <span class="tag">应用题</span>
+                        <span class="tag">初中</span>
+                    </div>
+                    <button class="btn-download" onclick="downloadResource(4)">下载</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function downloadResource(resourceId) {
+            // 模拟下载资源
+            alert('资源下载中，请稍候...');
+            setTimeout(() => {
+                alert('资源下载成功！');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

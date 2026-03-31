@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理支持 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #4CAF50;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .psychological-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .psychological-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .psychological-section p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .counselor-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .counselor-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        
+        .counselor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .counselor-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .counselor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #E8F5E8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4CAF50;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .counselor-info h3 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        
+        .counselor-specialty {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .counselor-description {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .btn-consult {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-consult:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .assessment-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .assessment-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .btn-assessment {
+            padding: 15px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-assessment:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .counselor-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>学生中心</h2>
+            <ul class="nav-menu">
+                <li><a href="student-dashboard.html">仪表盘</a></li>
+                <li><a href="student-teacher-selection.html">教师选择</a></li>
+                <li><a href="student-chat.html">聊天沟通</a></li>
+                <li><a href="student-resources.html">学习资源</a></li>
+                <li><a href="student-psychological.html" class="active">心理支持</a></li>
+                <li><a href="student-ai-recommendation.html">AI推荐</a></li>
+                <li><a href="student-match.html">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>心理支持</h1>
+                <div class="user-info">
+                    <span>欢迎，小明</span>
+                    <div class="user-avatar">小</div>
+                </div>
+            </div>
+            
+            <div class="psychological-section">
+                <h2>关于心理支持</h2>
+                <p>我们理解成长过程中可能会遇到各种心理挑战，特别是对于留守儿童来说，可能会面临更多的心理压力。我们的心理支持服务旨在为你提供专业的心理辅导和支持，帮助你健康成长。</p>
+                <p>你可以通过以下方式获得心理支持：</p>
+                <ul>
+                    <li>与专业心理咨询师进行一对一的咨询</li>
+                    <li>参与心理健康评估，了解自己的心理状态</li>
+                    <li>获取心理健康相关的资源和建议</li>
+                </ul>
+            </div>
+            
+            <div class="psychological-section">
+                <h2>专业心理咨询师</h2>
+                <div class="counselor-list">
+                    <div class="counselor-card">
+                        <div class="counselor-header">
+                            <div class="counselor-avatar">张</div>
+                            <div class="counselor-info">
+                                <h3>张老师</h3>
+                                <div class="counselor-specialty">儿童心理咨询师</div>
+                            </div>
+                        </div>
+                        <div class="counselor-description">
+                            拥有10年儿童心理咨询经验，擅长处理留守儿童的心理问题，包括分离焦虑、情绪管理等。
+                        </div>
+                        <button class="btn-consult" onclick="consultCounselor(1)">预约咨询</button>
+                    </div>
+                    
+                    <div class="counselor-card">
+                        <div class="counselor-header">
+                            <div class="counselor-avatar">李</div>
+                            <div class="counselor-info">
+                                <h3>李老师</h3>
+                                <div class="counselor-specialty">青少年心理咨询师</div>
+                            </div>
+                        </div>
+                        <div class="counselor-description">
+                            专注于青少年心理健康，擅长处理学习压力、人际关系等问题，采用温和而有效的咨询方法。
+                        </div>
+                        <button class="btn-consult" onclick="consultCounselor(2)">预约咨询</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="assessment-section">
+                <h2>心理健康评估</h2>
+                <p>通过心理健康评估，你可以了解自己的心理状态，及时发现潜在的心理问题，并获得相应的建议和支持。</p>
+                <button class="btn-assessment" onclick="startAssessment()">开始评估</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function consultCounselor(counselorId) {
+            // 预约心理咨询
+            alert('预约请求已发送，请等待咨询师确认');
+        }
+        
+        function startAssessment() {
+            // 开始心理健康评估
+            alert('即将开始心理健康评估');
+        }
+    </script>
+</body>
+</html>

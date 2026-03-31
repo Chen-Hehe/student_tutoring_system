@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匹配确认 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #FF9800;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FF9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .match-list {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .match-item {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .match-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .match-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .match-item-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .match-item-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .match-item-details {
+            margin-bottom: 15px;
+        }
+        
+        .match-item-details p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .teacher-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .teacher-info h4 {
+            margin-bottom: 10px;
+            color: #FF9800;
+        }
+        
+        .match-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #F57C00;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #bdbdbd;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .match-item-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>家长中心</h2>
+            <ul class="nav-menu">
+                <li><a href="parent-dashboard.html">仪表盘</a></li>
+                <li><a href="parent-child-management.html">孩子管理</a></li>
+                <li><a href="parent-teacher-communication.html">教师沟通</a></li>
+                <li><a href="parent-learning-report.html">学习报告</a></li>
+                <li><a href="parent-psychological-status.html">心理状态</a></li>
+                <li><a href="parent-match-confirmation.html" class="active">匹配确认</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>匹配确认</h1>
+                <div class="user-info">
+                    <span>欢迎，王家长</span>
+                    <div class="user-avatar">王</div>
+                </div>
+            </div>
+            
+            <div class="match-list">
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导请求 - 小明（三年级）</div>
+                        <span class="match-item-status status-pending">待家长确认</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 辅导科目：数学</p>
+                        <p>🎯 学习需求：分数的加减法</p>
+                        <p>⏰ 申请时间：2026-03-30 09:30</p>
+                    </div>
+                    <div class="teacher-info">
+                        <h4>教师信息</h4>
+                        <p>👩‍🏫 姓名：李老师</p>
+                        <p>🎓 教育背景：北京大学数学专业</p>
+                        <p>📚 教学经验：8年</p>
+                        <p>📍 所在地：北京市</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-primary" onclick="approveRequest(1)">同意</button>
+                        <button class="btn btn-secondary" onclick="rejectRequest(1)">拒绝</button>
+                    </div>
+                </div>
+                
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导邀请 - 小红（四年级）</div>
+                        <span class="match-item-status status-pending">待家长确认</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 辅导科目：语文</p>
+                        <p>🎯 辅导内容：作文指导</p>
+                        <p>⏰ 邀请时间：2026-03-29 16:45</p>
+                    </div>
+                    <div class="teacher-info">
+                        <h4>教师信息</h4>
+                        <p>👩‍🏫 姓名：王老师</p>
+                        <p>🎓 教育背景：北京师范大学中文专业</p>
+                        <p>📚 教学经验：5年</p>
+                        <p>📍 所在地：上海市</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-primary" onclick="approveRequest(2)">同意</button>
+                        <button class="btn btn-secondary" onclick="rejectRequest(2)">拒绝</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function approveRequest(requestId) {
+            // 同意请求
+            if (confirm('确定要同意这个辅导请求吗？')) {
+                alert('已同意辅导请求');
+            }
+        }
+        
+        function rejectRequest(requestId) {
+            // 拒绝请求
+            if (confirm('确定要拒绝这个辅导请求吗？')) {
+                alert('已拒绝辅导请求');
+            }
+        }
+    </script>
+</body>
+</html>

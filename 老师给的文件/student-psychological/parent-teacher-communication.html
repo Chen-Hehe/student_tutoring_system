@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师沟通 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #FF9800;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FF9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .teacher-list {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .teacher-list h2 {
+            color: #FF9800;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .teacher-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .teacher-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .teacher-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #FFF3E0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FF9800;
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        
+        .teacher-info {
+            flex: 1;
+        }
+        
+        .teacher-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .teacher-subject {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #F57C00;
+        }
+        
+        .message-history {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message-history h2 {
+            color: #FF9800;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .message-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .message-sent {
+            background: #FFF3E0;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        
+        .message-received {
+            background: #f0f8ff;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            color: #FF9800;
+        }
+        
+        .message-time {
+            color: #999;
+        }
+        
+        .message-content {
+            line-height: 1.5;
+        }
+        
+        .message-input {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .message-input textarea {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            resize: none;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .message-input textarea:focus {
+            outline: none;
+            border-color: #FF9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .teacher-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .teacher-avatar {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .message-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>家长中心</h2>
+            <ul class="nav-menu">
+                <li><a href="parent-dashboard.html">仪表盘</a></li>
+                <li><a href="parent-child-management.html">孩子管理</a></li>
+                <li><a href="parent-teacher-communication.html" class="active">教师沟通</a></li>
+                <li><a href="parent-learning-report.html">学习报告</a></li>
+                <li><a href="parent-psychological-status.html">心理状态</a></li>
+                <li><a href="parent-match-confirmation.html">匹配确认</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>教师沟通</h1>
+                <div class="user-info">
+                    <span>欢迎，王家长</span>
+                    <div class="user-avatar">王</div>
+                </div>
+            </div>
+            
+            <div class="teacher-list">
+                <h2>孩子的教师</h2>
+                <div class="teacher-item">
+                    <div class="teacher-avatar">李</div>
+                    <div class="teacher-info">
+                        <div class="teacher-name">李老师</div>
+                        <div class="teacher-subject">数学教师 | 三年级</div>
+                    </div>
+                    <button class="btn btn-primary">沟通</button>
+                </div>
+                <div class="teacher-item">
+                    <div class="teacher-avatar">张</div>
+                    <div class="teacher-info">
+                        <div class="teacher-name">张老师</div>
+                        <div class="teacher-subject">语文教师 | 四年级</div>
+                    </div>
+                    <button class="btn btn-primary">沟通</button>
+                </div>
+            </div>
+            
+            <div class="message-history">
+                <h2>沟通记录</h2>
+                <div class="message-item message-received">
+                    <div class="message-header">
+                        <span class="message-sender">李老师</span>
+                        <span class="message-time">2026-03-30 10:00</span>
+                    </div>
+                    <div class="message-content">
+                        您好，王家长！小明最近在数学学习上有很大进步，尤其是在应用题方面。建议在家多练习一些实际生活中的数学问题，帮助他巩固所学知识。
+                    </div>
+                </div>
+                <div class="message-item message-sent">
+                    <div class="message-header">
+                        <span class="message-sender">王家长</span>
+                        <span class="message-time">2026-03-30 10:30</span>
+                    </div>
+                    <div class="message-content">
+                        谢谢李老师的反馈！我们会按照您的建议，在家多帮助小明练习数学应用题。请问小明在课堂上的表现如何？
+                    </div>
+                </div>
+                <div class="message-item message-received">
+                    <div class="message-header">
+                        <span class="message-sender">李老师</span>
+                        <span class="message-time">2026-03-30 11:00</span>
+                    </div>
+                    <div class="message-content">
+                        小明在课堂上表现很积极，经常主动回答问题，而且作业完成质量也很好。他是个很有潜力的学生，只要继续保持，数学成绩会越来越好的。
+                    </div>
+                </div>
+                <div class="message-input">
+                    <textarea placeholder="输入消息..."></textarea>
+                    <button class="btn btn-primary">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

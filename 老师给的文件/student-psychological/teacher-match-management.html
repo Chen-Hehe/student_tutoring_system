@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匹配管理 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #2196F3;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .match-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+        
+        .match-list {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .match-item {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .match-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .match-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .match-item-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .match-item-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .match-item-details {
+            margin-bottom: 15px;
+        }
+        
+        .match-item-details p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .student-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .student-info h4 {
+            margin-bottom: 10px;
+            color: #2196F3;
+        }
+        
+        .match-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #bdbdbd;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .match-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .match-item-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>教师中心</h2>
+            <ul class="nav-menu">
+                <li><a href="teacher-dashboard.html">仪表盘</a></li>
+                <li><a href="teacher-student-management.html">学生管理</a></li>
+                <li><a href="teacher-chat.html">聊天沟通</a></li>
+                <li><a href="teacher-resources.html">教学资源</a></li>
+                <li><a href="teacher-psychological.html">心理辅导</a></li>
+                <li><a href="teacher-ai-match.html">AI匹配</a></li>
+                <li><a href="teacher-match-management.html" class="active">匹配管理</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>匹配管理</h1>
+                <div class="user-info">
+                    <span>欢迎，李老师</span>
+                    <div class="user-avatar">李</div>
+                </div>
+            </div>
+            
+            <div class="match-tabs">
+                <button class="tab-btn active" onclick="switchTab('received')">收到的请求</button>
+                <button class="tab-btn" onclick="switchTab('sent')">发送的邀请</button>
+                <button class="tab-btn" onclick="switchTab('matched')">已匹配</button>
+            </div>
+            
+            <div class="match-list" id="matchList">
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导请求 - 小明（三年级）</div>
+                        <span class="match-item-status status-pending">待确认</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 辅导科目：数学</p>
+                        <p>🎯 学习需求：分数的加减法</p>
+                        <p>⏰ 发送时间：2026-03-30 09:30</p>
+                    </div>
+                    <div class="student-info">
+                        <h4>学生信息</h4>
+                        <p>👨‍🎓 姓名：小明</p>
+                        <p>📚 年级：三年级</p>
+                        <p>📍 学校：希望小学</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-primary" onclick="acceptRequest(1)">接受</button>
+                        <button class="btn btn-danger" onclick="rejectRequest(1)">拒绝</button>
+                    </div>
+                </div>
+                
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-title">辅导请求 - 小红（四年级）</div>
+                        <span class="match-item-status status-approved">已接受</span>
+                    </div>
+                    <div class="match-item-details">
+                        <p>📝 辅导科目：语文</p>
+                        <p>🎯 学习需求：作文指导</p>
+                        <p>⏰ 发送时间：2026-03-28 14:20</p>
+                        <p>✅ 确认时间：2026-03-29 10:15</p>
+                    </div>
+                    <div class="student-info">
+                        <h4>学生信息</h4>
+                        <p>👨‍🎓 姓名：小红</p>
+                        <p>📚 年级：四年级</p>
+                        <p>📍 学校：希望小学</p>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-primary" onclick="viewDetails(2)">查看详情</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tab) {
+            // 切换标签
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 模拟切换内容
+            console.log('Switching to tab:', tab);
+        }
+        
+        function acceptRequest(requestId) {
+            // 接受请求
+            if (confirm('确定要接受这个辅导请求吗？')) {
+                alert('已接受辅导请求');
+            }
+        }
+        
+        function rejectRequest(requestId) {
+            // 拒绝请求
+            if (confirm('确定要拒绝这个辅导请求吗？')) {
+                alert('已拒绝辅导请求');
+            }
+        }
+        
+        function viewDetails(matchId) {
+            // 查看详情
+            alert('查看匹配详情');
+        }
+    </script>
+</body>
+</html>

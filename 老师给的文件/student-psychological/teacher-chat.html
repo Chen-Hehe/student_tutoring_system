@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师聊天 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo img {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav a:hover {
+            transform: translateY(-3px);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .chat-container {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 600px;
+        }
+        
+        .chat-sidebar {
+            width: 300px;
+            border-right: 1px solid #e0e0e0;
+            background: #f9f9f9;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .chat-header h2 {
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-list {
+            overflow-y: auto;
+            height: calc(100vh - 280px);
+        }
+        
+        .chat-item {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .chat-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .chat-item.active {
+            background-color: #e3f2fd;
+        }
+        
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .chat-info {
+            flex: 1;
+        }
+        
+        .chat-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .chat-message {
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-main-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+        }
+        
+        .chat-main-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .chat-main-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .chat-main-info p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message.sent {
+            align-items: flex-end;
+        }
+        
+        .message.received {
+            align-items: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.sent .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.received .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s ease;
+            min-height: 80px;
+        }
+        
+        .chat-input textarea:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-input button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .chat-container {
+                flex-direction: column;
+            }
+            
+            .chat-sidebar {
+                width: 100%;
+                height: 300px;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .chat-list {
+                height: 200px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E" alt="乡村助学平台">
+                    乡村助学平台
+                </div>
+                <nav class="nav">
+                    <a href="teacher-dashboard.html">首页</a>
+                    <a href="teacher-match-management.html">匹配管理</a>
+                    <a href="teacher-chat.html">聊天</a>
+                    <a href="index.html">退出</a>
+                </nav>
+                <div class="user-info">
+                    <span>李老师</span>
+                    <div class="user-avatar">李</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="chat-container">
+            <div class="chat-sidebar">
+                <div class="chat-header">
+                    <h2>消息列表</h2>
+                </div>
+                <div class="search-box">
+                    <input type="text" placeholder="搜索学生...">
+                </div>
+                <div class="chat-list">
+                    <div class="chat-item active">
+                        <div class="chat-avatar">张</div>
+                        <div class="chat-info">
+                            <div class="chat-name">张三</div>
+                            <div class="chat-message">老师，我有一道数学题不会做</div>
+                        </div>
+                        <div class="chat-time">10:30</div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="chat-avatar">李</div>
+                        <div class="chat-info">
+                            <div class="chat-name">李四</div>
+                            <div class="chat-message">谢谢老师的指导！</div>
+                        </div>
+                        <div class="chat-time">昨天</div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="chat-avatar">王</div>
+                        <div class="chat-info">
+                            <div class="chat-name">王五</div>
+                            <div class="chat-message">老师，我想请教英语语法</div>
+                        </div>
+                        <div class="chat-time">2天前</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-main">
+                <div class="chat-main-header">
+                    <div class="chat-main-avatar">张</div>
+                    <div class="chat-main-info">
+                        <h3>张三</h3>
+                        <p>小学五年级 | 数学、语文</p>
+                    </div>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message received">
+                        <div class="message-content">
+                            老师，我有一道数学题不会做，想请您帮忙解答一下
+                        </div>
+                        <div class="message-time">10:00</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">
+                            好的，你把题目发过来，老师帮你看看
+                        </div>
+                        <div class="message-time">10:05</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">
+                            题目是：一个长方形的周长是24厘米，长比宽多2厘米，求长方形的面积
+                        </div>
+                        <div class="message-time">10:10</div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">
+                            这道题我们可以用方程来解。设宽为x厘米，那么长就是x+2厘米。根据周长公式，2*(长+宽)=24，所以2*(x+2+x)=24，化简后是2*(2x+2)=24，4x+4=24，4x=20，x=5。所以宽是5厘米，长是7厘米，面积就是5*7=35平方厘米。
+                        </div>
+                        <div class="message-time">10:20</div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">
+                            老师，我明白了！谢谢您的讲解
+                        </div>
+                        <div class="message-time">10:30</div>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <form class="chat-input-form">
+                        <textarea placeholder="输入消息..."></textarea>
+                        <button type="submit">发送</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

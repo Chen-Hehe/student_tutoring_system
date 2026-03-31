@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习报告 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #FF9800;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FF9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .child-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .child-selector h2 {
+            color: #FF9800;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .child-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .child-option {
+            padding: 15px 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .child-option:hover {
+            border-color: #FF9800;
+            background-color: #FFF3E0;
+        }
+        
+        .child-option.active {
+            border-color: #FF9800;
+            background-color: #FFF3E0;
+            font-weight: bold;
+        }
+        
+        .report-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .report-card h2 {
+            color: #FF9800;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .report-info h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .report-info p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .grade-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .grade-item {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .grade-item h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .grade-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FF9800;
+        }
+        
+        .progress-section {
+            margin-bottom: 30px;
+        }
+        
+        .progress-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .progress-item {
+            margin-bottom: 20px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .progress-header span {
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF9800, #F57C00);
+            border-radius: 5px;
+        }
+        
+        .teacher-comments {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .teacher-comments h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .teacher-comments p {
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .report-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .grade-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>家长中心</h2>
+            <ul class="nav-menu">
+                <li><a href="parent-dashboard.html">仪表盘</a></li>
+                <li><a href="parent-child-management.html">孩子管理</a></li>
+                <li><a href="parent-teacher-communication.html">教师沟通</a></li>
+                <li><a href="parent-learning-report.html" class="active">学习报告</a></li>
+                <li><a href="parent-psychological-status.html">心理状态</a></li>
+                <li><a href="parent-match-confirmation.html">匹配确认</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>学习报告</h1>
+                <div class="user-info">
+                    <span>欢迎，王家长</span>
+                    <div class="user-avatar">王</div>
+                </div>
+            </div>
+            
+            <div class="child-selector">
+                <h2>选择孩子</h2>
+                <div class="child-options">
+                    <div class="child-option active">小明 (三年级)</div>
+                    <div class="child-option">小红 (四年级)</div>
+                </div>
+            </div>
+            
+            <div class="report-card">
+                <h2>学习情况报告</h2>
+                <div class="report-header">
+                    <div class="report-info">
+                        <h3>小明</h3>
+                        <p>三年级 | 数学、语文</p>
+                        <p>报告周期：2026年3月</p>
+                    </div>
+                    <div class="report-info">
+                        <h3>总体评价</h3>
+                        <p>优秀</p>
+                        <p>班级排名：第5名</p>
+                    </div>
+                </div>
+                
+                <div class="grade-summary">
+                    <div class="grade-item">
+                        <h4>数学</h4>
+                        <div class="grade-value">92</div>
+                    </div>
+                    <div class="grade-item">
+                        <h4>语文</h4>
+                        <div class="grade-value">88</div>
+                    </div>
+                    <div class="grade-item">
+                        <h4>英语</h4>
+                        <div class="grade-value">90</div>
+                    </div>
+                    <div class="grade-item">
+                        <h4>平均成绩</h4>
+                        <div class="grade-value">90</div>
+                    </div>
+                </div>
+                
+                <div class="progress-section">
+                    <h3>学习进度</h3>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>数学</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>语文</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 78%;"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>英语</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="teacher-comments">
+                    <h3>教师评语</h3>
+                    <p>小明在本学习期间表现优秀，特别是在数学方面有很大进步。他上课认真听讲，积极参与课堂讨论，作业完成质量高。建议继续保持这种学习态度，在语文阅读理解方面可以多加强练习，提高阅读速度和理解能力。总体来说，小明是一个很有潜力的学生，只要继续努力，成绩会更上一层楼。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
