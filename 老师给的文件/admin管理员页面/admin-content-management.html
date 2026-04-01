@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容管理 - 乡村助学平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-menu a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .nav-menu a.active {
+            background-color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #9C27B0;
+            font-size: 1.8em;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #9C27B0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .content-tabs {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .tab:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .tab-content {
+            display: block;
+        }
+        
+        .search-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-group label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .search-group input,
+        .search-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #9C27B0;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #7B1FA2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #bdbdbd;
+            transform: translateY(-2px);
+        }
+        
+        .content-management {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .content-management h3 {
+            color: #9C27B0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .resource-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .resource-table th,
+        .resource-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .resource-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            color: #9C27B0;
+        }
+        
+        .resource-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .resource-type {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .type-courseware {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+        
+        .type-lesson-plan {
+            background-color: #E8F5E8;
+            color: #388E3C;
+        }
+        
+        .type-exercise {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+        
+        .type-video {
+            background-color: #F3E5F5;
+            color: #7B1FA2;
+        }
+        
+        .type-other {
+            background-color: #E0F7FA;
+            color: #00838F;
+        }
+        
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination button:hover {
+            background: #f0f0f0;
+        }
+        
+        .pagination button.active {
+            background: #9C27B0;
+            color: white;
+            border-color: #9C27B0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .resource-table {
+                font-size: 0.9em;
+            }
+            
+            .resource-table th,
+            .resource-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>管理员中心</h2>
+            <ul class="nav-menu">
+                <li><a href="admin-dashboard.html">仪表盘</a></li>
+                <li><a href="admin-user-management.html">用户管理</a></li>
+                <li><a href="admin-content-management.html" class="active">内容管理</a></li>
+                <li><a href="admin-ai-configuration.html">AI配置</a></li>
+                <li><a href="admin-system-settings.html">系统设置</a></li>
+                <li><a href="login.html">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>内容管理</h1>
+                <div class="user-info">
+                    <span>欢迎，管理员</span>
+                    <div class="user-avatar">管</div>
+                </div>
+            </div>
+            
+            <div class="content-tabs">
+                <div class="tabs">
+                    <div class="tab active">教学资源</div>
+                    <div class="tab">学习资料</div>
+                    <div class="tab">公告管理</div>
+                    <div class="tab">轮播图</div>
+                </div>
+            </div>
+            
+            <div class="search-filter">
+                <div class="search-group">
+                    <label for="search">搜索：</label>
+                    <input type="text" id="search" placeholder="输入资源标题">
+                </div>
+                <div class="search-group">
+                    <label for="resource-type">资源类型：</label>
+                    <select id="resource-type">
+                        <option value="">全部</option>
+                        <option value="courseware">课件</option>
+                        <option value="lesson_plan">教案</option>
+                        <option value="exercise">习题</option>
+                        <option value="video">视频</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label for="teacher">教师：</label>
+                    <select id="teacher">
+                        <option value="">全部</option>
+                        <option value="1">李老师</option>
+                        <option value="2">王老师</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary">搜索</button>
+                <button class="btn btn-secondary">重置</button>
+                <button class="btn btn-primary">上传资源</button>
+            </div>
+            
+            <div class="content-management">
+                <h3>教学资源列表</h3>
+                <table class="resource-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>类型</th>
+                            <th>上传教师</th>
+                            <th>上传时间</th>
+                            <th>下载次数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>三年级数学上册课件</td>
+                            <td><span class="resource-type type-courseware">课件</span></td>
+                            <td>李老师</td>
+                            <td>2026-03-01</td>
+                            <td>25</td>
+                            <td>
+                                <button class="btn btn-primary">编辑</button>
+                                <button class="btn btn-secondary">删除</button>
+                                <button class="btn btn-secondary">下载</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>五年级语文阅读技巧</td>
+                            <td><span class="resource-type type-lesson-plan">教案</span></td>
+                            <td>王老师</td>
+                            <td>2026-03-02</td>
+                            <td>18</td>
+                            <td>
+                                <button class="btn btn-primary">编辑</button>
+                                <button class="btn btn-secondary">删除</button>
+                                <button class="btn btn-secondary">下载</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>四年级数学练习题</td>
+                            <td><span class="resource-type type-exercise">习题</span></td>
+                            <td>李老师</td>
+                            <td>2026-03-03</td>
+                            <td>32</td>
+                            <td>
+                                <button class="btn btn-primary">编辑</button>
+                                <button class="btn btn-secondary">删除</button>
+                                <button class="btn btn-secondary">下载</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>六年级作文指导视频</td>
+                            <td><span class="resource-type type-video">视频</span></td>
+                            <td>王老师</td>
+                            <td>2026-03-04</td>
+                            <td>45</td>
+                            <td>
+                                <button class="btn btn-primary">编辑</button>
+                                <button class="btn btn-secondary">删除</button>
+                                <button class="btn btn-secondary">下载</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>小学生心理辅导指南</td>
+                            <td><span class="resource-type type-other">其他</span></td>
+                            <td>李老师</td>
+                            <td>2026-03-05</td>
+                            <td>20</td>
+                            <td>
+                                <button class="btn btn-primary">编辑</button>
+                                <button class="btn btn-secondary">删除</button>
+                                <button class="btn btn-secondary">下载</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button>上一页</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
