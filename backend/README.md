@@ -106,6 +106,15 @@ npm start
 | PUT | `/api/auth/update` | 更新用户信息 | 已登录 |
 | PUT | `/api/auth/change-password` | 修改密码 | 已登录 |
 
+### 文件上传接口
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| POST | `/api/upload/:type` | 上传单个文件 | 已登录 |
+| POST | `/api/upload/batch/:type` | 批量上传文件 | 已登录 |
+
+type 可选值：`image`, `document`, `video`, `audio`
+
 ### 用户管理接口
 
 | 方法 | 路径 | 描述 | 权限 |
@@ -145,6 +154,26 @@ npm start
 | PUT | `/api/matches/:id/reject` | 拒绝匹配 | 已登录 |
 | GET | `/api/matches/ai/recommend-teachers` | AI 推荐教师 | 学生 |
 | GET | `/api/matches/ai/recommend-students` | AI 推荐学生 | 教师 |
+| POST | `/api/matches/ai/run` | 执行 AI 匹配 | 管理员 |
+
+### 心理评估接口
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| POST | `/api/psychological` | 创建心理评估 | 教师/管理员 |
+| GET | `/api/psychological/student/:studentId` | 获取学生评估历史 | 已登录 |
+| PUT | `/api/psychological/:id` | 更新心理评估 | 教师/管理员 |
+| GET | `/api/psychological/attention/needed` | 获取需关注学生 | 教师/管理员 |
+
+### 聊天接口（已更新）
+
+| 方法 | 路径 | 描述 | 权限 |
+|------|------|------|------|
+| GET | `/api/chat/conversations` | 获取聊天列表 | 已登录 |
+| POST | `/api/chat/send` | 发送消息 | 已登录 |
+| GET | `/api/chat/:userId` | 获取聊天记录 | 已登录 |
+| PUT | `/api/chat/:userId/read` | 标记消息已读 | 已登录 |
+| DELETE | `/api/chat/:messageId` | 删除消息 | 已登录 |
 
 ## Socket.IO 实时通信
 
@@ -207,11 +236,25 @@ AI 智能匹配推荐记录。
 4. **错误处理**: 统一的错误处理中间件
 5. **环境变量**: 敏感信息通过环境变量管理
 
+## 测试数据
+
+使用种子脚本快速创建测试数据：
+
+```bash
+npm run seed
+```
+
+测试账号：
+- 管理员：`admin / 123456`
+- 教师：`teacher_zhang / 123456`, `teacher_li / 123456`
+- 家长：`parent_wang / 123456`, `parent_chen / 123456`
+- 学生：`student_xiaoming / 123456`, `student_xiaohong / 123456`
+
 ## 下一步
 
-- [ ] 实现文件上传功能（multer）
 - [ ] 添加数据验证（express-validator）
-- [ ] 实现 AI 匹配算法
 - [ ] 添加单元测试
 - [ ] 配置日志系统
 - [ ] 添加 API 文档（Swagger）
+- [ ] 实现邮件通知功能
+- [ ] 添加数据备份功能
