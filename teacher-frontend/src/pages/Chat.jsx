@@ -23,7 +23,11 @@ const Chat = () => {
   
   // 状态管理
   const [conversations, setConversations] = useState([])
-  const [selectedConversation, setSelectedConversation] = useState(null)
+  const [selectedConversation, setSelectedConversation] = useState(() => {
+    // 从 localStorage 恢复选中的对话
+    const saved = localStorage.getItem('selectedConversation')
+    return saved ? JSON.parse(saved) : null
+  })
   const [messages, setMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,6 +82,8 @@ const Chat = () => {
   // 选择对话
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
+    // 持久化选中的对话到 localStorage
+    localStorage.setItem('selectedConversation', JSON.stringify(conversation))
     loadChatHistory(conversation.userId)
   }
   
@@ -91,6 +97,8 @@ const Chat = () => {
       unreadCount: 0
     }
     setSelectedConversation(newConversation)
+    // 持久化选中的对话到 localStorage
+    localStorage.setItem('selectedConversation', JSON.stringify(newConversation))
     setMessages([])
     setShowUserModal(false)
     
@@ -156,6 +164,13 @@ const Chat = () => {
     }
   }
   
+  // 清除选中的对话
+  const clearSelectedConversation = () => {
+    setSelectedConversation(null)
+    setMessages([])
+    localStorage.removeItem('selectedConversation')
+  }
+  
   // 处理图片上传
   const handleImageUpload = async (file) => {
     if (!selectedConversation) {
@@ -182,7 +197,7 @@ const Chat = () => {
     }
   }
   
-  // 初始化 WebSocket 连接
+  // 初始化 WebSocket 连接和加载数据
   useEffect(() => {
     if (currentUser?.id) {
       // 连接 WebSocket
@@ -253,6 +268,12 @@ const Chat = () => {
       // 加载对话列表
       loadConversations()
       
+      // 如果有恢复的选中对话，加载聊天记录
+      if (selectedConversation?.userId) {
+        console.log('恢复选中的对话，加载聊天记录:', selectedConversation.userId)
+        loadChatHistory(selectedConversation.userId)
+      }
+      
       // 清理
       return () => {
         unsubscribeMessage()
@@ -260,7 +281,7 @@ const Chat = () => {
         wsService.disconnect()
       }
     }
-  }, [currentUser?.id])
+  }, [currentUser?.id, selectedConversation?.userId])
   
   // 获取消息类型图标
   const getMessageTypeIcon = (type) => {
