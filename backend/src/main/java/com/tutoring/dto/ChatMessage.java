@@ -1,5 +1,6 @@
 package com.tutoring.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ public class ChatMessage {
     /**
      * 时间戳
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
     
     /**

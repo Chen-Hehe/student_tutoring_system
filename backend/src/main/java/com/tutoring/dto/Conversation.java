@@ -1,5 +1,6 @@
 package com.tutoring.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,7 @@ public class Conversation {
     /**
      * 最后一条消息时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastMessageTime;
     
     /**
