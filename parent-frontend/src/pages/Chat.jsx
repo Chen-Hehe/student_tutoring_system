@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { Input, Button, Avatar, List, Badge, Upload, message as antdMessage, Spin, Empty } from 'antd'
-import { SendOutlined, PictureOutlined, AudioOutlined, SmileOutlined } from '@ant-design/icons'
+import { SendOutlined, PictureOutlined, AudioOutlined, SmileOutlined, PlusOutlined } from '@ant-design/icons'
 import wsService from '../services/websocket'
 import { chatAPI } from '../services/chatApi'
+import UserListModal from '../components/UserListModal'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -28,6 +29,8 @@ const Chat = () => {
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [pendingMessage, setPendingMessage] = useState('')
   
   // 引用
   const messagesEndRef = useRef(null)
@@ -76,6 +79,30 @@ const Chat = () => {
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
     loadChatHistory(conversation.userId)
+  }
+  
+  // 开始新聊天
+  const startNewChat = (user) => {
+    // 创建新的对话对象
+    const newConversation = {
+      userId: user.id,
+      userName: user.name || user.username,
+      userAvatar: user.avatar,
+      unreadCount: 0
+    }
+    setSelectedConversation(newConversation)
+    setMessages([])
+    setShowUserModal(false)
+    
+    // 如果有待发送的消息，发送它
+    if (pendingMessage.trim()) {
+      setInputValue(pendingMessage.trim())
+      setPendingMessage('')
+      // 自动发送
+      setTimeout(() => {
+        sendMessage()
+      }, 100)
+    }
   }
   
   // 发送消息
@@ -316,8 +343,18 @@ const Chat = () => {
           borderBottom: '1px solid #f0f0f0',
           backgroundColor: '#fafafa'
         }}>
-          <h3 style={{ margin: 0 }}>消息</h3>
-          <div style={{ fontSize: 12, color: isConnected ? '#52c41a' : '#ff4d4f', marginTop: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <h3 style={{ margin: 0 }}>消息</h3>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              size="small"
+              onClick={() => setShowUserModal(true)}
+            >
+              新建聊天
+            </Button>
+          </div>
+          <div style={{ fontSize: 12, color: isConnected ? '#52c41a' : '#ff4d4f' }}>
             {isConnected ? '● 已连接' : '● 已断开'}
           </div>
         </div>
@@ -494,6 +531,15 @@ const Chat = () => {
           </div>
         )}
       </div>
+      
+      {/* 用户选择弹窗 */}
+      <UserListModal
+        visible={showUserModal}
+        onCancel={() => setShowUserModal(false)}
+        onSelect={startNewChat}
+        currentUserId={currentUser?.id}
+        currentRole={currentUser?.role}
+      />
     </div>
   )
 }
