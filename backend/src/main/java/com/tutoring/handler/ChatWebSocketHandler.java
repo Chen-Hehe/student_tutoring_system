@@ -1,6 +1,7 @@
 package com.tutoring.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tutoring.dto.ChatMessage;
 import com.tutoring.entity.ChatRecord;
 import com.tutoring.service.ChatRecordService;
@@ -44,7 +45,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     /**
      * JSON 对象映射器
      */
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = createObjectMapper();
+    
+    private static ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
+    }
     
     /**
      * Redis 频道前缀
