@@ -26,9 +26,13 @@ export const chatAPI = {
   
   /**
    * 获取所有对话列表
+   * @param {number} userId - 当前用户 ID
    */
-  getConversations: () => {
-    return api.get('/chat/conversations')
+  getConversations: (userId) => {
+    if (!userId) {
+      return Promise.reject(new Error('缺少用户 ID 参数'))
+    }
+    return api.get('/chat/conversations', { params: { userId } })
   },
   
   /**

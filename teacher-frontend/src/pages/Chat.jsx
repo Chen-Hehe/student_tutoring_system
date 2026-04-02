@@ -44,8 +44,12 @@ const Chat = () => {
   
   // 加载对话列表
   const loadConversations = async () => {
+    if (!currentUser?.id) {
+      console.warn('用户未登录，无法加载对话列表')
+      return
+    }
     try {
-      const result = await chatAPI.getConversations()
+      const result = await chatAPI.getConversations(currentUser.id)
       setConversations(result.data || [])
     } catch (error) {
       console.error('加载对话列表失败:', error)
