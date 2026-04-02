@@ -2,6 +2,7 @@ package com.tutoring.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tutoring.dto.ChatMessage;
+import com.tutoring.entity.ChatRecord;
 import com.tutoring.service.ChatRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,21 +72,27 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         
-        log.info("收到用户 {} 的消息：{}", userId, message.getPayload());
+        log.info("=== WebSocket 收到用户 {} 的消息：{}", userId, message.getPayload());
         
         try {
             // 解析消息
             ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
+            log.debug("解析后的消息对象：receiverId={}, message={}, type={}", 
+                chatMessage.getReceiverId(), chatMessage.getMessage(), chatMessage.getType());
+            
             chatMessage.setSenderId(userId);
+            log.info("设置 senderId={}，准备保存到数据库", userId);
             
             // 保存消息到数据库
-            chatRecordService.sendMessage(chatMessage);
+            ChatRecord savedRecord = chatRecordService.sendMessage(chatMessage);
+            log.info("消息已保存到数据库，recordId={}", savedRecord.getId());
             
             // 通过 Redis 发布消息（支持多节点）
             publishMessage(chatMessage);
             
             // 直接发送给在线的接收者
             sendToUser(chatMessage.getReceiverId(), chatMessage);
+            log.info("消息处理完成，已发送给接收者 {}", chatMessage.getReceiverId());
             
         } catch (Exception e) {
             log.error("处理消息失败", e);

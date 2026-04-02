@@ -8,6 +8,7 @@ import com.tutoring.entity.User;
 import com.tutoring.repository.ChatRecordRepository;
 import com.tutoring.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 聊天记录服务类
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRecordService {
@@ -36,6 +38,9 @@ public class ChatRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ChatRecord sendMessage(ChatMessage chatMessage) {
+        log.info("ChatRecordService.sendMessage - 开始保存消息：senderId={}, receiverId={}, message={}", 
+            chatMessage.getSenderId(), chatMessage.getReceiverId(), chatMessage.getMessage());
+        
         ChatRecord record = new ChatRecord();
         record.setSenderId(chatMessage.getSenderId());
         record.setReceiverId(chatMessage.getReceiverId());
@@ -45,10 +50,18 @@ public class ChatRecordService {
         record.setIsRead(false);
         record.setSentAt(LocalDateTime.now());
         
-        chatRecordRepository.insert(record);
+        int insertResult = chatRecordRepository.insert(record);
+        log.info("ChatRecordService.sendMessage - 数据库插入结果：affectedRows={}, recordId={}", 
+            insertResult, record.getId());
+        
+        if (insertResult == 0) {
+            log.error("ChatRecordService.sendMessage - 数据库插入失败，影响行数为 0");
+            throw new RuntimeException("消息保存失败");
+        }
         
         // 清除 Redis 缓存
         clearCache(chatMessage.getSenderId(), chatMessage.getReceiverId());
+        log.info("ChatRecordService.sendMessage - 消息保存成功，recordId={}", record.getId());
         
         return record;
     }
@@ -61,15 +74,21 @@ public class ChatRecordService {
      * @return 聊天记录列表
      */
     public List<ChatMessage> getChatHistory(Long currentUserId, Long targetUserId) {
+        log.info("ChatRecordService.getChatHistory - 获取聊天记录：currentUserId={}, targetUserId={}", 
+            currentUserId, targetUserId);
+        
         String cacheKey = "chat:history:" + currentUserId + ":" + targetUserId;
         
         // 尝试从 Redis 缓存获取
         List<ChatMessage> cached = (List<ChatMessage>) redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
+            log.debug("从 Redis 缓存获取聊天记录，共 {} 条", cached.size());
             return cached;
         }
         
         List<ChatRecord> records = chatRecordRepository.selectChatHistory(currentUserId, targetUserId);
+        log.info("从数据库获取聊天记录，共 {} 条", records.size());
+        
         List<ChatMessage> messages = new ArrayList<>();
         
         for (ChatRecord record : records) {
@@ -79,6 +98,7 @@ public class ChatRecordService {
         
         // 缓存 5 分钟
         redisTemplate.opsForValue().set(cacheKey, messages, 5, TimeUnit.MINUTES);
+        log.info("聊天记录已缓存到 Redis，key={}", cacheKey);
         
         return messages;
     }
