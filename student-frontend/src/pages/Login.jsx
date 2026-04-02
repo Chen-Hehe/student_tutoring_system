@@ -1,42 +1,125 @@
 import { useState } from 'react'
-import { Form, Input, Button, Card, message } from 'antd'
+import { Form, Input, Button, Card, Select, message } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { loginSuccess } from '../store/slices/authSlice'
+import { useNavigate, Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginStart, loginSuccess, loginFailure, clearError } from '../store/slices/authSlice'
+import { authAPI } from '../services/api'
+
+const { Option } = Select
 
 const Login = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const [loading, setLoading] = useState(false)
+  const { loading, error } = useSelector((state) => state.auth)
+  const [selectedRole, setSelectedRole] = useState(null)
+
+  // 角色选项
+  const roleOptions = [
+    { value: 1, label: '教师' },
+    { value: 2, label: '学生' },
+    { value: 3, label: '家长' },
+    { value: 4, label: '管理员' }
+  ]
 
   const onFinish = async (values) => {
-    setLoading(true)
+    dispatch(clearError())
+    dispatch(loginStart())
+
     try {
-      setTimeout(() => {
-        dispatch(loginSuccess({ token: 'mock-token-student', user: { id: 1, username: values.username, role: 2, name: '李明' } }))
+      const response = await authAPI.login({
+        username: values.username,
+        password: values.password,
+        role: values.role
+      })
+
+      if (response.code === 200) {
+        dispatch(loginSuccess(response.data))
         message.success('登录成功')
-        navigate('/dashboard')
-        setLoading(false)
-      }, 1000)
+        
+        // 根据角色跳转到不同的首页
+        const userRole = response.data.user.role
+        if (userRole === 1) {
+          navigate('/dashboard') // 教师
+        } else if (userRole === 2) {
+          navigate('/dashboard') // 学生
+        } else if (userRole === 3) {
+          navigate('/dashboard') // 家长
+        } else if (userRole === 4) {
+          navigate('/dashboard') // 管理员
+        }
+      } else {
+        dispatch(loginFailure(response.message || '登录失败'))
+        message.error(response.message || '登录失败')
+      }
     } catch (error) {
-      message.error('登录失败')
-      setLoading(false)
+      const errorMsg = error.response?.data?.message || error.message || '登录失败'
+      dispatch(loginFailure(errorMsg))
+      message.error(errorMsg)
     }
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <Card style={{ width: 400 }} title="学生登录">
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    }}>
+      <Card 
+        style={{ width: 400 }} 
+        title="用户登录"
+        headStyle={{ textAlign: 'center', fontSize: '20px' }}
+      >
         <Form onFinish={onFinish} size="large">
-          <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
-            <Input prefix={<UserOutlined />} placeholder="用户名" />
+          <Form.Item 
+            name="role" 
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select 
+              prefix={<UserOutlined />} 
+              placeholder="请选择角色" 
+              size="large"
+              onChange={(value) => setSelectedRole(value)}
+            >
+              {roleOptions.map((option) => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+
+          <Form.Item 
+            name="username" 
+            rules={[{ required: true, message: '请输入用户名' }]}
+          >
+            <Input prefix={<UserOutlined />} placeholder="用户名" size="large" />
           </Form.Item>
+
+          <Form.Item 
+            name="password" 
+            rules={[{ required: true, message: '请输入密码' }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="密码" size="large" />
+          </Form.Item>
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>登录</Button>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading} 
+              block 
+              size="large"
+            >
+              登录
+            </Button>
+          </Form.Item>
+
+          <Form.Item style={{ textAlign: 'center', marginBottom: 0 }}>
+            <span>还没有账号？</span>
+            <Link to="/register">立即注册</Link>
           </Form.Item>
         </Form>
       </Card>
