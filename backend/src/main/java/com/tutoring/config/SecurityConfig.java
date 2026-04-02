@@ -38,10 +38,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 允许访问认证接口
                 .requestMatchers("/api/auth/**").permitAll()
+                // 允许访问聊天接口
+                .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问 Swagger/OpenAPI
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 允许 WebSocket 连接
-                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/ws/**", "/ws-chat/**").permitAll()
                 // 其他请求需要认证
                 .anyRequest().authenticated()
             )

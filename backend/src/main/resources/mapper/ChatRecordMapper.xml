@@ -28,7 +28,7 @@
     
     <!-- 获取用户的所有对话对象 -->
     <select id="selectConversationPartners" resultType="java.lang.Long">
-        SELECT DISTINCT
+        SELECT 
             CASE
                 WHEN sender_id = #{userId} THEN receiver_id
                 ELSE sender_id
@@ -36,7 +36,8 @@
         FROM chat_records
         WHERE deleted = 0
           AND (sender_id = #{userId} OR receiver_id = #{userId})
-        ORDER BY sent_at DESC
+        GROUP BY partner_id
+        ORDER BY MAX(sent_at) DESC
     </select>
     
     <!-- 获取用户最后一条消息的时间 -->

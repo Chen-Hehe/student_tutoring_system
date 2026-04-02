@@ -90,50 +90,71 @@ public class ChatRecordService {
      * @return 对话列表
      */
     public List<Conversation> getConversations(Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+        
         List<Long> partnerIds = chatRecordRepository.selectConversationPartners(userId);
+        if (partnerIds == null || partnerIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 去重
+        List<Long> uniquePartnerIds = partnerIds.stream().distinct().toList();
         List<Conversation> conversations = new ArrayList<>();
         
-        for (Long partnerId : partnerIds) {
-            User partner = userRepository.selectById(partnerId);
-            if (partner != null && partner.getDeleted() == 0) {
-                Conversation conversation = new Conversation();
-                conversation.setUserId(partner.getId());
-                conversation.setUserName(partner.getName());
-                conversation.setUserAvatar(partner.getAvatar());
-                conversation.setUserRole(partner.getRole());
-                
-                // 获取最后一条消息
-                LocalDateTime lastTime = chatRecordRepository.selectLastMessageTime(userId, partnerId);
-                if (lastTime != null) {
-                    LambdaQueryWrapper<ChatRecord> wrapper = new LambdaQueryWrapper<>();
-                    wrapper.eq(ChatRecord::getSenderId, partnerId)
-                           .eq(ChatRecord::getReceiverId, userId)
-                           .eq(ChatRecord::getIsRead, false)
-                           .eq(ChatRecord::getDeleted, 0);
-                    long unreadCount = chatRecordRepository.selectCount(wrapper);
-                    
-                    conversation.setLastMessageTime(lastTime);
-                    conversation.setUnreadCount((int) unreadCount);
-                    
-                    // 获取最后一条消息内容
-                    LambdaQueryWrapper<ChatRecord> lastWrapper = new LambdaQueryWrapper<>();
-                    lastWrapper.eq(ChatRecord::getDeleted, 0)
-                               .and(w -> w.eq(ChatRecord::getSenderId, userId)
-                                          .eq(ChatRecord::getReceiverId, partnerId)
-                                       .or()
-                                       .eq(ChatRecord::getSenderId, partnerId)
-                                          .eq(ChatRecord::getReceiverId, userId))
-                               .orderByDesc(ChatRecord::getSentAt)
-                               .last("LIMIT 1");
-                    ChatRecord lastRecord = chatRecordRepository.selectOne(lastWrapper);
-                    if (lastRecord != null) {
-                        conversation.setLastMessage(lastRecord.getMessage());
-                        conversation.setLastMessageType(lastRecord.getType());
-                    }
-                }
-                
-                conversations.add(conversation);
+        for (Long partnerId : uniquePartnerIds) {
+            if (partnerId == null) {
+                continue;
             }
+            
+            User partner = userRepository.selectById(partnerId);
+            if (partner == null || partner.getDeleted() == null || partner.getDeleted() != 0) {
+                continue;
+            }
+            
+            Conversation conversation = new Conversation();
+            conversation.setUserId(partner.getId());
+            conversation.setUserName(partner.getName());
+            conversation.setUserAvatar(partner.getAvatar());
+            conversation.setUserRole(partner.getRole());
+            
+            // 获取最后一条消息的时间
+            LocalDateTime lastTime = chatRecordRepository.selectLastMessageTime(userId, partnerId);
+            if (lastTime != null) {
+                conversation.setLastMessageTime(lastTime);
+                
+                // 计算未读消息数
+                LambdaQueryWrapper<ChatRecord> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ChatRecord::getSenderId, partnerId)
+                       .eq(ChatRecord::getReceiverId, userId)
+                       .eq(ChatRecord::getIsRead, false)
+                       .eq(ChatRecord::getDeleted, 0);
+                long unreadCount = chatRecordRepository.selectCount(wrapper);
+                conversation.setUnreadCount((int) unreadCount);
+                
+                // 获取最后一条消息内容
+                LambdaQueryWrapper<ChatRecord> lastWrapper = new LambdaQueryWrapper<>();
+                lastWrapper.eq(ChatRecord::getDeleted, 0)
+                           .and(w -> w.eq(ChatRecord::getSenderId, userId)
+                                      .eq(ChatRecord::getReceiverId, partnerId)
+                                   .or()
+                                   .eq(ChatRecord::getSenderId, partnerId)
+                                      .eq(ChatRecord::getReceiverId, userId))
+                           .orderByDesc(ChatRecord::getSentAt)
+                           .last("LIMIT 1");
+                ChatRecord lastRecord = chatRecordRepository.selectOne(lastWrapper);
+                if (lastRecord != null) {
+                    conversation.setLastMessage(lastRecord.getMessage());
+                    conversation.setLastMessageType(lastRecord.getType());
+                } else {
+                    conversation.setUnreadCount(0);
+                }
+            } else {
+                conversation.setUnreadCount(0);
+            }
+            
+            conversations.add(conversation);
         }
         
         return conversations;

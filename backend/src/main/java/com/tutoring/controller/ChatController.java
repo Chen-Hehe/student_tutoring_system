@@ -58,13 +58,20 @@ public class ChatController {
     /**
      * 获取所有对话列表
      *
-     * @param currentUserId 当前用户 ID
+     * @param currentUserId 当前用户 ID（支持从 Header 或查询参数获取）
      * @return 对话列表
      */
     @GetMapping("/conversations")
-    public Result<List<Conversation>> getConversations(@RequestHeader("X-User-Id") Long currentUserId) {
+    public Result<List<Conversation>> getConversations(
+            @RequestHeader(value = "X-User-Id", required = false) Long currentUserId,
+            @RequestParam(value = "userId", required = false) Long userIdFromParam) {
         try {
-            List<Conversation> conversations = chatRecordService.getConversations(currentUserId);
+            // 优先从 Header 获取，如果没有则从查询参数获取
+            Long finalUserId = currentUserId != null ? currentUserId : userIdFromParam;
+            if (finalUserId == null) {
+                return Result.error(400, "缺少用户 ID 参数");
+            }
+            List<Conversation> conversations = chatRecordService.getConversations(finalUserId);
             return Result.success(conversations);
         } catch (Exception e) {
             return Result.error(500, "获取对话列表失败：" + e.getMessage());

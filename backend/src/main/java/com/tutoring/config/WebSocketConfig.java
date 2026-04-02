@@ -19,13 +19,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
     
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // 注册 WebSocket 处理器
+        // 注册 WebSocket 处理器，支持从 URL 参数获取 userId
         registry.addHandler(chatWebSocketHandler, "/ws-chat")
-                .setAllowedOrigins("*"); // 允许所有跨域请求
+                .setAllowedOriginPatterns("*"); // 允许所有跨域请求（支持通配符模式）
         
         // 支持 SockJS 回退
         registry.addHandler(chatWebSocketHandler, "/ws-chat/sockjs")
-                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
 }
