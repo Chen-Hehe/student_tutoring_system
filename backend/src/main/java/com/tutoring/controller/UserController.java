@@ -68,4 +68,20 @@ public class UserController {
             return Result.error(404, e.getMessage());
         }
     }
+    
+    /**
+     * 获取用户列表（带角色过滤）
+     *
+     * @param role 角色筛选（可选，1=教师，2=学生，3=家长，4=管理员）
+     * @return 用户列表
+     */
+    @GetMapping("/users/list")
+    public Result<java.util.List<UserInfo>> listUsers(@RequestParam(required = false) Integer role) {
+        try {
+            java.util.List<UserInfo> users = userService.listUsers(role);
+            return Result.success(users);
+        } catch (RuntimeException e) {
+            return Result.error(500, e.getMessage());
+        }
+    }
 }
