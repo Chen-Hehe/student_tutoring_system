@@ -12,13 +12,21 @@ const api = axios.create({
   }
 })
 
-// 请求拦截器 - 添加 Token
+// 请求拦截器 - 添加 Token 和用户 ID
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
+    const user = JSON.parse(localStorage.getItem('user') || 'null')
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // 添加用户 ID 到请求头（后端需要 X-User-Id）
+    if (user && user.id) {
+      config.headers['X-User-Id'] = user.id
+    }
+    
     return config
   },
   (error) => {
