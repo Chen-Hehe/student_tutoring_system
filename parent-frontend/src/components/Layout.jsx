@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Layout as AntLayout, Menu, Button } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { DashboardOutlined, ChildOutlined, MessageOutlined, FileTextOutlined, HeartOutlined, CheckCircleOutlined, LogoutOutlined } from '@ant-design/icons'
+import { DashboardOutlined, UserOutlined, MessageOutlined, FileTextOutlined, HeartOutlined, CheckCircleOutlined, LogoutOutlined } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import { logout } from '../store/slices/authSlice'
 const { Header, Sider, Content } = AntLayout
@@ -9,7 +9,7 @@ const Layout = () => {
   const navigate = useNavigate(), location = useLocation(), dispatch = useDispatch(), [collapsed, setCollapsed] = useState(false)
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    { key: '/children', icon: <ChildOutlined />, label: '孩子管理' },
+    { key: '/children', icon: <UserOutlined />, label: '孩子管理' },
     { key: '/teacher-chat', icon: <MessageOutlined />, label: '教师沟通' },
     { key: '/learning-report', icon: <FileTextOutlined />, label: '学习报告' },
     { key: '/psychological', icon: <HeartOutlined />, label: '心理状态' },
