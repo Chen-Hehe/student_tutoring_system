@@ -124,13 +124,16 @@ const Chat = () => {
       timestamp: new Date().toISOString()
     }
     
+    console.log('发送消息:', messageData)
+    
     try {
       // 通过 WebSocket 发送
       wsService.send(messageData)
       
-      // 乐观更新 UI
+      // 乐观更新 UI - 临时消息，等待服务器确认
+      const tempMessageId = 'temp_' + Date.now()
       const newMessage = {
-        messageId: Date.now(),
+        messageId: tempMessageId, // 临时 ID，等待服务器返回真实 ID
         senderId: currentUser.id,
         receiverId: selectedConversation.userId,
         message: inputValue.trim(),
@@ -187,14 +190,41 @@ const Chat = () => {
       
       // 监听消息
       const unsubscribeMessage = wsService.onMessage((data) => {
+        console.log('收到 WebSocket 消息:', data)
+        
         if (data.type === 'ping') {
           // 心跳响应，忽略
           return
         }
         
+        // 错误消息处理
+        if (data.type === 'error') {
+          antdMessage.error(data.message || '消息发送失败')
+          return
+        }
+        
         // 收到新消息
-        if (data.senderId && data.receiverId) {
-          setMessages(prev => [...prev, data])
+        if (data.senderId && data.receiverId && data.message) {
+          console.log('处理收到的消息:', data)
+          
+          // 避免重复添加消息（检查是否已存在）
+          setMessages(prev => {
+            // 检查是否已存在该消息（通过 messageId 或临时 ID）
+            const exists = prev.some(msg => 
+              msg.messageId === data.messageId || 
+              (msg.messageId && msg.messageId.startsWith('temp_') && 
+               msg.senderId === data.senderId && 
+               msg.message === data.message)
+            )
+            
+            if (exists) {
+              console.log('消息已存在，跳过添加')
+              return prev
+            }
+            
+            console.log('添加新消息到状态')
+            return [...prev, data]
+          })
           
           // 如果是对话中的消息，刷新对话列表
           if (selectedConversation && 
