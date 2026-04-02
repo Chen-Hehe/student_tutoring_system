@@ -155,10 +155,6 @@ const Chat = () => {
       setSending(false)
     }
   }
-    } finally {
-      setSending(false)
-    }
-  }
   
   // 处理图片上传
   const handleImageUpload = async (file) => {
