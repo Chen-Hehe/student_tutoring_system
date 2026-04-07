@@ -128,11 +128,7 @@ const UserManagement = () => {
   ]
 
   return (
-    // 3. 整个右侧内容区 全屏淡蓝色背景
-    <div style={{ background: '#f0f7ff', padding: '20px 24px', minHeight: '100vh', fontSize: '16px' }}>
-      
-      {/* 2. 已删除 搜索上方的“用户管理”标题 */}
-
+    <div>
       {/* 搜索区域卡片 */}
       <Card style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: 12, marginBottom: 20, padding: '20px' }}>
         <Row gutter={[16, 16]} align="middle">
@@ -179,40 +175,39 @@ const UserManagement = () => {
           dataSource={data} 
           rowKey="id"
           size="large"
-          pagination={{
-            // 1. 页码 底部 + 居中
-            position: ['bottomCenter'],
-            current: 1,
-            pageSize: 10,
-            total: 25,
-            showSizeChanger: false,
-            showQuickJumper: false,
-            itemRender: (page, type, originalElement) => {
-              if (type === 'prev') return <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '16px' }}>上一页</span>
-              if (type === 'next') return <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '16px' }}>下一页</span>
-              if (type === 'page') {
-                return (
-                  <span 
-                    style={{
-                      margin: '0 8px',
-                      padding: '6px 12px',
-                      borderRadius: 4,
-                      backgroundColor: page === 1 ? '#9C27B0' : 'white',
-                      color: page === 1 ? 'white' : '#333',
-                      border: '1px solid #e0e0e0',
-                      display: 'inline-block',
-                      cursor: 'pointer',
-                      fontSize: '16px'
-                    }}
-                  >
-                    {page}
-                  </span>
-                )
-              }
-              return originalElement
-            }
-          }}
+          pagination={false}
+          style={{ marginBottom: '20px' }}
         />
+        
+        {/* 自定义分页 */}
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
+          <span 
+            style={{
+              margin: '0 5px',
+              padding: '6px 10px',
+              borderRadius: 4,
+              backgroundColor: '#9C27B0',
+              color: 'white',
+              border: '1px solid #9C27B0',
+              display: 'inline-block',
+              cursor: 'pointer',
+              fontSize: '14px',
+              outline: 'none',
+              boxShadow: 'none',
+              lineHeight: '1.5',
+              minWidth: '30px',
+              textAlign: 'center',
+              boxSizing: 'border-box',
+              userSelect: 'none'
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            onFocus={(e) => e.currentTarget.style.outline = 'none'}
+          >
+            1
+          </span>
+          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
+        </div>
       </Card>
     </div>
   )
