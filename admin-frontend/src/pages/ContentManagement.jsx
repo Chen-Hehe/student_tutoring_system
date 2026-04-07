@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col } from 'antd'
 
 const { TabPane } = Tabs
 const { Option } = Select
 
 const ContentManagement = () => {
+  const [activeTab, setActiveTab] = useState('1')
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '标题', dataIndex: 'title', key: 'title' },
@@ -50,23 +52,139 @@ const ContentManagement = () => {
   return (
     <div>
       <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: 20, borderRadius: 12, padding: 20 }}>
-        <Tabs defaultActiveKey="1" style={{ marginBottom: 20, fontSize: '16px' }} size="large">
-          <TabPane tab="教学资源" key="1" />
-          <TabPane tab="学习资料" key="2" />
-          <TabPane tab="公告管理" key="3" />
-          <TabPane tab="轮播图" key="4" />
-        </Tabs>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <div 
+            onClick={() => setActiveTab('1')}
+            style={{
+              backgroundColor: activeTab === '1' ? '#9C27B0' : 'white',
+              color: activeTab === '1' ? 'white' : '#333',
+              borderRadius: '12px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              minWidth: '100px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: activeTab === '1' ? '2px solid #9C27B0' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== '1') {
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== '1') {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+          >
+            教学资源
+          </div>
+          <div 
+            onClick={() => setActiveTab('2')}
+            style={{
+              backgroundColor: activeTab === '2' ? '#9C27B0' : 'white',
+              color: activeTab === '2' ? 'white' : '#333',
+              borderRadius: '12px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              minWidth: '100px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: activeTab === '2' ? '2px solid #9C27B0' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== '2') {
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== '2') {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+          >
+            学习资料
+          </div>
+          <div 
+            onClick={() => setActiveTab('3')}
+            style={{
+              backgroundColor: activeTab === '3' ? '#9C27B0' : 'white',
+              color: activeTab === '3' ? 'white' : '#333',
+              borderRadius: '12px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              minWidth: '100px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: activeTab === '3' ? '2px solid #9C27B0' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== '3') {
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== '3') {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+          >
+            公告管理
+          </div>
+          <div 
+            onClick={() => setActiveTab('4')}
+            style={{
+              backgroundColor: activeTab === '4' ? '#9C27B0' : 'white',
+              color: activeTab === '4' ? 'white' : '#333',
+              borderRadius: '12px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              minWidth: '100px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: activeTab === '4' ? '2px solid #9C27B0' : 'none'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== '4') {
+                e.currentTarget.style.backgroundColor = '#f0f0f0';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== '4') {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = '#333';
+              }
+            }}
+          >
+            轮播图
+          </div>
+        </div>
       </Card>
       
       <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: 20, padding: 20, borderRadius: 12 }}>
         <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} sm={8} md={6}>
-            <span style={{ fontWeight: 'bold', color: '#555', marginRight: 12, fontSize: '16px' }}>搜索：</span>
-            <Input placeholder="输入资源标题" style={{ width: '100%', fontSize: '16px', padding: '8px 12px' }} />
+          <Col>
+            <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>搜索:</span>
+            <Input placeholder="输入资源标题" style={{ width: 250, fontSize: '16px', padding: '8px 12px' }} />
           </Col>
-          <Col xs={24} sm={8} md={4}>
-            <span style={{ fontWeight: 'bold', color: '#555', marginRight: 12, fontSize: '16px' }}>资源类型：</span>
-            <Select style={{ width: '100%', fontSize: '16px' }} defaultValue="">
+          <Col>
+            <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>资源类型:</span>
+            <Select style={{ width: 150, fontSize: '16px' }} defaultValue="">
               <Option value="" style={{ fontSize: '16px' }}>全部</Option>
               <Option value="courseware" style={{ fontSize: '16px' }}>课件</Option>
               <Option value="lesson_plan" style={{ fontSize: '16px' }}>教案</Option>
@@ -75,18 +193,22 @@ const ContentManagement = () => {
               <Option value="other" style={{ fontSize: '16px' }}>其他</Option>
             </Select>
           </Col>
-          <Col xs={24} sm={8} md={4}>
-            <span style={{ fontWeight: 'bold', color: '#555', marginRight: 12, fontSize: '16px' }}>教师：</span>
-            <Select style={{ width: '100%', fontSize: '16px' }} defaultValue="">
+          <Col>
+            <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>教师:</span>
+            <Select style={{ width: 150, fontSize: '16px' }} defaultValue="">
               <Option value="" style={{ fontSize: '16px' }}>全部</Option>
               <Option value="1" style={{ fontSize: '16px' }}>李老师</Option>
               <Option value="2" style={{ fontSize: '16px' }}>王老师</Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={10} style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <Button style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', color: 'white', fontSize: '16px', padding: '8px 16px' }}>搜索</Button>
-            <Button style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', color: 'white', fontSize: '16px', padding: '8px 16px' }}>重置</Button>
-            <Button style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', color: 'white', fontSize: '16px', padding: '8px 16px' }}>上传资源</Button>
+          <Col>
+            <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>搜索</Button>
+          </Col>
+          <Col>
+            <Button style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '8px 16px' }}>重置</Button>
+          </Col>
+          <Col>
+            <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>上传资源</Button>
           </Col>
         </Row>
       </Card>
