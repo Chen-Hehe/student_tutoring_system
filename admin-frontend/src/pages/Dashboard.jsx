@@ -41,64 +41,117 @@ const Dashboard = () => {
   ]
 
   return (
-    <div style={{ background: '#f0f7ff', padding: '20px 24px', minHeight: '100vh', fontSize: '16px' }}>
-      <Row gutter={[30, 30]} style={{ marginBottom: 30 }}>
+    <div>
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
-          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', transition: 'all 0.3s ease', borderRadius: 12, padding: 30 }} hoverable>
-            <div style={{ fontSize: '3.5em', marginBottom: 20, color: '#9C27B0' }}>👨‍🏫</div>
-            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.8em' }}>教师数量</h3>
-            <div style={{ fontSize: '3em', fontWeight: 'bold', color: '#333' }}>45</div>
-            <p style={{ marginTop: 15, color: '#666', fontSize: '18px' }}>本周新增 2 名</p>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍🏫</div>
+            <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>教师数量</h3>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>45</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 2 名</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', transition: 'all 0.3s ease', borderRadius: 12, padding: 30 }} hoverable>
-            <div style={{ fontSize: '3.5em', marginBottom: 20, color: '#9C27B0' }}>👨‍🎓</div>
-            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.8em' }}>学生数量</h3>
-            <div style={{ fontSize: '3em', fontWeight: 'bold', color: '#333' }}>128</div>
-            <p style={{ marginTop: 15, color: '#666', fontSize: '18px' }}>本周新增 5 名</p>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍🎓</div>
+            <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>学生数量</h3>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>128</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 5 名</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', transition: 'all 0.3s ease', borderRadius: 12, padding: 30 }} hoverable>
-            <div style={{ fontSize: '3.5em', marginBottom: 20, color: '#9C27B0' }}>👨‍👩‍👧‍👦</div>
-            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.8em' }}>家长数量</h3>
-            <div style={{ fontSize: '3em', fontWeight: 'bold', color: '#333' }}>89</div>
-            <p style={{ marginTop: 15, color: '#666', fontSize: '18px' }}>本周新增 3 名</p>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍👩‍👧‍👦</div>
+            <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>家长数量</h3>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>89</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 3 名</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', transition: 'all 0.3s ease', borderRadius: 12, padding: 30 }} hoverable>
-            <div style={{ fontSize: '3.5em', marginBottom: 20, color: '#9C27B0' }}>💬</div>
-            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.8em' }}>辅导会话</h3>
-            <div style={{ fontSize: '3em', fontWeight: 'bold', color: '#333' }}>236</div>
-            <p style={{ marginTop: 15, color: '#666', fontSize: '18px' }}>本周新增 15 次</p>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>💬</div>
+            <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>辅导会话</h3>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>236</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 15 次</p>
           </Card>
         </Col>
       </Row>
       
-      <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', borderRadius: 12, padding: 30 }}>
-        <h3 style={{ color: '#9C27B0', marginBottom: 30, fontSize: '2em', fontWeight: 'bold' }}>用户管理</h3>
+      <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 12, padding: 20, backgroundColor: '#ffffff' }}>
+        <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.6em', fontWeight: 'bold' }}>用户管理</h3>
         <Table 
           columns={columns} 
           dataSource={data} 
           rowKey="id" 
-          size="large"
-          pagination={{ 
-            pageSize: 10, 
-            fontSize: '18px',
-            itemRender: (current, type, originalElement) => {
-              if (type === 'prev') {
-                return <a style={{ fontSize: '18px' }}>上一页</a>;
-              }
-              if (type === 'next') {
-                return <a style={{ fontSize: '18px' }}>下一页</a>;
-              }
-              return <a style={{ fontSize: '18px' }}>{current}</a>;
-            }
-          }}
-          style={{ fontSize: '18px' }}
+          size="middle"
+          pagination={false}
+          style={{ fontSize: '16px', marginBottom: '20px' }}
         />
+        {/* 自定义分页 */}
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
+          <span 
+            style={{
+              margin: '0 5px',
+              padding: '6px 10px',
+              borderRadius: 4,
+              backgroundColor: '#9C27B0',
+              color: 'white',
+              border: '1px solid #9C27B0',
+              display: 'inline-block',
+              cursor: 'pointer',
+              fontSize: '14px',
+              outline: 'none',
+              boxShadow: 'none',
+              lineHeight: '1.5',
+              minWidth: '30px',
+              textAlign: 'center',
+              boxSizing: 'border-box',
+              userSelect: 'none'
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            onFocus={(e) => e.currentTarget.style.outline = 'none'}
+          >
+            1
+          </span>
+          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
+        </div>
       </Card>
     </div>
   )
