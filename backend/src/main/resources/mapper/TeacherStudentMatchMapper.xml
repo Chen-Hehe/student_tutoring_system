@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tutoring.repository.TeacherStudentMatchRepository">
+
+    <resultMap id="MatchResultMap" type="com.tutoring.entity.TeacherStudentMatch">
+        <id column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="requester_type" property="requesterType"/>
+        <result column="status" property="status"/>
+        <result column="request_message" property="requestMessage"/>
+        <result column="student_confirm" property="studentConfirm"/>
+        <result column="parent_confirm" property="parentConfirm"/>
+        <result column="teacher_confirm" property="teacherConfirm"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 查询教师的匹配列表 -->
+    <select id="selectByTeacherId" resultMap="MatchResultMap">
+        SELECT * FROM teacher_student_matches
+        WHERE teacher_id = #{teacherId}
+          AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 查询学生的匹配列表 -->
+    <select id="selectByStudentId" resultMap="MatchResultMap">
+        SELECT * FROM teacher_student_matches
+        WHERE student_id = #{studentId}
+          AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 查询待处理的匹配（教师维度） -->
+    <select id="selectPendingByTeacherId" resultMap="MatchResultMap">
+        SELECT * FROM teacher_student_matches
+        WHERE teacher_id = #{teacherId}
+          AND status IN (0, 1)
+          AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 查询待处理的匹配（学生维度） -->
+    <select id="selectPendingByStudentId" resultMap="MatchResultMap">
+        SELECT * FROM teacher_student_matches
+        WHERE student_id = #{studentId}
+          AND status IN (0, 1)
+          AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+</mapper>
