@@ -1,117 +1,114 @@
 import { useState } from 'react'
-import { Form, Input, Button, Card, Select, message } from 'antd'
-import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons'
 import { useNavigate, Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { registerStart, registerSuccess, registerFailure, clearError } from '../store/slices/authSlice'
-import { authAPI } from '../services/api'
+import { Form, Input, Button, Card, message, Typography, Select } from 'antd'
+import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
+import api from '../services/api'
 
-const { Option } = Select
+const { Title } = Typography
 
 const Register = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const { loading, error } = useSelector((state) => state.auth)
-  const [form] = Form.useForm()
-
-  // 角色选项
-  const roleOptions = [
-    { value: 1, label: '教师' },
-    { value: 2, label: '学生' },
-    { value: 3, label: '家长' },
-    { value: 4, label: '管理员' }
-  ]
+  const [loading, setLoading] = useState(false)
 
   const onFinish = async (values) => {
-    dispatch(clearError())
-    dispatch(registerStart())
-
+    setLoading(true)
     try {
-      const response = await authAPI.register({
+      const response = await api.post('/auth/register', {
         username: values.username,
         password: values.password,
-        role: values.role,
-        name: values.name,
+        nickname: values.nickname,
         email: values.email,
-        phone: values.phone,
-        gender: values.gender,
-        qq: values.qq,
-        wechat: values.wechat
+        role: 'STUDENT',
+        grade: values.grade,
       })
-
+      
       if (response.code === 200) {
-        dispatch(registerSuccess(response.data))
-        message.success('注册成功，请登录')
+        message.success('注册成功！请登录')
         navigate('/login')
       } else {
-        dispatch(registerFailure(response.message || '注册失败'))
         message.error(response.message || '注册失败')
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || '注册失败'
-      dispatch(registerFailure(errorMsg))
-      message.error(errorMsg)
+      message.error(error.response?.data?.message || '注册失败，请检查网络')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
     }}>
-      <Card 
-        style={{ width: 450, maxWidth: '100%' }} 
-        title="用户注册"
-        headStyle={{ textAlign: 'center', fontSize: '20px' }}
-      >
-        <Form 
-          form={form}
-          onFinish={onFinish} 
+      <Card style={{ width: 400, boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <Title level={2} style={{ color: '#4CAF50' }}>🦞 乡村助学平台</Title>
+          <Title level={4} style={{ color: '#666' }}>学生端注册</Title>
+        </div>
+        
+        <Form
+          name="register"
+          onFinish={onFinish}
+          autoComplete="off"
           size="large"
           layout="vertical"
         >
-          <Form.Item 
-            name="role" 
-            label="角色"
-            rules={[{ required: true, message: '请选择角色' }]}
-          >
-            <Select placeholder="请选择角色" size="large">
-              {roleOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item 
-            name="username" 
+          <Form.Item
+            name="username"
             label="用户名"
-            rules={[
-              { required: true, message: '请输入用户名' },
-              { min: 3, message: '用户名至少 3 个字符' }
-            ]}
+            rules={[{ required: true, message: '请输入用户名' }]}
           >
             <Input prefix={<UserOutlined />} placeholder="请输入用户名" />
           </Form.Item>
 
-          <Form.Item 
-            name="password" 
-            label="密码"
+          <Form.Item
+            name="nickname"
+            label="昵称"
+            rules={[{ required: true, message: '请输入昵称' }]}
+          >
+            <Input placeholder="请输入昵称" />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="邮箱"
             rules={[
-              { required: true, message: '请输入密码' },
-              { min: 6, message: '密码至少 6 个字符' }
+              { required: true, message: '请输入邮箱' },
+              { type: 'email', message: '请输入有效的邮箱地址' }
             ]}
+          >
+            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
+          </Form.Item>
+
+          <Form.Item
+            name="grade"
+            label="年级"
+            rules={[{ required: true, message: '请选择年级' }]}
+          >
+            <Select placeholder="请选择年级">
+              <Select.Option value="PRIMARY_3">小学三年级</Select.Option>
+              <Select.Option value="PRIMARY_4">小学四年级</Select.Option>
+              <Select.Option value="PRIMARY_5">小学五年级</Select.Option>
+              <Select.Option value="PRIMARY_6">小学六年级</Select.Option>
+              <Select.Option value="MIDDLE_1">初一</Select.Option>
+              <Select.Option value="MIDDLE_2">初二</Select.Option>
+              <Select.Option value="MIDDLE_3">初三</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label="密码"
+            rules={[{ required: true, message: '请输入密码' }]}
           >
             <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
           </Form.Item>
 
-          <Form.Item 
-            name="confirmPassword" 
+          <Form.Item
+            name="confirmPassword"
             label="确认密码"
             dependencies={['password']}
             rules={[
@@ -126,74 +123,18 @@ const Register = () => {
               }),
             ]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="请再次输入密码" />
-          </Form.Item>
-
-          <Form.Item 
-            name="name" 
-            label="真实姓名"
-            rules={[{ required: true, message: '请输入真实姓名' }]}
-          >
-            <Input placeholder="请输入真实姓名" />
-          </Form.Item>
-
-          <Form.Item 
-            name="email" 
-            label="邮箱"
-            rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' }
-            ]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
-          </Form.Item>
-
-          <Form.Item 
-            name="phone" 
-            label="手机号"
-            rules={[
-              { required: true, message: '请输入手机号' },
-              { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号' }
-            ]}
-          >
-            <Input prefix={<PhoneOutlined />} placeholder="请输入手机号" />
-          </Form.Item>
-
-          <Form.Item 
-            name="gender" 
-            label="性别"
-          >
-            <Select placeholder="请选择性别">
-              <Option value={1}>男</Option>
-              <Option value={2}>女</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="qq" label="QQ 号">
-            <Input placeholder="请输入 QQ 号（选填）" />
-          </Form.Item>
-
-          <Form.Item name="wechat" label="微信">
-            <Input placeholder="请输入微信号（选填）" />
+            <Input.Password prefix={<LockOutlined />} placeholder="请确认密码" />
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              loading={loading} 
-              block 
-              size="large"
-              style={{ marginTop: '10px' }}
-            >
+            <Button type="primary" htmlType="submit" loading={loading} block>
               注册
             </Button>
           </Form.Item>
 
-          <Form.Item style={{ textAlign: 'center', marginBottom: 0 }}>
-            <span>已有账号？</span>
-            <Link to="/login">立即登录</Link>
-          </Form.Item>
+          <div style={{ textAlign: 'center' }}>
+            <Link to="/login">已有账号？立即登录</Link>
+          </div>
         </Form>
       </Card>
     </div>

@@ -4,18 +4,18 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import App from './App.jsx'
-import store from './store/index.js'
+import App from './App'
+import store from './store'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-      <ConfigProvider locale={zhCN}>
-        <BrowserRouter>
+      <BrowserRouter>
+        <ConfigProvider locale={zhCN} theme={{ token: { colorPrimary: '#4CAF50' } }}>
           <App />
-        </BrowserRouter>
-      </ConfigProvider>
+        </ConfigProvider>
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>,
 )
