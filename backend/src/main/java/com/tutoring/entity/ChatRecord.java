@@ -41,17 +41,19 @@ public class ChatRecord {
     /**
      * 存储图片或语音的 OSS 链接
      */
+    @TableField("file_url")
     private String fileUrl;
     
     /**
      * 发送时间
      */
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "sent_at", fill = FieldFill.INSERT)
     private LocalDateTime sentAt;
     
     /**
      * 已读状态
      */
+    @TableField("is_read")
     private Boolean isRead;
     
     /**

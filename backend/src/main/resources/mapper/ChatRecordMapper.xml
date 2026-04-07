@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tutoring.repository.ChatRecordRepository">
+    
+    <resultMap id="ChatRecordMap" type="com.tutoring.entity.ChatRecord">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="message" column="message"/>
+        <result property="type" column="type"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="sentAt" column="sent_at"/>
+        <result property="isRead" column="is_read"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+    
+    <!-- 获取两个用户之间的聊天记录 -->
+    <select id="selectChatHistory" resultMap="ChatRecordMap">
+        SELECT *
+        FROM chat_records
+        WHERE deleted = 0
+          AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+          )
+        ORDER BY sent_at ASC
+    </select>
+    
+    <!-- 获取用户的所有对话对象 -->
+    <select id="selectConversationPartners" resultType="java.lang.Long">
+        SELECT 
+            CASE
+                WHEN sender_id = #{userId} THEN receiver_id
+                ELSE sender_id
+            END AS partner_id
+        FROM chat_records
+        WHERE deleted = 0
+          AND (sender_id = #{userId} OR receiver_id = #{userId})
+        GROUP BY partner_id
+        ORDER BY MAX(sent_at) DESC
+    </select>
+    
+    <!-- 获取用户最后一条消息的时间 -->
+    <select id="selectLastMessageTime" resultType="java.time.LocalDateTime">
+        SELECT MAX(sent_at)
+        FROM chat_records
+        WHERE deleted = 0
+          AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+          )
+    </select>
+    
+</mapper>

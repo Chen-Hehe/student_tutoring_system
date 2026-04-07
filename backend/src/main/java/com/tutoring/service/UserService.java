@@ -152,4 +152,23 @@ public class UserService {
         userInfo.setCreatedAt(user.getCreatedAt());
         return userInfo;
     }
+    
+    /**
+     * 获取用户列表（带角色过滤）
+     *
+     * @param role 角色筛选（可选，1=教师，2=学生，3=家长，4=管理员）
+     * @return 用户列表
+     */
+    public java.util.List<UserInfo> listUsers(Integer role) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getDeleted, 0);
+        if (role != null) {
+            wrapper.eq(User::getRole, role);
+        }
+        
+        java.util.List<User> users = userRepository.selectList(wrapper);
+        return users.stream()
+                .map(this::convertToUserInfo)
+                .toList();
+    }
 }
