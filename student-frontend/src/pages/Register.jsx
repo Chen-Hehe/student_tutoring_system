@@ -16,10 +16,9 @@ const Register = () => {
       const response = await api.post('/auth/register', {
         username: values.username,
         password: values.password,
-        nickname: values.nickname,
+        name: values.nickname,
         email: values.email,
-        role: 'STUDENT',
-        grade: values.grade,
+        role: 2, // 1:教师，2:学生，3:家长，4:管理员
       })
       
       if (response.code === 200) {
