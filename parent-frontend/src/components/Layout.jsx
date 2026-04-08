@@ -37,7 +37,7 @@ const Layout = () => {
           onClick={() => setCollapsed(!collapsed)}
           style={{
             position: 'absolute',
-            bottom: 20,
+            bottom: 80,
             left: '50%',
             transform: 'translateX(-50%)',
             color: 'white',
@@ -50,7 +50,8 @@ const Layout = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            zIndex: 10
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)';
@@ -134,14 +135,7 @@ const Layout = () => {
         </div>
       </Sider>
       <AntLayout>
-        <Header style={{ padding: '0 24px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', borderRadius: '10px', margin: '16px', height: 64 }}>
-          <h1 style={{ color: '#FF9800', fontSize: '1.8em', margin: 0 }}>家长{location.pathname === '/dashboard' ? '仪表盘' : location.pathname === '/children' ? '孩子管理' : location.pathname === '/teacher-chat' ? '教师沟通' : location.pathname === '/learning-report' ? '学习报告' : location.pathname === '/psychological' ? '心理状态' : location.pathname === '/match-confirm' ? '匹配确认' : '中心'}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>欢迎，王家长</span>
-            <Avatar style={{ backgroundColor: '#FF9800', color: 'white', fontWeight: 'bold' }}>王</Avatar>
-          </div>
-        </Header>
-        <Content style={{ margin: '0 16px 16px', padding: 24, background: '#f0f8ff', minHeight: 280 }}><Outlet /></Content>
+        <Content style={{ margin: 0, padding: 20, background: '#F0F8FF' }}><Outlet /></Content>
       </AntLayout>
     </AntLayout>
   )
