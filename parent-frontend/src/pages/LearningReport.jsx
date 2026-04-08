@@ -54,13 +54,43 @@ const LearningReport = () => {
   const currentReport = reportData[selectedChild]
   
   return (
-    <div>
+    <div style={{ background: '#f0f8ff', padding: 0 }}>
+      {/* 学习报告标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>学习报告</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，王家长</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#FF9800',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>王</div>
+        </div>
+      </div>
+
+      {/* 选择孩子 */}
       <Card 
         style={{ 
           boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
           borderRadius: 10,
           padding: 20,
-          marginBottom: 30
+          marginBottom: 30,
+          backgroundColor: '#fff'
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>选择孩子</h2>
@@ -98,12 +128,14 @@ const LearningReport = () => {
         </div>
       </Card>
       
+      {/* 学习情况报告 */}
       <Card 
         style={{ 
           boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
           borderRadius: 10,
           padding: 30,
-          marginBottom: 30
+          marginBottom: 30,
+          backgroundColor: '#fff'
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>学习情况报告</h2>
