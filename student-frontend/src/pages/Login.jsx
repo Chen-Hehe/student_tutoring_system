@@ -19,7 +19,7 @@ const Login = () => {
       const response = await api.post('/auth/login', {
         username: values.username,
         password: values.password,
-        role: 'STUDENT',
+        role: 2, // 1:教师，2:学生，3:家长，4:管理员
       })
       
       if (response.code === 200) {
