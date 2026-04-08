@@ -98,6 +98,18 @@ INSERT INTO parents (id, user_id, deleted)
 VALUES (4003, 3003, 0);
 
 -- ========================================
+-- 4. 创建管理员账号 (2 个)
+-- ========================================
+
+-- 管理员 1: 系统管理员
+INSERT INTO users (id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, created_at, deleted)
+VALUES (4001, 'admin_system', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 4, '系统管理员', 'admin_chen@example.com', '13600136001', 1, '1980-01-01 00:00:00', '456789001', 'admin_system', '北京市海淀区中关村科技园区', NOW(), 0);
+
+-- 管理员 2: 超级管理员
+INSERT INTO users (id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, created_at, deleted)
+VALUES (4002, 'admin_super', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 4, '超级管理员', 'admin_li@example.com', '13600136002', 0, '1982-02-02 00:00:00', '456789002', 'admin_super', '上海市浦东新区张江高科技园区', NOW(), 0);
+
+-- ========================================
 -- 4. 创建家长学生关联关系
 -- ========================================
 
@@ -140,5 +152,5 @@ SELECT
     u.email,
     u.phone
 FROM users u
-WHERE u.id >= 1001 AND u.id <= 3003
+WHERE u.id >= 1001 AND u.id <= 4002
 ORDER BY u.role, u.id;

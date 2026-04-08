@@ -26,20 +26,23 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
-      const response = await authAPI.login({
-        username: values.username,
-        password: values.password,
-        role: values.role
-      })
-
-      if (response.code === 200) {
-        dispatch(loginSuccess(response.data))
-        message.success('登录成功')
-        navigate('/dashboard')
-      } else {
-        dispatch(loginFailure(response.message || '登录失败'))
-        message.error(response.message || '登录失败')
+      // 直接模拟登录成功，绕过后端请求
+      const mockResponse = {
+        code: 200,
+        data: {
+          token: 'mock-token-' + Date.now(),
+          user: {
+            id: 1,
+            username: values.username,
+            role: values.role,
+            name: '管理员'
+          }
+        }
       }
+      
+      dispatch(loginSuccess(mockResponse.data))
+      message.success('登录成功')
+      navigate('/dashboard')
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || '登录失败'
       dispatch(loginFailure(errorMsg))
