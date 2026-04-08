@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Avatar, Button, Input, Space } from 'antd'
+import { Card, Avatar, Button, Input } from 'antd'
 const { TextArea } = Input
 const TeacherCommunication = () => {
   const [messages, setMessages] = useState([
@@ -58,13 +58,43 @@ const TeacherCommunication = () => {
   ]
   
   return (
-    <div>
+    <div style={{ background: '#f0f8ff', padding: 0 }}>
+      {/* 教师沟通标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>教师沟通</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，王家长</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#FF9800',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>王</div>
+        </div>
+      </div>
+
+      {/* 孩子的教师 */}
       <Card 
         style={{ 
           boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
           borderRadius: 10,
           padding: 20,
-          marginBottom: 30
+          marginBottom: 30,
+          backgroundColor: '#fff'
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>孩子的教师</h2>
@@ -106,7 +136,17 @@ const TeacherCommunication = () => {
                 fontWeight: 'bold',
                 padding: '8px 16px',
                 borderRadius: 5,
-                fontSize: '14px'
+                fontSize: '14px',
+                border: 'none',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#F57C00'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF9800'
+                e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
               沟通
@@ -115,11 +155,13 @@ const TeacherCommunication = () => {
         ))}
       </Card>
       
+      {/* 沟通记录 */}
       <Card 
         style={{ 
           boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
           borderRadius: 10,
-          padding: 20
+          padding: 20,
+          backgroundColor: '#fff'
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>沟通记录</h2>
@@ -153,7 +195,16 @@ const TeacherCommunication = () => {
               border: '2px solid #e0e0e0', 
               borderRadius: 8, 
               resize: 'none',
-              minHeight: 100
+              minHeight: 100,
+              transition: 'all 0.3s ease'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#FF9800'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 152, 0, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e0e0e0'
+              e.currentTarget.style.boxShadow = 'none'
             }}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -166,7 +217,17 @@ const TeacherCommunication = () => {
               alignSelf: 'flex-end',
               padding: '8px 16px',
               borderRadius: 5,
-              fontSize: '14px'
+              fontSize: '14px',
+              border: 'none',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#F57C00'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#FF9800'
+              e.currentTarget.style.transform = 'translateY(0)'
             }}
             onClick={handleSendMessage}
           >
