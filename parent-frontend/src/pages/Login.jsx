@@ -26,6 +26,26 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
+      // 模拟登录功能，方便查看家长端页面效果
+      if (values.role === 3 && (values.username === 'admin' || values.username === 'parent') && values.password === 'admin') {
+        const mockResponse = {
+          code: 200,
+          data: {
+            token: 'mock-token',
+            user: {
+              id: 1,
+              username: values.username,
+              role: 3,
+              name: '王家长'
+            }
+          }
+        }
+        dispatch(loginSuccess(mockResponse.data))
+        message.success('登录成功')
+        navigate('/dashboard')
+        return
+      }
+
       const response = await authAPI.login({
         username: values.username,
         password: values.password,
