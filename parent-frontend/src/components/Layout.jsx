@@ -22,35 +22,116 @@ const Layout = () => {
         collapsible 
         collapsed={collapsed} 
         onCollapse={setCollapsed}
+        width={250}
+        collapsedWidth={80}
+        trigger={null}
         style={{
-          background: 'linear-gradient(135deg, #FF9800, #F57C00)',
-          boxShadow: '2px 0 5px rgba(0,0,0,0.1)'
+          background: '#FF9800',
+          boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <div style={{ height: 40, margin: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.5em' }}>{collapsed ? '家长' : '家长中心'}</div>
-        <Menu 
-          theme="light" 
-          mode="inline" 
-          selectedKeys={[location.pathname]} 
-          items={menuItems} 
-          onClick={({ key }) => navigate(key)}
+        <div
+          onClick={() => setCollapsed(!collapsed)}
           style={{
-            background: 'transparent',
-            borderRight: 'none'
-          }}
-          itemStyle={{
-            marginBottom: 10,
-            borderRadius: 8
-          }}
-          selectedItemStyle={{
-            backgroundColor: 'rgba(255,255,255,0.3)',
-            fontWeight: 'bold'
-          }}
-          itemHoverStyle={{
+            position: 'absolute',
+            bottom: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '20px',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
             backgroundColor: 'rgba(255,255,255,0.2)',
-            transform: 'translateX(5px)'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.3s ease'
           }}
-        />
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+          }}
+        >
+          {collapsed ? '>' : '<'}
+        </div>
+        <div style={{ 
+          marginBottom: 30, 
+          textAlign: 'center',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '1.5em'
+        }}>
+          {collapsed ? '家长' : '家长中心'}
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          {menuItems.map(item => (
+            <div
+              key={item.key}
+              onClick={() => navigate(item.key)}
+              style={{
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: location.pathname === item.key ? 'bold' : 'normal',
+                padding: 12,
+                marginBottom: 10,
+                borderRadius: 8,
+                backgroundColor: location.pathname === item.key ? 'rgba(255,255,255,0.3)' : 'transparent',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                e.currentTarget.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = location.pathname === item.key ? 'rgba(255,255,255,0.3)' : 'transparent';
+                e.currentTarget.style.transform = 'translateX(0)';
+              }}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 'auto' }}>
+          <div
+            onClick={handleLogout}
+            style={{
+              color: 'white',
+              fontSize: '16px',
+              padding: 12,
+              marginBottom: 10,
+              borderRadius: 8,
+              backgroundColor: 'transparent',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+              e.currentTarget.style.transform = 'translateX(5px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.transform = 'translateX(0)';
+            }}
+          >
+            <LogoutOutlined />
+            <span>退出登录</span>
+          </div>
+        </div>
       </Sider>
       <AntLayout>
         <Header style={{ padding: '0 24px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', borderRadius: '10px', margin: '16px', height: 64 }}>
@@ -58,7 +139,6 @@ const Layout = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span>欢迎，王家长</span>
             <Avatar style={{ backgroundColor: '#FF9800', color: 'white', fontWeight: 'bold' }}>王</Avatar>
-            <Button icon={<LogoutOutlined />} onClick={handleLogout} style={{ marginLeft: 10 }}>退出登录</Button>
           </div>
         </Header>
         <Content style={{ margin: '0 16px 16px', padding: 24, background: '#f0f8ff', minHeight: 280 }}><Outlet /></Content>
