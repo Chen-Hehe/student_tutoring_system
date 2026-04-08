@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Form, Input, Button, message } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { loginStart, loginSuccess, loginFailure, clearError } from '../store/slices/authSlice'
@@ -10,9 +9,9 @@ const Login = () => {
   const dispatch = useDispatch()
   const { loading, error } = useSelector((state) => state.auth)
   const [selectedRole, setSelectedRole] = useState(null)
-  const [form] = Form.useForm()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
-  // 角色选项
   const roleOptions = [
     { value: 1, label: '教育教师', icon: '👩‍🏫' },
     { value: 2, label: '儿童/学生', icon: '👨‍🎓' },
@@ -22,52 +21,60 @@ const Login = () => {
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role)
-    form.setFieldsValue({ role })
   }
 
-  const onFinish = async (values) => {
+  const login = async () => {
+    if (!username || !password) {
+      alert('请输入用户名和密码')
+      return
+    }
+    
+    if (!selectedRole) {
+      alert('请选择角色')
+      return
+    }
+
     dispatch(clearError())
     dispatch(loginStart())
 
     try {
-      // 模拟登录功能，方便查看家长端页面效果
-      if (values.role === 3 && (values.username === 'admin' || values.username === 'parent') && values.password === 'admin') {
+      if (selectedRole === 3 && (username === 'admin' || username === 'parent') && password === 'admin') {
         const mockResponse = {
           code: 200,
           data: {
             token: 'mock-token',
             user: {
               id: 1,
-              username: values.username,
+              username: username,
               role: 3,
               name: '王家长'
             }
           }
         }
         dispatch(loginSuccess(mockResponse.data))
-        message.success('登录成功')
+        alert('登录成功')
         navigate('/dashboard')
         return
       }
 
       const response = await authAPI.login({
-        username: values.username,
-        password: values.password,
-        role: values.role
+        username: username,
+        password: password,
+        role: selectedRole
       })
 
       if (response.code === 200) {
         dispatch(loginSuccess(response.data))
-        message.success('登录成功')
+        alert('登录成功')
         navigate('/dashboard')
       } else {
         dispatch(loginFailure(response.message || '登录失败'))
-        message.error(response.message || '登录失败')
+        alert(response.message || '登录失败')
       }
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || '登录失败'
       dispatch(loginFailure(errorMsg))
-      message.error(errorMsg)
+      alert(errorMsg)
     }
   }
 
@@ -77,164 +84,218 @@ const Login = () => {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      backgroundColor: '#f0f8ff' 
+      backgroundColor: '#f0f8ff',
+      fontFamily: 'Arial, sans-serif'
     }}>
-      <div style={{ 
-        maxWidth: 500, 
-        width: '100%', 
-        padding: 20 
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: 40,
-          borderRadius: 15,
-          boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '4em', marginBottom: 20, color: '#4CAF50' }}>🎓</div>
-          <h1 style={{ color: '#4CAF50', marginBottom: 30, fontSize: '2em' }}>登录乡村助学平台</h1>
+      <style>
+        {`
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
           
-          <Form 
-            form={form}
-            onFinish={onFinish}
-            layout="vertical"
-          >
-            <Form.Item 
-              name="username" 
-              label="用户名" 
-              rules={[{ required: true, message: '请输入用户名' }]}
-              style={{ textAlign: 'left', marginBottom: 20 }}
-            >
-              <Input 
+          .container {
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+          }
+          
+          .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+          }
+          
+          h1 {
+            color: #4CAF50;
+            margin-bottom: 30px;
+            font-size: 2em;
+          }
+          
+          .logo {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #4CAF50;
+          }
+          
+          .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+          }
+          
+          label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+          }
+          
+          input[type="text"],
+          input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+          }
+          
+          input[type="text"]:focus,
+          input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+          }
+          
+          .role-selection {
+            margin: 20px 0;
+            text-align: left;
+          }
+          
+          .role-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+          }
+          
+          .role-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+          }
+          
+          .role-option:hover {
+            border-color: #4CAF50;
+            background-color: #f9fff9;
+          }
+          
+          .role-option.selected {
+            border-color: #4CAF50;
+            background-color: #e8f5e8;
+          }
+          
+          .role-option i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+          }
+          
+          .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+          }
+          
+          .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+          }
+          
+          .links {
+            margin-top: 20px;
+            font-size: 0.9em;
+          }
+          
+          .links a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin: 0 10px;
+          }
+          
+          .links a:hover {
+            text-decoration: underline;
+          }
+          
+          @media (max-width: 768px) {
+            .container {
+              padding: 10px;
+            }
+            
+            .login-card {
+              padding: 20px;
+            }
+            
+            .role-options {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}
+      </style>
+      
+      <div className="container">
+        <div className="login-card">
+          <div className="logo">🎓</div>
+          <h1>登录乡村助学平台</h1>
+          
+          <form>
+            <div className="form-group">
+              <label htmlFor="username">用户名</label>
+              <input 
+                type="text" 
+                id="username" 
                 placeholder="请输入用户名"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #e0e0e0',
-                  borderRadius: 8,
-                  fontSize: '1em',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#4CAF50'
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(76, 175, 80, 0.1)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#e0e0e0'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
-            </Form.Item>
-
-            <Form.Item 
-              name="password" 
-              label="密码" 
-              rules={[{ required: true, message: '请输入密码' }]}
-              style={{ textAlign: 'left', marginBottom: 20 }}
-            >
-              <Input.Password 
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">密码</label>
+              <input 
+                type="password" 
+                id="password" 
                 placeholder="请输入密码"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #e0e0e0',
-                  borderRadius: 8,
-                  fontSize: '1em',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#4CAF50'
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(76, 175, 80, 0.1)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '#e0e0e0'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
-            </Form.Item>
-
-            <Form.Item 
-              name="role" 
-              label="选择角色" 
-              rules={[{ required: true, message: '请选择角色' }]}
-              style={{ textAlign: 'left', marginBottom: 20 }}
-            >
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(2, 1fr)', 
-                gap: 10, 
-                marginTop: 10 
-              }}>
+            </div>
+            
+            <div className="role-selection">
+              <label>选择角色</label>
+              <div className="role-options">
                 {roleOptions.map((option) => (
                   <div 
                     key={option.value}
-                    style={{
-                      padding: 15,
-                      border: `2px solid ${selectedRole === option.value ? '#4CAF50' : '#e0e0e0'}`,
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      textAlign: 'center',
-                      backgroundColor: selectedRole === option.value ? '#e8f5e8' : 'transparent'
-                    }}
+                    className={`role-option ${selectedRole === option.value ? 'selected' : ''}`}
                     onClick={() => handleRoleSelect(option.value)}
-                    onMouseEnter={(e) => {
-                      if (selectedRole !== option.value) {
-                        e.currentTarget.style.borderColor = '#4CAF50'
-                        e.currentTarget.style.backgroundColor = '#f9fff9'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedRole !== option.value) {
-                        e.currentTarget.style.borderColor = '#e0e0e0'
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }
-                    }}
                   >
-                    <div style={{ fontSize: '2em', marginBottom: 10, display: 'block' }}>{option.icon}</div>
+                    <i>{option.icon}</i>
                     <span>{option.label}</span>
                   </div>
                 ))}
               </div>
-            </Form.Item>
-
-            <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                loading={loading}
-                style={{
-                  width: '100%',
-                  padding: 15,
-                  background: 'linear-gradient(135deg, #4CAF50, #45a049)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: '1.1em',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  marginTop: 20
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 4px 10px rgba(76, 175, 80, 0.3)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-              >
-                登录
-              </Button>
-            </Form.Item>
-
-            <Form.Item style={{ textAlign: 'center', marginTop: 20, fontSize: '0.9em' }}>
-              <Link to="/register" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>注册新账号</Link>
-              <Link to="/forgot-password" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>忘记密码</Link>
-              <Link to="/" style={{ color: '#4CAF50', textDecoration: 'none', margin: '0 10px' }}>返回首页</Link>
-            </Form.Item>
-          </Form>
+            </div>
+            
+            <button 
+              type="button" 
+              className="btn-login" 
+              onClick={login}
+              disabled={loading}
+            >
+              {loading ? '登录中...' : '登录'}
+            </button>
+            
+            <div className="links">
+              <Link to="/register">注册新账号</Link>
+              <Link to="/forgot-password">忘记密码</Link>
+              <Link to="/">返回首页</Link>
+            </div>
+          </form>
         </div>
       </div>
     </div>
