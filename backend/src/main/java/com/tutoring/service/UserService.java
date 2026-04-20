@@ -172,4 +172,53 @@ public class UserService {
                 .map(this::convertToUserInfo)
                 .toList();
     }
+    
+    /**
+     * 更新用户信息
+     *
+     * @param userId 用户ID
+     * @param userInfo 用户信息
+     * @return 更新后的用户信息
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public UserInfo updateUser(Long userId, UserInfo userInfo) {
+        // 查询用户是否存在
+        User user = userRepository.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        
+        // 更新用户信息
+        user.setUsername(userInfo.getUsername());
+        user.setName(userInfo.getName());
+        user.setRole(userInfo.getRole());
+        user.setEmail(userInfo.getEmail());
+        user.setPhone(userInfo.getPhone());
+        user.setGender(userInfo.getGender());
+        user.setQq(userInfo.getQq());
+        user.setWechat(userInfo.getWechat());
+        
+        userRepository.updateById(user);
+        
+        return convertToUserInfo(user);
+    }
+    
+    /**
+     * 禁用/启用用户
+     *
+     * @param userId 用户ID
+     * @param disabled 是否禁用
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void toggleUserStatus(Long userId, Boolean disabled) {
+        // 查询用户是否存在
+        User user = userRepository.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        
+        // 更新用户状态
+        user.setDeleted(disabled ? 1 : 0);
+        userRepository.updateById(user);
+    }
 }
