@@ -32,6 +32,11 @@ public class ChatMessage {
     private Integer type;
     
     /**
+     * 心跳类型 (用于 WebSocket 心跳检测)
+     */
+    private String ping;
+    
+    /**
      * 文件 URL (图片或语音)
      */
     private String fileUrl;

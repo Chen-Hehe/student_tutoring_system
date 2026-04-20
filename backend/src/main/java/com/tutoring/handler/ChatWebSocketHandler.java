@@ -82,10 +82,33 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.info("=== WebSocket 收到用户 {} 的消息：{}", userId, message.getPayload());
         
         try {
-            // 解析消息
+            // 先尝试解析为 Map，检查是否是心跳消息
+            Map<String, Object> rawMessage = objectMapper.readValue(message.getPayload(), Map.class);
+            
+            // 处理心跳消息
+            if ("ping".equals(rawMessage.get("ping"))) {
+                log.debug("收到用户 {} 的心跳消息", userId);
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "pong"))));
+                return;
+            }
+            
+            // 解析为 ChatMessage 对象
             ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
             log.debug("解析后的消息对象：receiverId={}, message={}, type={}", 
                 chatMessage.getReceiverId(), chatMessage.getMessage(), chatMessage.getType());
+            
+            // 验证必填字段
+            if (chatMessage.getReceiverId() == null) {
+                throw new IllegalArgumentException("缺少 receiverId 参数");
+            }
+            if (chatMessage.getMessage() == null || chatMessage.getMessage().trim().isEmpty()) {
+                throw new IllegalArgumentException("消息内容不能为空");
+            }
+            
+            // 设置默认类型（如果未指定）
+            if (chatMessage.getType() == null) {
+                chatMessage.setType(1); // 默认为文字消息
+            }
             
             chatMessage.setSenderId(userId);
             log.info("设置 senderId={}，准备保存到数据库", userId);
@@ -101,6 +124,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             sendToUser(chatMessage.getReceiverId(), chatMessage);
             log.info("消息处理完成，已发送给接收者 {}", chatMessage.getReceiverId());
             
+        } catch (IllegalArgumentException e) {
+            log.error("消息参数错误", e);
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(
+                Map.of("type", "error", "message", "消息格式错误：" + e.getMessage())
+            )));
         } catch (Exception e) {
             log.error("处理消息失败", e);
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(

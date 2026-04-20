@@ -8,13 +8,28 @@ const api = axios.create({
   },
 })
 
-// 请求拦截器 - 添加 token
+// 请求拦截器 - 添加 token 和用户 ID
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // 添加用户 ID 请求头（聊天接口需要）
+    if (user) {
+      try {
+        const userData = JSON.parse(user)
+        if (userData?.id) {
+          config.headers['X-User-Id'] = userData.id
+        }
+      } catch (e) {
+        console.warn('解析用户信息失败:', e)
+      }
+    }
+    
     return config
   },
   (error) => {
