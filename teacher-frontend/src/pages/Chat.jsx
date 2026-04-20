@@ -142,6 +142,7 @@ const Chat = () => {
     setInputValue('')
     
     const messageData = {
+      senderId: currentUser.id, // 当前用户 ID
       receiverId: selectedConversation.userId,
       message: inputValue.trim(),
       type: 1 // 文字消息

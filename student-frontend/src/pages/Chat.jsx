@@ -128,6 +128,7 @@ const Chat = () => {
     
     // 不发送 timestamp，由后端自动生成
     const messageData = {
+      senderId: currentUser.id, // 当前用户 ID
       receiverId: selectedConversation.userId,
       message: inputValue,
       type: 1 // 1=文字消息（确保是数字类型）
