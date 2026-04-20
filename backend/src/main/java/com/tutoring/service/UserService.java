@@ -48,8 +48,18 @@ public class UserService {
             throw new RuntimeException("角色不匹配");
         }
         
-        // 验证密码（使用 BCrypt 密文比对）
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        // 验证密码
+        // 临时方案：同时支持 BCrypt 和明文验证（等数据库密码更新后移除明文逻辑）
+        String inputPassword = request.getPassword();
+        String dbPassword = user.getPassword();
+        boolean matched = passwordEncoder.matches(inputPassword, dbPassword);
+        
+        // 如果 BCrypt 验证失败，尝试明文验证（临时兼容）
+        if (!matched && dbPassword.equals(inputPassword)) {
+            matched = true;
+        }
+        
+        if (!matched) {
             throw new RuntimeException("用户名或密码错误");
         }
         
