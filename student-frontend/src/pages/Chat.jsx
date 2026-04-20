@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { Input, Button, Avatar, List, Badge, Upload, message as antdMessage, Spin, Empty, Card } from 'antd'
-import { SendOutlined, PictureOutlined, AudioOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
+import { Input, Button, Avatar, List, Badge, Upload, message as antdMessage, Spin, Empty, Card, Modal, Table, Space, Tag } from 'antd'
+import { SendOutlined, PictureOutlined, AudioOutlined, SmileOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons'
 import wsService from '../services/websocket'
 import { chatAPI } from '../services/chatApi'
+import { userAPI } from '../services/userApi'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -23,7 +24,6 @@ const Chat = () => {
   // 状态管理
   const [conversations, setConversations] = useState([])
   const [selectedConversation, setSelectedConversation] = useState(() => {
-    // 从 localStorage 恢复选中的对话
     const saved = localStorage.getItem('selectedConversation')
     return saved ? JSON.parse(saved) : null
   })
@@ -32,6 +32,9 @@ const Chat = () => {
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
+  const [showTeacherModal, setShowTeacherModal] = useState(false)
+  const [teachers, setTeachers] = useState([])
+  const [teacherLoading, setTeacherLoading] = useState(false)
   
   // 引用
   const messagesEndRef = useRef(null)
@@ -78,9 +81,35 @@ const Chat = () => {
   // 选择对话
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
-    // 持久化选中的对话到 localStorage
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
     loadChatHistory(conversation.userId)
+  }
+  
+  // 加载教师列表
+  const loadTeachers = async () => {
+    setTeacherLoading(true)
+    try {
+      const result = await userAPI.getUsers(1) // 1=教师
+      setTeachers(result.data || result || [])
+    } catch (error) {
+      console.error('加载教师列表失败:', error)
+      // 使用模拟数据作为后备
+      setTeachers([])
+    } finally {
+      setTeacherLoading(false)
+    }
+  }
+  
+  // 选择教师聊天
+  const selectTeacherToChat = (teacher) => {
+    const conversation = {
+      userId: teacher.id,
+      userName: teacher.name || teacher.username,
+      userAvatar: teacher.avatar,
+      unreadCount: 0
+    }
+    selectConversation(conversation)
+    setShowTeacherModal(false)
   }
   
   // 发送消息
@@ -95,26 +124,17 @@ const Chat = () => {
       return
     }
     
-    if (!wsService.isConnected()) {
-      antdMessage.warning('WebSocket 未连接，消息可能无法实时发送')
-    }
-    
     setSending(true)
     
+    // 不发送 timestamp，由后端自动生成
     const messageData = {
       receiverId: selectedConversation.userId,
       message: inputValue,
-      type: 1, // 1=文字消息
-      fileUrl: null
+      type: 1 // 1=文字消息（确保是数字类型）
     }
     
     try {
-      // 通过 WebSocket 发送
-      if (wsService.isConnected()) {
-        wsService.send(messageData)
-      }
-      
-      // 同时通过 API 发送（保证消息不丢失）
+      // 通过 API 发送（主要方式）
       const result = await chatAPI.sendMessage(messageData)
       
       // 添加到消息列表
@@ -122,12 +142,16 @@ const Chat = () => {
         ...result.data,
         senderId: currentUser.id,
         senderName: currentUser.name || currentUser.username,
-        senderAvatar: currentUser.avatar,
         timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss')
       }
       
       setMessages(prev => [...prev, newMessage])
       setInputValue('')
+      
+      // 通过 WebSocket 实时推送（如果已连接）
+      if (wsService.isConnected()) {
+        wsService.send(messageData)
+      }
       
       // 更新对话列表
       loadConversations()
@@ -188,6 +212,9 @@ const Chat = () => {
     // 加载对话列表
     loadConversations()
     
+    // 加载教师列表（用于选择聊天对象）
+    loadTeachers()
+    
     // 恢复选中的对话
     if (selectedConversation) {
       console.log('恢复选中的对话，加载聊天记录:', selectedConversation.userId)
@@ -198,7 +225,6 @@ const Chat = () => {
     return () => {
       unsubscribeConnection()
       unsubscribeMessage()
-      // 不断开 WebSocket，保持连接
     }
   }, [currentUser?.id])
   
@@ -218,11 +244,21 @@ const Chat = () => {
         title={
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>消息列表</span>
-            <Badge 
-              count={isConnected ? 1 : 0} 
-              status={isConnected ? 'success' : 'error'} 
-              text={isConnected ? '在线' : '离线'}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Badge 
+                count={isConnected ? 1 : 0} 
+                status={isConnected ? 'success' : 'error'} 
+                text={isConnected ? '在线' : '离线'}
+              />
+              <Button 
+                type="primary" 
+                size="small" 
+                icon={<PlusOutlined />}
+                onClick={() => setShowTeacherModal(true)}
+              >
+                新聊天
+              </Button>
+            </div>
           </div>
         }
       >
@@ -411,6 +447,57 @@ const Chat = () => {
           />
         )}
       </Card>
+      
+      {/* 选择教师模态框 */}
+      <Modal
+        title="选择聊天对象"
+        open={showTeacherModal}
+        onCancel={() => setShowTeacherModal(false)}
+        footer={null}
+        width={700}
+      >
+        <Table
+          rowKey="id"
+          loading={teacherLoading}
+          dataSource={teachers}
+          columns={[
+            {
+              title: '教师',
+              dataIndex: 'name',
+              key: 'name',
+              render: (name, record) => (
+                <Space>
+                  <Avatar style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
+                  <div>
+                    <div style={{ fontWeight: 'bold' }}>{name}</div>
+                    <div style={{ fontSize: 12, color: '#999' }}>{record.subject || '未知科目'}</div>
+                  </div>
+                </Space>
+              ),
+            },
+            {
+              title: '用户名',
+              dataIndex: 'username',
+              key: 'username',
+            },
+            {
+              title: '操作',
+              key: 'action',
+              render: (_, record) => (
+                <Button 
+                  type="primary" 
+                  size="small"
+                  onClick={() => selectTeacherToChat(record)}
+                >
+                  选择
+                </Button>
+              ),
+            },
+          ]}
+          pagination={{ pageSize: 5 }}
+          locale={{ emptyText: '暂无教师数据，请确保后端已创建教师账号' }}
+        />
+      </Modal>
     </div>
   )
 }

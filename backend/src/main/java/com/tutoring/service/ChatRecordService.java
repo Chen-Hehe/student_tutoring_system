@@ -217,7 +217,10 @@ public class ChatRecordService {
         message.setMessage(record.getMessage());
         message.setType(record.getType());
         message.setFileUrl(record.getFileUrl());
-        message.setTimestamp(record.getSentAt());
+        // 使用字符串格式，避免序列化问题
+        if (record.getSentAt() != null) {
+            message.setTimestamp(record.getSentAt());
+        }
         message.setIsRead(record.getIsRead());
         
         // 获取发送者信息
