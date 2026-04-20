@@ -1,6 +1,22 @@
-import { Card, Row, Col, Table, Tag, Space, Button } from 'antd'
+import { Card, Row, Col, Table, Tag, Space, Button, Spin } from 'antd'
+import { useState, useEffect } from 'react'
+import { adminAPI } from '../services/adminApi'
 
 const Dashboard = () => {
+  const [loading, setLoading] = useState(true)
+  const [statistics, setStatistics] = useState({
+    teacherCount: 0,
+    studentCount: 0,
+    parentCount: 0,
+    chatCount: 0
+  })
+  const [users, setUsers] = useState([])
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  })
+
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 100 },
     { title: '用户名', dataIndex: 'username', key: 'username' },
@@ -33,15 +49,49 @@ const Dashboard = () => {
     },
   ]
 
-  const data = [
-    { id: 1, username: 'teacher1', name: '李老师', role: 'teacher', status: '活跃' },
-    { id: 2, username: 'student1', name: '小明', role: 'student', status: '活跃' },
-    { id: 3, username: 'parent1', name: '王家长', role: 'parent', status: '活跃' },
-    { id: 4, username: 'admin1', name: '管理员', role: 'admin', status: '活跃' },
-  ]
+  useEffect(() => {
+    fetchStatistics()
+    fetchUsers()
+  }, [])
+
+  const fetchStatistics = async () => {
+    try {
+      const response = await adminAPI.getStatistics()
+      if (response && response.data && response.data.success) {
+        setStatistics(response.data.data)
+      }
+    } catch (error) {
+      console.error('获取统计数据失败:', error)
+    }
+  }
+
+  const fetchUsers = async (page = 1, size = 10) => {
+    setLoading(true)
+    try {
+      const response = await adminAPI.getUsers(page, size)
+      if (response && response.data && response.data.success) {
+        setUsers(response.data.data.list)
+        setPagination({
+          current: response.data.data.page,
+          pageSize: response.data.data.size,
+          total: response.data.data.total
+        })
+      }
+    } catch (error) {
+      console.error('获取用户列表失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div>
+      {loading && (
+        <div style={{ textAlign: 'center', padding: 40 }}>
+          <Spin size="large" />
+        </div>
+      )}
+      
       <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
@@ -56,8 +106,8 @@ const Dashboard = () => {
           >
             <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍🏫</div>
             <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>教师数量</h3>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>45</div>
-            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 2 名</p>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>{statistics.teacherCount}</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>当前系统中注册的教师</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -73,8 +123,8 @@ const Dashboard = () => {
           >
             <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍🎓</div>
             <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>学生数量</h3>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>128</div>
-            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 5 名</p>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>{statistics.studentCount}</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>当前系统中注册的学生</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -90,8 +140,8 @@ const Dashboard = () => {
           >
             <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>👨‍👩‍👧‍👦</div>
             <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>家长数量</h3>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>89</div>
-            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 3 名</p>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>{statistics.parentCount}</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>当前系统中注册的家长</p>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -107,8 +157,8 @@ const Dashboard = () => {
           >
             <div style={{ fontSize: '2.5em', marginBottom: 15, color: '#9C27B0' }}>💬</div>
             <h3 style={{ color: '#9C27B0', marginBottom: 10, fontSize: '1.4em' }}>辅导会话</h3>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>236</div>
-            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>本周新增 15 次</p>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>{statistics.chatCount}</div>
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>系统中总聊天记录数</p>
           </Card>
         </Col>
       </Row>
@@ -117,41 +167,17 @@ const Dashboard = () => {
         <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.6em', fontWeight: 'bold' }}>用户管理</h3>
         <Table 
           columns={columns} 
-          dataSource={data} 
+          dataSource={users} 
           rowKey="id" 
           size="middle"
-          pagination={false}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            onChange: (page, size) => fetchUsers(page, size)
+          }}
           style={{ fontSize: '16px', marginBottom: '20px' }}
         />
-        {/* 自定义分页 */}
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
-          <span 
-            style={{
-              margin: '0 5px',
-              padding: '6px 10px',
-              borderRadius: 4,
-              backgroundColor: '#9C27B0',
-              color: 'white',
-              border: '1px solid #9C27B0',
-              display: 'inline-block',
-              cursor: 'pointer',
-              fontSize: '14px',
-              outline: 'none',
-              boxShadow: 'none',
-              lineHeight: '1.5',
-              minWidth: '30px',
-              textAlign: 'center',
-              boxSizing: 'border-box',
-              userSelect: 'none'
-            }}
-            onMouseDown={(e) => e.preventDefault()}
-            onFocus={(e) => e.currentTarget.style.outline = 'none'}
-          >
-            1
-          </span>
-          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
-        </div>
       </Card>
     </div>
   )
