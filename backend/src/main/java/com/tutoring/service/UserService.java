@@ -53,11 +53,15 @@ public class UserService {
         String dbPassword = user.getPassword();
         boolean matched = passwordEncoder.matches(inputPassword, dbPassword);
         
+        System.out.println("【DEBUG】密码验证 - username: " + user.getUsername() + ", bcrypted: " + matched);
+        
         // 临时方案：允许测试账号用明文密码登录（数据库密码 hash 不正确）
         // 正确的解决方案：更新数据库密码为正确的 BCrypt hash
         if (!matched) {
             // 测试账号白名单（临时方案）
-            if (isTestAccount(user.getUsername(), inputPassword)) {
+            boolean isTest = isTestAccount(user.getUsername(), inputPassword);
+            System.out.println("【DEBUG】isTestAccount: " + isTest);
+            if (isTest) {
                 matched = true;
                 System.out.println("【临时方案】测试账号 " + user.getUsername() + " 使用明文密码验证通过");
             }
