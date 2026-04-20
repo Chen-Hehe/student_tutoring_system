@@ -86,15 +86,29 @@ public class UserService {
     // 临时测试账号验证（等数据库更新后移除）
     private boolean isTestAccount(String username, String password) {
         // 测试账号列表：用户名 -> 密码
-        if (username.equals("teacher_zhang") || username.equals("teacher_li") || username.equals("teacher_wang")) {
-            return password.equals("Test1234!");
+        System.out.println("【DEBUG】isTestAccount 检查 - username: '" + username + "', password: '" + password + "'");
+        
+        if (username == null) {
+            return false;
         }
-        if (username.equals("student_ming") || username.equals("student_hua") || username.equals("student_gang") 
-            || username.equals("student_fang") || username.equals("student_jun")) {
-            return password.equals("Test1234!");
+        
+        // 教师账号
+        if (username.startsWith("teacher_")) {
+            boolean result = password.equals("Test1234!");
+            System.out.println("【DEBUG】教师账号匹配: " + result);
+            return result;
         }
-        if (username.equals("parent_chen") || username.equals("parent_liu") || username.equals("parent_zhao")) {
-            return password.equals("Test1234!");
+        // 学生账号
+        if (username.startsWith("student_")) {
+            boolean result = password.equals("Test1234!");
+            System.out.println("【DEBUG】学生账号匹配: " + result);
+            return result;
+        }
+        // 家长账号
+        if (username.startsWith("parent_")) {
+            boolean result = password.equals("Test1234!");
+            System.out.println("【DEBUG】家长账号匹配: " + result);
+            return result;
         }
         return false;
     }
