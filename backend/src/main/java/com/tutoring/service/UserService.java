@@ -66,6 +66,17 @@ public class UserService {
         if (!matched) {
             throw new RuntimeException("用户名或密码错误");
         }
+        
+        // 生成 Token
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
+        
+        // 构建用户信息
+        UserInfo userInfo = convertToUserInfo(user);
+        
+        return Map.of(
+            "token", token,
+            "user", userInfo
+        );
     }
     
     // 临时测试账号验证（等数据库更新后移除）
@@ -82,18 +93,6 @@ public class UserService {
             return password.equals("Test1234!");
         }
         return false;
-    }
-    
-    // 生成 Token
-    String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
-        
-        // 构建用户信息
-        UserInfo userInfo = convertToUserInfo(user);
-        
-        return Map.of(
-            "token", token,
-            "user", userInfo
-        );
     }
     
     /**
