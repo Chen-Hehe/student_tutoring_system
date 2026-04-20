@@ -44,9 +44,9 @@ public class ChatMessage {
     private String fileUrl;
     
     /**
-     * 时间戳 (支持多种格式)
+     * 时间戳
      */
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime timestamp;
     
     /**

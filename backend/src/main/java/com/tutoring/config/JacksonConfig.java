@@ -1,46 +1,38 @@
 package com.tutoring.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  * Jackson JSON 序列化配置
- * 配置 Java 8 日期时间类型的序列化/反序列化
+ * 使用 Jackson2ObjectMapperBuilderCustomizer 统一配置
  */
 @Configuration
 public class JacksonConfig {
+    
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * 配置全局 Jackson ObjectMapper
-     * 注册 JavaTimeModule 以支持 Java 8 日期时间类型
+     * 配置全局 Jackson 序列化行为
+     * 注册 JavaTimeModule 并设置日期时间格式
      */
     @Bean
-    public Jackson2ObjectMapperBuilder jacksonBuilder() {
-        return new Jackson2ObjectMapperBuilder()
-                .modules(new JavaTimeModule())
-                .serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .deserializerByType(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-    }
-    
-    /**
-     * 提供全局 ObjectMapper Bean，供 WebSocket 等组件使用
-     */
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new Jackson2ObjectMapperBuilder()
-                .modules(new JavaTimeModule())
-                .serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .deserializerByType(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
-                .build();
+    public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
+        return builder -> {
+            // 注册 Java 8 时间模块
+            builder.modules(new JavaTimeModule());
+            builder.simpleDateFormat(DATE_TIME_FORMAT);
+            
+            // 配置 LocalDateTime 序列化器和反序列化器
+            builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+            builder.deserializers(new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+        };
     }
 }
