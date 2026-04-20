@@ -71,15 +71,21 @@ public class UserService {
     // 临时测试账号验证（等数据库更新后移除）
     private boolean isTestAccount(String username, String password) {
         // 测试账号列表：用户名 -> 密码
-        return switch (username) {
-            case "teacher_zhang", "teacher_li", "teacher_wang" -> password.equals("Test1234!");
-            case "student_ming", "student_hua", "student_gang", "student_fang", "student_jun" -> password.equals("Test1234!");
-            case "parent_chen", "parent_liu", "parent_zhao" -> password.equals("Test1234!");
-            default -> false;
-        };
-        
-        // 生成 Token
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
+        if (username.equals("teacher_zhang") || username.equals("teacher_li") || username.equals("teacher_wang")) {
+            return password.equals("Test1234!");
+        }
+        if (username.equals("student_ming") || username.equals("student_hua") || username.equals("student_gang") 
+            || username.equals("student_fang") || username.equals("student_jun")) {
+            return password.equals("Test1234!");
+        }
+        if (username.equals("parent_chen") || username.equals("parent_liu") || username.equals("parent_zhao")) {
+            return password.equals("Test1234!");
+        }
+        return false;
+    }
+    
+    // 生成 Token
+    String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
         
         // 构建用户信息
         UserInfo userInfo = convertToUserInfo(user);
