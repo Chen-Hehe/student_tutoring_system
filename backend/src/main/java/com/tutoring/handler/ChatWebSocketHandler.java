@@ -1,13 +1,8 @@
 package com.tutoring.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.tutoring.dto.ChatMessage;
-import com.tutoring.entity.ChatRecord;
-import com.tutoring.service.ChatRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -20,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 聊天 WebSocket 处理器
+ * 只处理心跳包，不处理业务消息发送
  */
 @Slf4j
 @Component
@@ -31,16 +27,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      * Key: 用户 ID, Value: WebSocketSession
      */
     private static final Map<Long, WebSocketSession> ONLINE_USERS = new ConcurrentHashMap<>();
-    
-    /**
-     * Redis 模板
-     */
-    private final RedisTemplate<String, Object> redisTemplate;
-    
-    /**
-     * 聊天服务
-     */
-    private final ChatRecordService chatRecordService;
     
     /**
      * JSON 对象映射器（使用 Spring 配置的 Bean）
@@ -59,9 +45,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         if (userId != null) {
             ONLINE_USERS.put(userId, session);
             log.info("用户 {} 已连接 WebSocket，当前在线人数：{}", userId, ONLINE_USERS.size());
-            
-            // 订阅该用户的 Redis 频道
-            subscribeUserChannel(userId);
         }
     }
     
@@ -73,60 +56,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         
-        log.info("=== WebSocket 收到用户 {} 的消息：{}", userId, message.getPayload());
+        log.debug("=== WebSocket 收到用户 {} 的消息：{}", userId, message.getPayload());
         
         try {
-            // 先尝试解析为 Map，检查是否是心跳消息
+            // 解析消息
             Map<String, Object> rawMessage = objectMapper.readValue(message.getPayload(), Map.class);
             
-            // 处理心跳消息（检查 "ping" 字段或 type="ping"）
+            // 只处理心跳消息（ping/pong）
             if ("ping".equals(rawMessage.get("ping")) || "ping".equals(rawMessage.get("type"))) {
-                log.debug("收到用户 {} 的心跳消息", userId);
+                log.debug("收到用户 {} 的心跳消息，回复 pong", userId);
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "pong"))));
                 return;
             }
             
-            // 解析为 ChatMessage 对象
-            ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
-            log.debug("解析后的消息对象：receiverId={}, message={}, type={}", 
-                chatMessage.getReceiverId(), chatMessage.getMessage(), chatMessage.getType());
+            // 不再处理业务聊天消息 - 所有消息发送必须走 HTTP REST API
+            log.debug("收到非心跳消息，已忽略（消息发送请走 HTTP API）：{}", rawMessage);
             
-            // 验证必填字段
-            if (chatMessage.getReceiverId() == null) {
-                throw new IllegalArgumentException("缺少 receiverId 参数");
-            }
-            if (chatMessage.getMessage() == null || chatMessage.getMessage().trim().isEmpty()) {
-                throw new IllegalArgumentException("消息内容不能为空");
-            }
-            
-            // 设置默认类型（如果未指定）
-            if (chatMessage.getType() == null) {
-                chatMessage.setType(1); // 默认为文字消息
-            }
-            
-            chatMessage.setSenderId(userId);
-            log.info("设置 senderId={}，准备保存到数据库", userId);
-            
-            // 保存消息到数据库
-            ChatRecord savedRecord = chatRecordService.sendMessage(chatMessage);
-            log.info("消息已保存到数据库，recordId={}", savedRecord.getId());
-            
-            // 通过 Redis 发布消息（支持多节点）
-            publishMessage(chatMessage);
-            
-            // 直接发送给在线的接收者
-            sendToUser(chatMessage.getReceiverId(), chatMessage);
-            log.info("消息处理完成，已发送给接收者 {}", chatMessage.getReceiverId());
-            
-        } catch (IllegalArgumentException e) {
-            log.error("消息参数错误", e);
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(
-                Map.of("type", "error", "message", "消息格式错误：" + e.getMessage())
-            )));
         } catch (Exception e) {
-            log.error("处理消息失败", e);
+            log.error("WebSocket 消息处理失败", e);
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(
-                Map.of("type", "error", "message", "消息发送失败：" + e.getMessage())
+                Map.of("type", "error", "message", "消息处理失败：" + e.getMessage())
             )));
         }
     }
@@ -175,61 +124,41 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
     
     /**
-     * 发送消息给指定用户
+     * 发送消息给指定用户（由 Redis 消息监听器调用）
      */
-    public void sendToUser(Long userId, ChatMessage chatMessage) throws IOException {
+    public void sendToUser(Long userId, Object message) throws IOException {
         WebSocketSession session = ONLINE_USERS.get(userId);
         if (session != null && session.isOpen()) {
-            String json = objectMapper.writeValueAsString(chatMessage);
+            String json = objectMapper.writeValueAsString(message);
             session.sendMessage(new TextMessage(json));
-            log.debug("消息已发送给用户 {}", userId);
+            log.debug("消息已推送给用户 {}", userId);
         } else {
-            log.debug("用户 {} 不在线，消息将通过 Redis 推送", userId);
+            log.debug("用户 {} 不在线，无法推送", userId);
         }
     }
     
     /**
-     * 通过 Redis 发布消息（支持多节点部署）
-     */
-    private void publishMessage(ChatMessage chatMessage) {
-        String channel = REDIS_CHANNEL_PREFIX + chatMessage.getReceiverId();
-        try {
-            redisTemplate.convertAndSend(channel, objectMapper.writeValueAsString(chatMessage));
-            log.debug("消息已发布到 Redis 频道：{}", channel);
-        } catch (Exception e) {
-            log.error("发布消息到 Redis 失败", e);
-        }
-    }
-    
-    /**
-     * 订阅用户的 Redis 频道
+     * 订阅用户的 Redis 频道（由 RedisListenerConfig 处理）
      */
     private void subscribeUserChannel(Long userId) {
-        // 注意：实际的 Redis 订阅需要在应用启动时由专门的监听器处理
-        // 这里只是标记需要订阅
-        log.debug("准备订阅用户 {} 的 Redis 频道", userId);
+        log.debug("用户 {} 已连接，等待 Redis 消息推送", userId);
     }
     
     /**
-     * 从 Redis 接收消息并推送给在线用户（由 Redis 消息监听器调用）
+     * 从 Redis 接收消息并推送给在线用户（由 RedisListenerConfig 调用）
+     * WebSocket 仅用于接收推送，不处理发送
      */
-    public void onRedisMessage(String channel, String message) {
+    public void onRedisMessage(String message, String channel) {
         try {
-            ChatMessage chatMessage = objectMapper.readValue(message, ChatMessage.class);
-            Long userId = chatMessage.getReceiverId();
-            
             // 提取频道中的用户 ID
             String channelId = channel.replace(REDIS_CHANNEL_PREFIX, "");
-            try {
-                userId = Long.parseLong(channelId);
-            } catch (NumberFormatException e) {
-                log.error("解析频道用户 ID 失败：{}", channelId, e);
-                return;
-            }
+            Long userId = Long.parseLong(channelId);
             
-            sendToUser(userId, chatMessage);
+            // 直接推送原始消息（已经是 ChatMessage JSON）
+            sendToUser(userId, message);
+            log.debug("已从 Redis 推送消息给用户 {}", userId);
         } catch (Exception e) {
-            log.error("处理 Redis 消息失败", e);
+            log.error("处理 Redis 消息失败：channel={}, message={}", channel, message, e);
         }
     }
 }

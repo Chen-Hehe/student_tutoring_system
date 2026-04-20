@@ -119,45 +119,58 @@ const Chat = () => {
       return
     }
     
-    if (!wsService.isConnected()) {
-      antdMessage.warning('连接已断开，请刷新页面')
-      return
-    }
-    
     setSending(true)
+    
+    // 生成临时 ID，用于乐观更新
+    const tempMessageId = 'temp_' + Date.now()
+    const tempTimestamp = new Date().toISOString()
+    
+    // 乐观更新 UI - 先显示消息（发送中状态）
+    const tempMessage = {
+      messageId: tempMessageId,
+      senderId: currentUser.id,
+      receiverId: selectedConversation.userId,
+      message: inputValue.trim(),
+      type: 1,
+      timestamp: tempTimestamp,
+      isRead: false,
+      senderName: currentUser.name,
+      senderAvatar: currentUser.avatar,
+      sending: true // 标记为发送中
+    }
+    setMessages(prev => [...prev, tempMessage])
+    setInputValue('')
+    
     const messageData = {
       receiverId: selectedConversation.userId,
       message: inputValue.trim(),
-      type: 1, // 文字消息
-      timestamp: new Date().toISOString()
+      type: 1 // 文字消息
     }
     
-    console.log('发送消息:', messageData)
-    
     try {
-      // 通过 WebSocket 发送
-      wsService.send(messageData)
+      // 通过 HTTP API 发送（统一发送链路）
+      const result = await chatAPI.sendMessage(messageData)
       
-      // 乐观更新 UI - 临时消息，等待服务器确认
-      const tempMessageId = 'temp_' + Date.now()
-      const newMessage = {
-        messageId: tempMessageId, // 临时 ID，等待服务器返回真实 ID
-        senderId: currentUser.id,
-        receiverId: selectedConversation.userId,
-        message: inputValue.trim(),
-        type: 1,
-        timestamp: new Date().toISOString(),
-        isRead: false,
-        senderName: currentUser.name,
-        senderAvatar: currentUser.avatar
+      // 用后端返回的真实消息替换临时消息
+      const realMessage = {
+        ...result.data,
+        timestamp: result.data.timestamp || tempTimestamp
       }
-      setMessages(prev => [...prev, newMessage])
-      setInputValue('')
+      
+      // 替换临时消息为真实消息
+      setMessages(prev => prev.map(msg => 
+        msg.messageId === tempMessageId ? realMessage : msg
+      ))
       
       // 刷新对话列表
       loadConversations()
+      
     } catch (error) {
       console.error('发送消息失败:', error)
+      // 标记为发送失败
+      setMessages(prev => prev.map(msg => 
+        msg.messageId === tempMessageId ? { ...msg, sending: false, sendFailed: true } : msg
+      ))
       antdMessage.error('发送失败，请重试')
     } finally {
       setSending(false)

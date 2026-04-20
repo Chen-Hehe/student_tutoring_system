@@ -7,6 +7,7 @@ import com.tutoring.entity.ChatRecord;
 import com.tutoring.service.ChatRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * 聊天控制器
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -22,17 +24,26 @@ public class ChatController {
     private final ChatRecordService chatRecordService;
     
     /**
-     * 发送消息
+     * 发送消息（HTTP 接口 - 负责落库与触发推送）
      *
-     * @param chatMessage 消息内容
-     * @return 发送结果
+     * @param chatMessage 消息内容（必须包含：receiverId, message, type）
+     * @return 发送结果（包含真实数据库 ID 和 timestamp）
      */
     @PostMapping("/send")
-    public Result<ChatRecord> sendMessage(@Valid @RequestBody ChatMessage chatMessage) {
+    public Result<ChatRecord> sendMessage(
+            @Valid @RequestBody ChatMessage chatMessage,
+            @RequestHeader(value = "X-User-Id", required = false) Long currentUserId) {
         try {
-            ChatRecord record = chatRecordService.sendMessage(chatMessage);
+            // 从 Header 获取发送者 ID（如果未设置）
+            if (chatMessage.getSenderId() == null && currentUserId != null) {
+                chatMessage.setSenderId(currentUserId);
+            }
+            
+            // 调用核心方法：保存并推送
+            ChatRecord record = chatRecordService.saveAndPushMessage(chatMessage);
             return Result.success("发送成功", record);
         } catch (Exception e) {
+            log.error("发送消息失败", e);
             return Result.error(500, "发送失败：" + e.getMessage());
         }
     }

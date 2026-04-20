@@ -148,10 +148,7 @@ const Chat = () => {
       setMessages(prev => [...prev, newMessage])
       setInputValue('')
       
-      // 通过 WebSocket 实时推送（如果已连接）
-      if (wsService.isConnected()) {
-        wsService.send(messageData)
-      }
+      // 不再通过 WebSocket 发送，只使用 HTTP API
       
       // 更新对话列表
       loadConversations()

@@ -26,21 +26,24 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ChatRecordService {
     
+    private static final String REDIS_CHANNEL_PREFIX = "chat:user:";
+    
     private final ChatRecordRepository chatRecordRepository;
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     
     /**
-     * 发送消息
+     * 发送消息并推送给接收者（HTTP 接口使用）
      *
-     * @param chatMessage 消息内容
-     * @return 保存后的聊天记录
+     * @param chatMessage 消息内容（包含 senderId, receiverId, message, type）
+     * @return 保存后的聊天记录（包含真实 ID 和 timestamp）
      */
     @Transactional(rollbackFor = Exception.class)
-    public ChatRecord sendMessage(ChatMessage chatMessage) {
-        log.info("ChatRecordService.sendMessage - 开始保存消息：senderId={}, receiverId={}, message={}", 
+    public ChatRecord saveAndPushMessage(ChatMessage chatMessage) {
+        log.info("ChatRecordService.saveAndPushMessage - 开始保存并推送消息：senderId={}, receiverId={}, message={}", 
             chatMessage.getSenderId(), chatMessage.getReceiverId(), chatMessage.getMessage());
         
+        // 1. 保存消息到数据库
         ChatRecord record = new ChatRecord();
         record.setSenderId(chatMessage.getSenderId());
         record.setReceiverId(chatMessage.getReceiverId());
@@ -51,19 +54,45 @@ public class ChatRecordService {
         record.setSentAt(LocalDateTime.now());
         
         int insertResult = chatRecordRepository.insert(record);
-        log.info("ChatRecordService.sendMessage - 数据库插入结果：affectedRows={}, recordId={}", 
+        log.info("ChatRecordService.saveAndPushMessage - 数据库插入结果：affectedRows={}, recordId={}", 
             insertResult, record.getId());
         
         if (insertResult == 0) {
-            log.error("ChatRecordService.sendMessage - 数据库插入失败，影响行数为 0");
+            log.error("ChatRecordService.saveAndPushMessage - 数据库插入失败，影响行数为 0");
             throw new RuntimeException("消息保存失败");
         }
         
-        // 清除 Redis 缓存
+        // 2. 清除 Redis 缓存
         clearCache(chatMessage.getSenderId(), chatMessage.getReceiverId());
-        log.info("ChatRecordService.sendMessage - 消息保存成功，recordId={}", record.getId());
         
+        // 3. 通过 Redis 推送给接收者（实时通知）
+        try {
+            pushMessageToReceiver(chatMessage.getReceiverId(), chatMessage);
+            log.info("ChatRecordService.saveAndPushMessage - 已推送消息到 Redis，receiverId={}", 
+                chatMessage.getReceiverId());
+        } catch (Exception e) {
+            log.error("ChatRecordService.saveAndPushMessage - 推送消息失败", e);
+            // 推送失败不影响主流程
+        }
+        
+        log.info("ChatRecordService.saveAndPushMessage - 消息保存并推送完成，recordId={}", record.getId());
         return record;
+    }
+    
+    /**
+     * 发送消息（旧方法，保留兼容性）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ChatRecord sendMessage(ChatMessage chatMessage) {
+        return saveAndPushMessage(chatMessage);
+    }
+    
+    /**
+     * 通过 Redis 推送消息给接收者
+     */
+    private void pushMessageToReceiver(Long receiverId, ChatMessage message) {
+        String channel = REDIS_CHANNEL_PREFIX + receiverId;
+        redisTemplate.convertAndSend(channel, message);
     }
     
     /**
