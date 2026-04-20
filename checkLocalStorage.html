@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check LocalStorage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin-bottom: 30px; }
+        h2 { color: #FF9800; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LocalStorage Data</h1>
+        
+        <div class="section">
+            <h2>Children</h2>
+            <pre id="children"></pre>
+        </div>
+        
+        <div class="section">
+            <h2>Match Requests</h2>
+            <pre id="matchRequests"></pre>
+        </div>
+        
+        <div class="section">
+            <h2>Confirmed Requests</h2>
+            <pre id="confirmedRequests"></pre>
+        </div>
+        
+        <div class="section">
+            <h2>Teachers</h2>
+            <pre id="teachers"></pre>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('children').textContent = JSON.stringify(JSON.parse(localStorage.getItem('children') || '[]'), null, 2);
+        document.getElementById('matchRequests').textContent = JSON.stringify(JSON.parse(localStorage.getItem('matchRequests') || '[]'), null, 2);
+        document.getElementById('confirmedRequests').textContent = JSON.stringify(JSON.parse(localStorage.getItem('confirmedRequests') || '[]'), null, 2);
+        document.getElementById('teachers').textContent = JSON.stringify(JSON.parse(localStorage.getItem('teachers') || '[]'), null, 2);
+    </script>
+</body>
+</html>

@@ -1,8 +1,21 @@
-import { Table, Tag, Space, Button, Input, Select, Row, Col, Card } from 'antd'
+import { useState, useEffect } from 'react'
+import { Table, Tag, Space, Button, Input, Select, Row, Col, Card, message, Spin, Modal, Form } from 'antd'
+import { userAPI } from '../services/userApi'
 
 const { Option } = Select
 
 const UserManagement = () => {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [searchParams, setSearchParams] = useState({
+    keyword: '',
+    role: '',
+    status: ''
+  })
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [form] = Form.useForm()
+
   const columns = [
     { 
       title: 'ID', 
@@ -30,10 +43,10 @@ const UserManagement = () => {
       align: 'center',
       render: (role) => {
         const roleMap = {
-          teacher: { color: '#E3F2FD', textColor: '#1976D2', text: '教师' },
-          student: { color: '#E8F5E9', textColor: '#388E3C', text: '学生' },
-          parent: { color: '#FFF3E0', textColor: '#F57C00', text: '家长' },
-          admin: { color: '#F3E5F5', textColor: '#7B1FA2', text: '管理员' }
+          1: { color: '#E3F2FD', textColor: '#1976D2', text: '教师' },
+          2: { color: '#E8F5E9', textColor: '#388E3C', text: '学生' },
+          3: { color: '#FFF3E0', textColor: '#F57C00', text: '家长' },
+          4: { color: '#F3E5F5', textColor: '#7B1FA2', text: '管理员' }
         }
         const roleInfo = roleMap[role] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
         return (
@@ -54,15 +67,15 @@ const UserManagement = () => {
     },
     { 
       title: '状态', 
-      dataIndex: 'status', 
-      key: 'status',
+      dataIndex: 'deleted', 
+      key: 'deleted',
       align: 'center',
-      render: (status) => {
+      render: (deleted) => {
         const statusMap = {
-          active: { color: '#E8F5E9', textColor: '#388E3C', text: '活跃' },
-          inactive: { color: '#FFEBEE', textColor: '#C62828', text: '禁用' }
+          0: { color: '#E8F5E9', textColor: '#388E3C', text: '活跃' },
+          1: { color: '#FFEBEE', textColor: '#C62828', text: '禁用' }
         }
-        const statusInfo = statusMap[status] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
+        const statusInfo = statusMap[deleted] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
         return (
           <span 
             style={{
@@ -81,9 +94,13 @@ const UserManagement = () => {
     },
     { 
       title: '注册时间', 
-      dataIndex: 'registerTime', 
-      key: 'registerTime',
-      align: 'center'
+      dataIndex: 'createdAt', 
+      key: 'createdAt',
+      align: 'center',
+      render: (createdAt) => {
+        if (!createdAt) return '-'
+        return new Date(createdAt).toLocaleDateString('zh-CN')
+      }
     },
     { 
       title: '操作', 
@@ -99,6 +116,7 @@ const UserManagement = () => {
               borderColor: '#9C27B0',
               borderRadius: 4
             }}
+            onClick={() => handleEditUser(record)}
           >
             编辑
           </Button>
@@ -109,23 +127,103 @@ const UserManagement = () => {
               color: '#333',
               borderRadius: 4
             }}
+            onClick={() => handleToggleStatus(record)}
           >
-            {record.status === 'active' ? '禁用' : '启用'}
+            {record.deleted === 0 ? '禁用' : '启用'}
           </Button>
         </Space>
       ),
     },
   ]
 
-  const data = [
-    { id: 1, username: 'teacher1', name: '李老师', role: 'teacher', status: 'active', registerTime: '2026-03-01' },
-    { id: 2, username: 'teacher2', name: '王老师', role: 'teacher', status: 'active', registerTime: '2026-03-02' },
-    { id: 3, username: 'student1', name: '小明', role: 'student', status: 'active', registerTime: '2026-03-03' },
-    { id: 4, username: 'student2', name: '小红', role: 'student', status: 'active', registerTime: '2026-03-04' },
-    { id: 5, username: 'parent1', name: '张三爸爸', role: 'parent', status: 'active', registerTime: '2026-03-05' },
-    { id: 6, username: 'parent2', name: '李四妈妈', role: 'parent', status: 'inactive', registerTime: '2026-03-06' },
-    { id: 7, username: 'admin1', name: '管理员', role: 'admin', status: 'active', registerTime: '2026-03-01' },
-  ]
+  // 获取用户列表
+  const fetchUsers = async () => {
+    setLoading(true)
+    try {
+      // 转换角色参数（前端使用字符串，后端使用数字）
+      let roleParam = null
+      switch (searchParams.role) {
+        case 'teacher': roleParam = 1; break
+        case 'student': roleParam = 2; break
+        case 'parent': roleParam = 3; break
+        case 'admin': roleParam = 4; break
+        default: roleParam = null
+      }
+      
+      const response = await userAPI.getUsers(roleParam)
+      if (response && response.data) {
+        setUsers(response.data)
+      }
+    } catch (error) {
+      message.error('获取用户列表失败')
+      console.error('Error fetching users:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 初始加载和参数变化时重新获取数据
+  useEffect(() => {
+    fetchUsers()
+  }, [searchParams.role])
+
+  // 处理搜索参数变化
+  const handleSearch = () => {
+    fetchUsers()
+  }
+
+  // 处理重置
+  const handleReset = () => {
+    setSearchParams({
+      keyword: '',
+      role: '',
+      status: ''
+    })
+    fetchUsers()
+  }
+
+  // 处理编辑用户
+  const handleEditUser = (user) => {
+    setCurrentUser(user)
+    form.setFieldsValue({
+      username: user.username,
+      name: user.name,
+      role: user.role
+    })
+    setIsEditModalVisible(true)
+  }
+
+  // 处理保存编辑
+  const handleSaveEdit = async () => {
+    try {
+      const values = await form.validateFields()
+      const updatedUser = {
+        ...currentUser,
+        ...values
+      }
+      
+      await userAPI.updateUser(currentUser.id, updatedUser)
+      message.success('用户信息更新成功')
+      setIsEditModalVisible(false)
+      fetchUsers()
+    } catch (error) {
+      message.error('保存失败，请检查输入')
+      console.error('Error updating user:', error)
+    }
+  }
+
+  // 处理禁用/启用用户
+  const handleToggleStatus = async (user) => {
+    try {
+      const newStatus = user.deleted === 0 ? 1 : 0
+      await userAPI.toggleUserStatus(user.id, newStatus === 1)
+      message.success(`${newStatus === 1 ? '禁用' : '启用'}成功`)
+      fetchUsers()
+    } catch (error) {
+      message.error('操作失败')
+      console.error('Error toggling user status:', error)
+    }
+  }
 
   return (
     <div>
@@ -134,11 +232,20 @@ const UserManagement = () => {
         <Row gutter={[16, 16]} align="middle">
           <Col>
             <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>搜索:</span>
-            <Input placeholder="输入用户名或姓名" style={{ width: 250, fontSize: '16px', padding: '8px 12px' }} />
+            <Input 
+              placeholder="输入用户名或姓名" 
+              style={{ width: 250, fontSize: '16px', padding: '8px 12px' }} 
+              value={searchParams.keyword}
+              onChange={(e) => setSearchParams({...searchParams, keyword: e.target.value})}
+            />
           </Col>
           <Col>
             <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>角色:</span>
-            <Select style={{ width: 150, fontSize: '16px' }} defaultValue="">
+            <Select 
+              style={{ width: 150, fontSize: '16px' }} 
+              value={searchParams.role}
+              onChange={(value) => setSearchParams({...searchParams, role: value})}
+            >
               <Option value="" style={{ fontSize: '16px' }}>全部</Option>
               <Option value="teacher" style={{ fontSize: '16px' }}>教师</Option>
               <Option value="student" style={{ fontSize: '16px' }}>学生</Option>
@@ -148,17 +255,31 @@ const UserManagement = () => {
           </Col>
           <Col>
             <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>状态:</span>
-            <Select style={{ width: 150, fontSize: '16px' }} defaultValue="">
+            <Select 
+              style={{ width: 150, fontSize: '16px' }} 
+              value={searchParams.status}
+              onChange={(value) => setSearchParams({...searchParams, status: value})}
+            >
               <Option value="" style={{ fontSize: '16px' }}>全部</Option>
               <Option value="active" style={{ fontSize: '16px' }}>活跃</Option>
               <Option value="inactive" style={{ fontSize: '16px' }}>禁用</Option>
             </Select>
           </Col>
           <Col>
-            <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>搜索</Button>
+            <Button 
+              style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}
+              onClick={handleSearch}
+            >
+              搜索
+            </Button>
           </Col>
           <Col>
-            <Button style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '8px 16px' }}>重置</Button>
+            <Button 
+              style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '8px 16px' }}
+              onClick={handleReset}
+            >
+              重置
+            </Button>
           </Col>
           <Col>
             <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>添加用户</Button>
@@ -170,14 +291,16 @@ const UserManagement = () => {
       <Card style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: 12, padding: '20px' }}>
         <h3 style={{ color: '#9C27B0', marginBottom: 16, fontSize: '20px', fontWeight: 600 }}>用户列表</h3>
         
-        <Table 
-          columns={columns} 
-          dataSource={data} 
-          rowKey="id"
-          size="large"
-          pagination={false}
-          style={{ marginBottom: '20px' }}
-        />
+        <Spin spinning={loading} tip="加载中...">
+          <Table 
+            columns={columns} 
+            dataSource={users} 
+            rowKey="id"
+            size="large"
+            pagination={false}
+            style={{ marginBottom: '20px' }}
+          />
+        </Spin>
         
         {/* 自定义分页 */}
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
@@ -209,6 +332,50 @@ const UserManagement = () => {
           <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
         </div>
       </Card>
+
+      {/* 编辑用户模态框 */}
+      <Modal
+        title="编辑用户信息"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        onOk={handleSaveEdit}
+        okText="保存"
+        cancelText="取消"
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{}}
+        >
+          <Form.Item
+            name="username"
+            label="用户名"
+            rules={[{ required: true, message: '请输入用户名' }]}
+          >
+            <Input placeholder="请输入用户名" />
+          </Form.Item>
+          <Form.Item
+            name="name"
+            label="真实姓名"
+            rules={[{ required: true, message: '请输入真实姓名' }]}
+          >
+            <Input placeholder="请输入真实姓名" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select placeholder="请选择角色">
+              <Option value={1}>教师</Option>
+              <Option value={2}>学生</Option>
+              <Option value={3}>家长</Option>
+              <Option value={4}>管理员</Option>
+            </Select>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

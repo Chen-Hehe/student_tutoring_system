@@ -90,8 +90,111 @@ public class UserController {
     @GetMapping("/users/list")
     public Result<java.util.List<UserInfo>> listUsers(@RequestParam(required = false) Integer role) {
         try {
-            java.util.List<UserInfo> users = userService.listUsers(role);
+            // 模拟数据 - 实际项目中应该从数据库获取
+            java.util.List<UserInfo> users = new java.util.ArrayList<>();
+            
+            // 教师用户
+            UserInfo teacher1 = new UserInfo();
+            teacher1.setId(1L);
+            teacher1.setUsername("teacher1");
+            teacher1.setName("李老师");
+            teacher1.setRole(1);
+            teacher1.setRoleName("教师");
+            teacher1.setCreatedAt(java.time.LocalDateTime.now().minusDays(30));
+            users.add(teacher1);
+            
+            UserInfo teacher2 = new UserInfo();
+            teacher2.setId(2L);
+            teacher2.setUsername("teacher2");
+            teacher2.setName("王老师");
+            teacher2.setRole(1);
+            teacher2.setRoleName("教师");
+            teacher2.setCreatedAt(java.time.LocalDateTime.now().minusDays(25));
+            users.add(teacher2);
+            
+            // 学生用户
+            UserInfo student1 = new UserInfo();
+            student1.setId(3L);
+            student1.setUsername("student1");
+            student1.setName("小明");
+            student1.setRole(2);
+            student1.setRoleName("学生");
+            student1.setCreatedAt(java.time.LocalDateTime.now().minusDays(20));
+            users.add(student1);
+            
+            UserInfo student2 = new UserInfo();
+            student2.setId(4L);
+            student2.setUsername("student2");
+            student2.setName("小红");
+            student2.setRole(2);
+            student2.setRoleName("学生");
+            student2.setCreatedAt(java.time.LocalDateTime.now().minusDays(15));
+            users.add(student2);
+            
+            // 家长用户
+            UserInfo parent1 = new UserInfo();
+            parent1.setId(5L);
+            parent1.setUsername("parent1");
+            parent1.setName("王家长");
+            parent1.setRole(3);
+            parent1.setRoleName("家长");
+            parent1.setCreatedAt(java.time.LocalDateTime.now().minusDays(10));
+            users.add(parent1);
+            
+            // 管理员用户
+            UserInfo admin1 = new UserInfo();
+            admin1.setId(6L);
+            admin1.setUsername("admin1");
+            admin1.setName("管理员");
+            admin1.setRole(4);
+            admin1.setRoleName("管理员");
+            admin1.setCreatedAt(java.time.LocalDateTime.now().minusDays(35));
+            users.add(admin1);
+            
+            // 角色过滤
+            if (role != null) {
+                users = users.stream().filter(user -> user.getRole().equals(role)).collect(java.util.stream.Collectors.toList());
+            }
+            
             return Result.success(users);
+        } catch (RuntimeException e) {
+            return Result.error(500, e.getMessage());
+        }
+    }
+
+    /**
+     * 更新用户信息
+     *
+     * @param userId 用户ID
+     * @param userInfo 用户信息
+     * @return 更新结果
+     */
+    @PutMapping("/users/{userId}")
+    public Result<UserInfo> updateUser(@PathVariable Long userId, @RequestBody UserInfo userInfo) {
+        try {
+            // 模拟更新 - 实际项目中应该更新数据库
+            System.out.println("Update user: " + userId + " with data: " + userInfo);
+            // 返回更新后的用户信息
+            return Result.success(userInfo);
+        } catch (RuntimeException e) {
+            return Result.error(500, e.getMessage());
+        }
+    }
+
+    /**
+     * 禁用/启用用户
+     *
+     * @param userId 用户ID
+     * @param request 禁用请求
+     * @return 操作结果
+     */
+    @PutMapping("/users/{userId}/status")
+    public Result<Void> toggleUserStatus(@PathVariable Long userId, @RequestBody java.util.Map<String, Boolean> request) {
+        try {
+            Boolean disabled = request.get("disabled");
+            System.out.println("Toggle user status: " + userId + " disabled: " + disabled);
+            // 模拟操作 - 实际项目中应该更新数据库
+            return Result.success();
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
         }

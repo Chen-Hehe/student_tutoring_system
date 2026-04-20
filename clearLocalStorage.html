@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear LocalStorage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: #FF9800; }
+        button { 
+            background-color: #FF9800; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        button:hover { background-color: #F57C00; }
+        .message { margin-top: 20px; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>清空 LocalStorage 数据</h1>
+        <p>点击下方按钮清空所有 LocalStorage 数据，这样教师沟通页面就不会显示任何老师，直到您在匹配确认页面同意辅导请求。</p>
+        <button onclick="clearLocalStorage()">清空 LocalStorage</button>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+    
+    <script>
+        function clearLocalStorage() {
+            try {
+                // 清空所有localStorage数据
+                localStorage.clear();
+                
+                // 显示成功消息
+                const message = document.getElementById('message');
+                message.textContent = 'LocalStorage 已成功清空！现在教师沟通页面不会显示任何老师。';
+                message.className = 'message success';
+                message.style.display = 'block';
+                
+                // 3秒后隐藏消息
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                // 显示错误消息
+                const message = document.getElementById('message');
+                message.textContent = '清空 LocalStorage 失败：' + error.message;
+                message.className = 'message error';
+                message.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

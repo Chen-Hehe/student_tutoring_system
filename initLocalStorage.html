@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>初始化 LocalStorage 数据</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: #FF9800; }
+        button { 
+            background-color: #FF9800; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        button:hover { background-color: #F57C00; }
+        .message { margin-top: 20px; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>初始化 LocalStorage 数据</h1>
+        <p>点击下方按钮初始化 LocalStorage 数据，添加两个已确认的辅导请求和一些沟通记录。</p>
+        <button onclick="initLocalStorage()">初始化 LocalStorage</button>
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+    
+    <script>
+        function initLocalStorage() {
+            try {
+                // 清空所有localStorage数据
+                localStorage.clear();
+                
+                // 设置孩子列表
+                const children = [
+                    { id: 1, name: '小明', grade: '三年级', subject: '数学', status: 'active', tutoringStatus: '进行中', teacher: '陈老师' },
+                    { id: 2, name: '小红', grade: '四年级', subject: '语文', status: 'active', tutoringStatus: '进行中', teacher: '张老师' }
+                ];
+                localStorage.setItem('children', JSON.stringify(children));
+                
+                // 设置待确认的辅导请求（空）
+                localStorage.setItem('matchRequests', JSON.stringify([]));
+                
+                // 设置已确认的辅导请求
+                const confirmedRequests = [
+                    {
+                        id: 1,
+                        title: '辅导请求 - 小明（三年级）',
+                        status: 'confirmed',
+                        subject: '数学',
+                        requirement: '分数的加减法',
+                        time: '2026-03-30 09:30',
+                        confirmedTime: '2026-04-20 10:00:00',
+                        teacher: {
+                            name: '陈老师',
+                            education: '清华大学数学专业',
+                            experience: '6年',
+                            location: '北京市'
+                        }
+                    },
+                    {
+                        id: 2,
+                        title: '辅导邀请 - 小红（四年级）',
+                        status: 'confirmed',
+                        subject: '语文',
+                        requirement: '作文指导',
+                        time: '2026-03-29 16:45',
+                        confirmedTime: '2026-04-20 10:30:00',
+                        teacher: {
+                            name: '张老师',
+                            education: '北京师范大学中文专业',
+                            experience: '5年',
+                            location: '上海市'
+                        }
+                    }
+                ];
+                localStorage.setItem('confirmedRequests', JSON.stringify(confirmedRequests));
+                
+                // 设置老师列表
+                const teachers = [
+                    {
+                        id: 1,
+                        name: '陈老师',
+                        subject: '数学教师 | 三年级',
+                        avatar: '陈'
+                    },
+                    {
+                        id: 2,
+                        name: '张老师',
+                        subject: '语文教师 | 四年级',
+                        avatar: '张'
+                    }
+                ];
+                localStorage.setItem('teachers', JSON.stringify(teachers));
+                
+                // 显示成功消息
+                const message = document.getElementById('message');
+                message.textContent = 'LocalStorage 数据初始化成功！已添加两个已确认的辅导请求和老师信息。';
+                message.className = 'message success';
+                message.style.display = 'block';
+                
+                // 3秒后隐藏消息
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                // 显示错误消息
+                const message = document.getElementById('message');
+                message.textContent = '初始化 LocalStorage 失败：' + error.message;
+                message.className = 'message error';
+                message.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -67,20 +67,23 @@ public class MatchService {
     @Transactional(rollbackFor = Exception.class)
     public MatchResponse createMatch(MatchRequest request) {
         // 验证学生和教师是否存在
-        Student student = studentRepository.selectById(request.getStudentId());
+        Long studentId = request.getStudentId();
+        Long teacherId = request.getTeacherId();
+        
+        Student student = studentRepository.selectById(studentId);
         if (student == null) {
             throw new RuntimeException("学生不存在");
         }
         
-        Teacher teacher = teacherRepository.selectById(request.getTeacherId());
+        Teacher teacher = teacherRepository.selectById(teacherId);
         if (teacher == null) {
             throw new RuntimeException("教师不存在");
         }
         
         // 检查是否已存在匹配
         LambdaQueryWrapper<TeacherStudentMatch> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(TeacherStudentMatch::getStudentId, request.getStudentId())
-               .eq(TeacherStudentMatch::getTeacherId, request.getTeacherId())
+        wrapper.eq(TeacherStudentMatch::getStudentId, studentId)
+               .eq(TeacherStudentMatch::getTeacherId, teacherId)
                .eq(TeacherStudentMatch::getDeleted, 0);
         
         List<TeacherStudentMatch> existingMatches = matchRepository.selectList(wrapper);
@@ -95,8 +98,8 @@ public class MatchService {
         
         // 创建新的匹配记录
         TeacherStudentMatch match = new TeacherStudentMatch();
-        match.setStudentId(request.getStudentId());
-        match.setTeacherId(request.getTeacherId());
+        match.setStudentId(studentId);
+        match.setTeacherId(teacherId);
         match.setRequesterType(request.getRequesterType());
         match.setRequestMessage(request.getRequestMessage());
         match.setStatus(0); // 待确认

@@ -1,7 +1,31 @@
 import { useState } from 'react'
-import { Card, Row, Col, Progress, Avatar, Button } from 'antd'
+import { Card, Row, Col, Progress, Avatar, Button, Modal, Input } from 'antd'
+const { TextArea } = Input
 const PsychologicalStatus = () => {
   const [selectedChild, setSelectedChild] = useState('小明 (三年级)')
+  const [isContactModalVisible, setIsContactModalVisible] = useState(false)
+  const [selectedCounselor, setSelectedCounselor] = useState(null)
+  const [counselorMessages, setCounselorMessages] = useState({
+    1: [
+      {
+        id: 1,
+        sender: '王心理师',
+        content: '您好，王家长！我是王心理师，专注于儿童心理健康。请问有什么可以帮助您的？',
+        time: '2026-03-28 09:00',
+        type: 'received'
+      }
+    ],
+    2: [
+      {
+        id: 1,
+        sender: '张心理师',
+        content: '您好，王家长！我是张心理师，专注于青少年心理健康。很高兴为您服务。',
+        time: '2026-03-28 10:00',
+        type: 'received'
+      }
+    ]
+  })
+  const [newMessage, setNewMessage] = useState('')
   
   const children = [
     '小明 (三年级)',
@@ -85,6 +109,34 @@ const PsychologicalStatus = () => {
       default:
         return <span style={{ ...style, backgroundColor: '#d4edda', color: '#155724' }}>{text}</span>
     }
+  }
+  
+  const handleContactCounselor = (counselor) => {
+    setSelectedCounselor(counselor)
+    setIsContactModalVisible(true)
+  }
+  
+  const handleSendMessage = () => {
+    if (newMessage.trim() && selectedCounselor) {
+      const message = {
+        id: counselorMessages[selectedCounselor.id].length + 1,
+        sender: '王家长',
+        content: newMessage,
+        time: new Date().toLocaleString('zh-CN'),
+        type: 'sent'
+      }
+      setCounselorMessages({
+        ...counselorMessages,
+        [selectedCounselor.id]: [...counselorMessages[selectedCounselor.id], message]
+      })
+      setNewMessage('')
+    }
+  }
+  
+  const handleCancelContact = () => {
+    setIsContactModalVisible(false)
+    setSelectedCounselor(null)
+    setNewMessage('')
   }
   
   return (
@@ -258,6 +310,7 @@ const PsychologicalStatus = () => {
                   e.currentTarget.style.backgroundColor = '#FF9800'
                   e.currentTarget.style.transform = 'translateY(0)'
                 }}
+                onClick={() => handleContactCounselor(counselor)}
               >
                 联系
               </Button>
@@ -265,6 +318,89 @@ const PsychologicalStatus = () => {
           ))}
         </div>
       </Card>
+      
+      {/* 联系心理辅导员模态框 */}
+      <Modal
+        title={`联系 ${selectedCounselor?.name}`}
+        open={isContactModalVisible}
+        onCancel={handleCancelContact}
+        footer={null}
+        style={{
+          borderRadius: 10,
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+        }}
+        width={600}
+      >
+        <div style={{ height: 400, overflowY: 'auto', marginBottom: 20 }}>
+          {selectedCounselor && counselorMessages[selectedCounselor.id].map(message => (
+            <div 
+              key={message.id}
+              style={{
+                marginBottom: 20,
+                padding: 15,
+                borderRadius: 10,
+                backgroundColor: message.type === 'sent' ? '#FFF3E0' : '#f0f8ff',
+                alignSelf: message.type === 'sent' ? 'flex-end' : 'flex-start',
+                borderBottomRightRadius: message.type === 'sent' ? 0 : 10,
+                borderBottomLeftRadius: message.type === 'sent' ? 10 : 0
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: '0.9em' }}>
+                <span style={{ fontWeight: 'bold', color: '#FF9800' }}>{message.sender}</span>
+                <span style={{ color: '#999' }}>{message.time}</span>
+              </div>
+              <div style={{ lineHeight: 1.5 }}>{message.content}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <TextArea 
+            placeholder="输入消息..."
+            style={{ 
+              flex: 1, 
+              border: '2px solid #e0e0e0', 
+              borderRadius: 8, 
+              resize: 'none',
+              minHeight: 100,
+              transition: 'all 0.3s ease'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#FF9800'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 152, 0, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e0e0e0'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <Button 
+            style={{ 
+              backgroundColor: '#FF9800', 
+              color: 'white', 
+              fontWeight: 'bold',
+              alignSelf: 'flex-end',
+              padding: '8px 16px',
+              borderRadius: 5,
+              fontSize: '14px',
+              border: 'none',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#F57C00'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#FF9800'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+            onClick={handleSendMessage}
+          >
+            发送
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }
