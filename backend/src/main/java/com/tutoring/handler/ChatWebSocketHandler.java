@@ -43,17 +43,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatRecordService chatRecordService;
     
     /**
-     * JSON 对象映射器
+     * JSON 对象映射器（使用 Spring 配置的 Bean）
      */
-    private static final ObjectMapper objectMapper = createObjectMapper();
-    
-    private static ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        // 配置 LocalDateTime 序列化格式
-        mapper.setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        return mapper;
-    }
+    private final ObjectMapper objectMapper;
     
     /**
      * Redis 频道前缀
@@ -87,8 +79,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // 先尝试解析为 Map，检查是否是心跳消息
             Map<String, Object> rawMessage = objectMapper.readValue(message.getPayload(), Map.class);
             
-            // 处理心跳消息
-            if ("ping".equals(rawMessage.get("ping"))) {
+            // 处理心跳消息（检查 "ping" 字段或 type="ping"）
+            if ("ping".equals(rawMessage.get("ping")) || "ping".equals(rawMessage.get("type"))) {
                 log.debug("收到用户 {} 的心跳消息", userId);
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "pong"))));
                 return;

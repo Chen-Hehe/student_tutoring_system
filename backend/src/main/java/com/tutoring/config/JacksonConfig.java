@@ -1,5 +1,7 @@
 package com.tutoring.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -25,7 +27,20 @@ public class JacksonConfig {
     public Jackson2ObjectMapperBuilder jacksonBuilder() {
         return new Jackson2ObjectMapperBuilder()
                 .modules(new JavaTimeModule())
-                .serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .deserializerByType(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                .serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .deserializerByType(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+    
+    /**
+     * 提供全局 ObjectMapper Bean，供 WebSocket 等组件使用
+     */
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new Jackson2ObjectMapperBuilder()
+                .modules(new JavaTimeModule())
+                .serializerByType(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .deserializerByType(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .build();
     }
 }
