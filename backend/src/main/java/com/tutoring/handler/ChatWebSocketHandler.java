@@ -148,17 +148,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
      * 从 Redis 接收消息并推送给在线用户（由 RedisListenerConfig 调用）
      * WebSocket 仅用于接收推送，不处理发送
      */
-    public void onRedisMessage(String message, String channel) {
+    public void onRedisMessage(byte[] messageBytes, String channel) {
         try {
+            String message = new String(messageBytes);
+            log.info("【Redis 收到消息】channel={}, message={}", channel, message);
+            
             // 提取频道中的用户 ID
             String channelId = channel.replace(REDIS_CHANNEL_PREFIX, "");
             Long userId = Long.parseLong(channelId);
             
-            // 直接推送原始消息（已经是 ChatMessage JSON）
+            // 直接推送原始消息
             sendToUser(userId, message);
-            log.debug("已从 Redis 推送消息给用户 {}", userId);
+            log.info("【WebSocket 推送】已推送给用户 {}", userId);
         } catch (Exception e) {
-            log.error("处理 Redis 消息失败：channel={}, message={}", channel, message, e);
+            log.error("处理 Redis 消息失败：channel={}, message={}", channel, messageBytes, e);
         }
     }
 }
