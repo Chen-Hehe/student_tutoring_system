@@ -6,11 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * Redis 消息监听器配置
@@ -24,8 +22,7 @@ public class RedisListenerConfig {
     
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
-            RedisConnectionFactory connectionFactory,
-            RedisTemplate<String, Object> redisTemplate) {
+            RedisConnectionFactory connectionFactory) {
         
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
@@ -36,9 +33,10 @@ public class RedisListenerConfig {
         listenerAdapter.setDefaultListenerMethod("onRedisMessage");
         
         // 订阅所有 chat:user:* 频道
-        container.addMessageListener(listenerAdapter, new PatternTopic(\"chat:user:*\"));
+        container.addMessageListener(listenerAdapter, new PatternTopic("chat:user:*"));
         
-        log.info(\"【Redis 监听器】已订阅频道: chat:user:*\");
+        log.info("【Redis 监听器】已订阅频道：chat:user:*");
         
-        // 测试 Redis 连接
-        try {\n            redisTemplate.convertAndSend(\"chat:test\", \"test message\");\n            log.info(\"【Redis 测试】发送测试消息成功\");\n        } catch (Exception e) {\n            log.error(\"【Redis 测试】发送测试消息失败\", e);\n        }\n        \n        return container;\n    }\n}\n
+        return container;
+    }
+}
