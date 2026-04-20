@@ -1,6 +1,7 @@
 package com.tutoring.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
  * 聊天消息 DTO
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatMessage {
     
     /**
@@ -42,9 +44,9 @@ public class ChatMessage {
     private String fileUrl;
     
     /**
-     * 时间戳
+     * 时间戳 (支持多种格式)
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private LocalDateTime timestamp;
     
     /**

@@ -45,11 +45,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     /**
      * JSON 对象映射器
      */
-    private final ObjectMapper objectMapper = createObjectMapper();
+    private static final ObjectMapper objectMapper = createObjectMapper();
     
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        // 配置 LocalDateTime 序列化格式
+        mapper.setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         return mapper;
     }
     
