@@ -39,6 +39,8 @@ public class UserService {
         
         User user = userRepository.selectOne(wrapper);
         
+        System.out.println("【DEBUG】查询用户: username=" + request.getUsername() + ", 结果=" + (user == null ? "null" : user.getUsername() + ", id=" + user.getId() + ", password=" + user.getPassword()));
+        
         if (user == null) {
             throw new RuntimeException("用户名或密码错误");
         }
