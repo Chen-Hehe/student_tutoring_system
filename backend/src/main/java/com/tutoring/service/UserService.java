@@ -52,10 +52,17 @@ public class UserService {
         
         // 验证密码（使用 BCrypt 验证）
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        
+        // 如果数据库中的密码是旧格式（以 $2a$10$ 开头但验证失败），尝试明文验证
         String inputPassword = request.getPassword();
         String dbPassword = user.getPassword();
         boolean match = encoder.matches(inputPassword, dbPassword);
-        System.out.println("【DEBUG】密码验证: input=" + inputPassword + ", db=" + dbPassword + ", match=" + match);
+        
+        // 如果 BCrypt 验证失败，尝试明文验证（临时兼容）
+        if (!match && dbPassword.equals(inputPassword)) {
+            System.out.println("【DEBUG】明文密码匹配（临时兼容）");
+            match = true;
+        }
         
         if (!match) {
             throw new RuntimeException("用户名或密码错误");
