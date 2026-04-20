@@ -34,10 +34,16 @@ public class ChatController {
             @Valid @RequestBody ChatMessage chatMessage,
             @RequestHeader(value = "X-User-Id", required = false) Long currentUserId) {
         try {
+            log.info("【DEBUG】ChatController 收到请求 - chatMessage.senderId={}, chatMessage.receiverId={}, Header.X-User-Id={}", 
+                chatMessage.getSenderId(), chatMessage.getReceiverId(), currentUserId);
+            
             // 从 Header 获取发送者 ID（如果未设置）
             if (chatMessage.getSenderId() == null && currentUserId != null) {
+                log.info("【DEBUG】从 Header 设置 senderId={}", currentUserId);
                 chatMessage.setSenderId(currentUserId);
             }
+            
+            log.info("【DEBUG】最终 senderId={}, receiverId={}", chatMessage.getSenderId(), chatMessage.getReceiverId());
             
             // 调用核心方法：保存并推送
             ChatRecord record = chatRecordService.saveAndPushMessage(chatMessage);
