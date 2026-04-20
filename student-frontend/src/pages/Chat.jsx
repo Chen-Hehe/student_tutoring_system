@@ -134,6 +134,8 @@ const Chat = () => {
       type: 1 // 1=文字消息（确保是数字类型）
     }
     
+    console.log('【DEBUG】发送消息 - senderId:', currentUser.id, 'receiverId:', selectedConversation.userId, 'currentUser:', currentUser)
+    
     try {
       // 通过 API 发送（主要方式）
       const result = await chatAPI.sendMessage(messageData)

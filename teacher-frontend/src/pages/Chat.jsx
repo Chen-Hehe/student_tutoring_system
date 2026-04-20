@@ -148,6 +148,8 @@ const Chat = () => {
       type: 1 // 文字消息
     }
     
+    console.log('【DEBUG】发送消息 - senderId:', currentUser.id, 'receiverId:', selectedConversation.userId, 'currentUser:', currentUser)
+    
     try {
       // 通过 HTTP API 发送（统一发送链路）
       const result = await chatAPI.sendMessage(messageData)
