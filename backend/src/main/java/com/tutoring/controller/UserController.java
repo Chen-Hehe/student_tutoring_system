@@ -30,10 +30,14 @@ public class UserController {
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
         try {
-            // 调用 Service 层登录逻辑（查询数据库验证）
+            System.out.println("Login request: " + request);
+            // 调用真实的登录服务逻辑，生成合法的 JWT Token
             Map<String, Object> data = userService.login(request);
+            System.out.println("Login success for user: " + request.getUsername());
             return Result.success("登录成功", data);
         } catch (RuntimeException e) {
+            System.out.println("Login error: " + e.getMessage());
+            e.printStackTrace();
             return Result.error(400, e.getMessage());
         }
     }

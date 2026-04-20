@@ -39,8 +39,6 @@ public class UserService {
         
         User user = userRepository.selectOne(wrapper);
         
-        System.out.println("【DEBUG】查询用户: username=" + request.getUsername() + ", 结果=" + (user == null ? "null" : user.getUsername() + ", id=" + user.getId() + ", password=" + user.getPassword()));
-        
         if (user == null) {
             throw new RuntimeException("用户名或密码错误");
         }
@@ -50,21 +48,8 @@ public class UserService {
             throw new RuntimeException("角色不匹配");
         }
         
-        // 验证密码（使用 BCrypt 验证）
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        
-        // 如果数据库中的密码是旧格式（以 $2a$10$ 开头但验证失败），尝试明文验证
-        String inputPassword = request.getPassword();
-        String dbPassword = user.getPassword();
-        boolean match = encoder.matches(inputPassword, dbPassword);
-        
-        // 如果 BCrypt 验证失败，尝试明文验证（临时兼容）
-        if (!match && dbPassword.equals(inputPassword)) {
-            System.out.println("【DEBUG】明文密码匹配（临时兼容）");
-            match = true;
-        }
-        
-        if (!match) {
+        // 验证密码（使用 BCrypt 密文比对）
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("用户名或密码错误");
         }
         
