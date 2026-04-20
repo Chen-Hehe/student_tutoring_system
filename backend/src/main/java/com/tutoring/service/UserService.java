@@ -48,9 +48,9 @@ public class UserService {
             throw new RuntimeException("角色不匹配");
         }
         
-        // 验证密码
-        // 暂时使用明文密码验证，方便测试
-        if (!request.getPassword().equals(user.getPassword())) {
+        // 验证密码（使用 BCrypt 验证）
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        if (!encoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("用户名或密码错误");
         }
         
