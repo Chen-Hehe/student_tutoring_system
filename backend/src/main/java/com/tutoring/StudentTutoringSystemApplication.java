@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 乡村助学平台后端应用
  */
 @SpringBootApplication
-@MapperScan("com.tutoring.repository")
+@MapperScan({"com.tutoring.repository", "com.tutoring.mapper"})
 public class StudentTutoringSystemApplication {
 
     public static void main(String[] args) {

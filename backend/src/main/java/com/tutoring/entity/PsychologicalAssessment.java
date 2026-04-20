@@ -1,62 +1,98 @@
 package com.tutoring.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
- * 心理评估表
+ * 心理状态评估实体类
  */
-@Data
 @TableName("psychological_assessments")
 public class PsychologicalAssessment {
     
-    /**
-     * 主键 (雪花算法)
-     */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
-    
-    /**
-     * 学生 ID
-     */
     private Long studentId;
-    
-    /**
-     * 评估者 ID
-     */
     private Long assessorId;
-    
-    /**
-     * 评估日期
-     */
-    private LocalDateTime assessmentDate;
-    
-    /**
-     * 评估分数
-     */
+    private Date assessmentDate;
     private Integer score;
-    
-    /**
-     * 评估意见
-     */
     private String comments;
-    
-    /**
-     * 建议
-     */
     private String recommendations;
-    
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createdAt;
-    
-    /**
-     * 逻辑删除
-     */
-    @TableLogic
+    private Date createdAt;
     private Integer deleted;
+    
+    // Getter and Setter methods
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public Long getStudentId() {
+        return studentId;
+    }
+    
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
+    }
+    
+    public Long getAssessorId() {
+        return assessorId;
+    }
+    
+    public void setAssessorId(Long assessorId) {
+        this.assessorId = assessorId;
+    }
+    
+    public Date getAssessmentDate() {
+        return assessmentDate;
+    }
+    
+    public void setAssessmentDate(Date assessmentDate) {
+        this.assessmentDate = assessmentDate;
+    }
+    
+    public Integer getScore() {
+        return score;
+    }
+    
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+    
+    public String getComments() {
+        return comments;
+    }
+    
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+    
+    public String getRecommendations() {
+        return recommendations;
+    }
+    
+    public void setRecommendations(String recommendations) {
+        this.recommendations = recommendations;
+    }
+    
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public Integer getDeleted() {
+        return deleted;
+    }
+    
+    public void setDeleted(Integer deleted) {
+        this.deleted = deleted;
+    }
 }

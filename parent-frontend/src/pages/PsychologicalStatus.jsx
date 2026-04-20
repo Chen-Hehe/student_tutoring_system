@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { Card, Row, Col, Progress, Avatar, Button, Modal, Input } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, Row, Col, Progress, Avatar, Button, Modal, Input, message } from 'antd'
+import { parentAPI } from '../services/parentApi'
 const { TextArea } = Input
 const PsychologicalStatus = () => {
-  const [selectedChild, setSelectedChild] = useState('小明 (三年级)')
+  const [selectedChild, setSelectedChild] = useState(null)
   const [isContactModalVisible, setIsContactModalVisible] = useState(false)
   const [selectedCounselor, setSelectedCounselor] = useState(null)
   const [counselorMessages, setCounselorMessages] = useState({
@@ -26,42 +27,10 @@ const PsychologicalStatus = () => {
     ]
   })
   const [newMessage, setNewMessage] = useState('')
-  
-  const children = [
-    '小明 (三年级)',
-    '小红 (四年级)'
-  ]
-  
-  const statusData = {
-    '小明 (三年级)': {
-      statuses: {
-        '情绪状态': { value: '良好', level: 'good', percentage: 85 },
-        '社交能力': { value: '优秀', level: 'good', percentage: 90 },
-        '学习压力': { value: '中等', level: 'warning', percentage: 60 },
-        '心理健康': { value: '良好', level: 'good', percentage: 80 }
-      },
-      assessments: {
-        '情绪稳定性': { percentage: 85, level: 'good' },
-        '社交互动': { percentage: 90, level: 'good' },
-        '学习压力': { percentage: 60, level: 'warning' },
-        '自我认知': { percentage: 80, level: 'good' }
-      }
-    },
-    '小红 (四年级)': {
-      statuses: {
-        '情绪状态': { value: '良好', level: 'good', percentage: 80 },
-        '社交能力': { value: '良好', level: 'good', percentage: 85 },
-        '学习压力': { value: '轻度', level: 'good', percentage: 45 },
-        '心理健康': { value: '优秀', level: 'good', percentage: 90 }
-      },
-      assessments: {
-        '情绪稳定性': { percentage: 80, level: 'good' },
-        '社交互动': { percentage: 85, level: 'good' },
-        '学习压力': { percentage: 45, level: 'good' },
-        '自我认知': { percentage: 88, level: 'good' }
-      }
-    }
-  }
+  const [children, setChildren] = useState([])
+  const [statusData, setStatusData] = useState({})
+  const [currentStatus, setCurrentStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
   
   const counselors = [
     {
@@ -78,7 +47,72 @@ const PsychologicalStatus = () => {
     }
   ]
   
-  const currentStatus = statusData[selectedChild]
+  // 获取孩子列表
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const response = await parentAPI.getChildren()
+        console.log('Children response:', response)
+        if (response && response.data && response.data.success && response.data.data) {
+        const childList = response.data.data.map(child => ({
+          id: child.id,
+          name: child.name,
+          grade: child.grade,
+          displayName: `${child.name} (${child.grade})`
+        }))
+        setChildren(childList)
+        if (childList.length > 0) {
+          setSelectedChild(childList[0])
+        }
+      }
+      } catch (error) {
+        console.error('Error fetching children:', error)
+        message.error('获取孩子列表失败')
+      }
+    }
+    
+    fetchChildren()
+  }, [])
+  
+  // 获取心理状态评估数据
+  const fetchPsychologicalStatus = async (studentId) => {
+    if (!studentId) return
+    
+    setLoading(true)
+    try {
+      console.log('Fetching psychological status for studentId:', studentId)
+      const response = await parentAPI.getPsychologicalStatus(studentId)
+      console.log('Response from API:', response)
+      if (response && response.data && response.data.success && response.data.data) {
+        const statusData = {
+          statuses: response.data.data.statuses,
+          assessments: response.data.data.assessments
+        }
+        setStatusData(statusData)
+        setCurrentStatus(statusData)
+      } else {
+        console.log('No status data found')
+        setCurrentStatus(null)
+        message.info('暂无心理状态评估数据')
+      }
+    } catch (error) {
+      message.error('获取心理状态评估失败')
+      console.error('Error fetching psychological status:', error)
+      if (error.response) {
+        console.error('Error response:', error.response)
+      }
+      setCurrentStatus(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  // 当选中的孩子变化时，获取对应的心理状态评估数据
+  useEffect(() => {
+    if (selectedChild) {
+      fetchPsychologicalStatus(selectedChild.id)
+    }
+  }, [selectedChild])
   
   const getStatusColor = (level) => {
     switch (level) {
@@ -183,32 +217,32 @@ const PsychologicalStatus = () => {
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           {children.map(child => (
             <div 
-              key={child}
+              key={child.id}
               style={{
                 padding: '15px 30px',
                 border: '2px solid #e0e0e0',
                 borderRadius: 8,
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                backgroundColor: selectedChild === child ? '#FFF3E0' : 'transparent',
-                borderColor: selectedChild === child ? '#FF9800' : '#e0e0e0',
-                fontWeight: selectedChild === child ? 'bold' : 'normal'
+                backgroundColor: selectedChild && selectedChild.id === child.id ? '#FFF3E0' : 'transparent',
+                borderColor: selectedChild && selectedChild.id === child.id ? '#FF9800' : '#e0e0e0',
+                fontWeight: selectedChild && selectedChild.id === child.id ? 'bold' : 'normal'
               }}
               onClick={() => setSelectedChild(child)}
               onMouseEnter={(e) => {
-                if (selectedChild !== child) {
+                if (!selectedChild || selectedChild.id !== child.id) {
                   e.currentTarget.borderColor = '#FF9800'
                   e.currentTarget.backgroundColor = '#FFF3E0'
                 }
               }}
               onMouseLeave={(e) => {
-                if (selectedChild !== child) {
+                if (!selectedChild || selectedChild.id !== child.id) {
                   e.currentTarget.borderColor = '#e0e0e0'
                   e.currentTarget.backgroundColor = 'transparent'
                 }
               }}
             >
-              {child}
+              {child.displayName}
             </div>
           ))}
         </div>
@@ -225,98 +259,111 @@ const PsychologicalStatus = () => {
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>心理状态评估</h2>
-        <Row gutter={[20, 20]} style={{ marginBottom: 30 }}>
-          {Object.entries(currentStatus.statuses).map(([title, status]) => (
-            <Col xs={24} md={6} key={title}>
-              <div style={{ 
-                backgroundColor: '#f9f9f9',
-                padding: 20,
-                borderRadius: 10,
-                textAlign: 'center'
-              }}>
-                <h3 style={{ marginBottom: 10, color: '#555' }}>{title}</h3>
-                <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FF9800' }}>{status.value}</div>
-                {getStatusBadge(status.level, status.level === 'good' ? '正常' : status.level === 'warning' ? '注意' : '危险')}
-              </div>
-            </Col>
-          ))}
-        </Row>
         
-        <div style={{ marginBottom: 30 }}>
-          <h3 style={{ marginBottom: 15, color: '#333' }}>详细评估</h3>
-          {Object.entries(currentStatus.assessments).map(([title, assessment]) => (
-            <div key={title} style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontWeight: 'bold' }}>{title}</span>
-                <span style={{ fontWeight: 'bold' }}>{assessment.percentage}%</span>
-              </div>
-              <div style={{ 
-                width: '100%', 
-                height: 10, 
-                backgroundColor: '#e0e0e0', 
-                borderRadius: 5, 
-                overflow: 'hidden'
-              }}>
-                <div 
-                  style={{ 
-                    height: '100%', 
-                    width: `${assessment.percentage}%`, 
-                    backgroundColor: getStatusColor(assessment.level), 
-                    borderRadius: 5
-                  }}
-                />
-              </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <p>加载中心理状态评估数据...</p>
+          </div>
+        ) : currentStatus ? (
+          <>
+            <Row gutter={[20, 20]} style={{ marginBottom: 30 }}>
+              {Object.entries(currentStatus.statuses).map(([title, status]) => (
+                <Col xs={24} md={6} key={title}>
+                  <div style={{ 
+                    backgroundColor: '#f9f9f9',
+                    padding: 20,
+                    borderRadius: 10,
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ marginBottom: 10, color: '#555' }}>{title}</h3>
+                    <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FF9800' }}>{status.value}</div>
+                    {getStatusBadge(status.level, status.level === 'good' ? '正常' : status.level === 'warning' ? '注意' : '危险')}
+                  </div>
+                </Col>
+              ))}
+            </Row>
+            
+            <div style={{ marginBottom: 30 }}>
+              <h3 style={{ marginBottom: 15, color: '#333' }}>详细评估</h3>
+              {Object.entries(currentStatus.assessments).map(([title, assessment]) => (
+                <div key={title} style={{ marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={{ fontWeight: 'bold' }}>{title}</span>
+                    <span style={{ fontWeight: 'bold' }}>{assessment.percentage}%</span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    height: 10, 
+                    backgroundColor: '#e0e0e0', 
+                    borderRadius: 5, 
+                    overflow: 'hidden'
+                  }}>
+                    <div 
+                      style={{ 
+                        height: '100%', 
+                        width: `${assessment.percentage}%`, 
+                        backgroundColor: getStatusColor(assessment.level), 
+                        borderRadius: 5
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        
-        <div style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
-          <h3 style={{ marginBottom: 15, color: '#333' }}>推荐心理辅导员</h3>
-          {counselors.map(counselor => (
-            <div key={counselor.id} style={{ display: 'flex', alignItems: 'center', gap: 15, marginBottom: 15 }}>
-              <Avatar 
-                style={{ 
-                  width: 60, 
-                  height: 60, 
-                  borderRadius: '50%', 
-                  backgroundColor: '#FFF3E0', 
-                  color: '#FF9800', 
-                  fontWeight: 'bold',
-                  fontSize: '1.5em'
-                }}
-              >
-                {counselor.avatar}
-              </Avatar>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ marginBottom: 5 }}>{counselor.name}</h4>
-                <p style={{ color: '#666', fontSize: '0.9em' }}>{counselor.title}</p>
-              </div>
-              <Button 
-                style={{ 
-                  backgroundColor: '#FF9800', 
-                  color: 'white', 
-                  fontWeight: 'bold',
-                  padding: '8px 16px',
-                  borderRadius: 5,
-                  fontSize: '14px',
-                  border: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#F57C00'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#FF9800'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-                onClick={() => handleContactCounselor(counselor)}
-              >
-                联系
-              </Button>
+            
+            <div style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
+              <h3 style={{ marginBottom: 15, color: '#333' }}>推荐心理辅导员</h3>
+              {counselors.map(counselor => (
+                <div key={counselor.id} style={{ display: 'flex', alignItems: 'center', gap: 15, marginBottom: 15 }}>
+                  <Avatar 
+                    style={{ 
+                      width: 60, 
+                      height: 60, 
+                      borderRadius: '50%', 
+                      backgroundColor: '#FFF3E0', 
+                      color: '#FF9800', 
+                      fontWeight: 'bold',
+                      fontSize: '1.5em'
+                    }}
+                  >
+                    {counselor.avatar}
+                  </Avatar>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ marginBottom: 5 }}>{counselor.name}</h4>
+                    <p style={{ color: '#666', fontSize: '0.9em' }}>{counselor.title}</p>
+                  </div>
+                  <Button 
+                    style={{ 
+                      backgroundColor: '#FF9800', 
+                      color: 'white', 
+                      fontWeight: 'bold',
+                      padding: '8px 16px',
+                      borderRadius: 5,
+                      fontSize: '14px',
+                      border: 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#F57C00'
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FF9800'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                    }}
+                    onClick={() => handleContactCounselor(counselor)}
+                  >
+                    联系
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <p>暂无心理状态评估数据</p>
+          </div>
+        )}
       </Card>
       
       {/* 联系心理辅导员模态框 */}

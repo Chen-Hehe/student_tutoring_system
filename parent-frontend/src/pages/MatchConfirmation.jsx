@@ -1,422 +1,161 @@
 import { useState, useEffect } from 'react'
-import { Card, Button } from 'antd'
+import { Card, Button, message } from 'antd'
+import { parentAPI } from '../services/parentApi'
 const MatchConfirmation = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [currentRequest, setCurrentRequest] = useState(null)
+  const [matchRequests, setMatchRequests] = useState([])
+  const [confirmedRequests, setConfirmedRequests] = useState([])
+  const [loading, setLoading] = useState(false)
   
-  // 从localStorage获取匹配请求， 如果没有则使用默认数据
-  const [matchRequests, setMatchRequests] = useState(() => {
-    try {
-      const storedRequests = localStorage.getItem('matchRequests')
-      if (storedRequests) {
-        const parsedRequests = JSON.parse(storedRequests)
-        if (Array.isArray(parsedRequests)) {
-          return parsedRequests
-        }
-      }
-    } catch (error) {
-      console.error('读取localStorage失败:', error)
-    }
-    // 默认数据
-    const defaultRequests = [
-      {
-        id: 3,
-        title: '辅导请求 - 小明（三年级）',
-        status: 'pending',
-        subject: '英语',
-        requirement: '单词记忆和基础语法',
-        time: '2026-04-01 10:00',
-        teacher: {
-          name: '刘老师',
-          education: '北京大学英语专业',
-          experience: '7年',
-          location: '北京市'
-        }
-      },
-      {
-        id: 4,
-        title: '辅导邀请 - 小红（四年级）',
-        status: 'pending',
-        subject: '数学',
-        requirement: '乘法口诀和应用题',
-        time: '2026-04-02 14:30',
-        teacher: {
-          name: '李老师',
-          education: '复旦大学数学专业',
-          experience: '4年',
-          location: '上海市'
-        }
-      }
-    ]
-    // 保存默认数据到localStorage
-    try {
-      localStorage.setItem('matchRequests', JSON.stringify(defaultRequests))
-    } catch (error) {
-      console.error('保存localStorage失败:', error)
-    }
-    return defaultRequests
-  })
-  
-  // 从localStorage获取已确认请求
-  const [confirmedRequests, setConfirmedRequests] = useState(() => {
-    try {
-      const storedConfirmedRequests = localStorage.getItem('confirmedRequests')
-      if (storedConfirmedRequests) {
-        const parsedRequests = JSON.parse(storedConfirmedRequests)
-        if (Array.isArray(parsedRequests)) {
-          return parsedRequests
-        }
-      }
-    } catch (error) {
-      console.error('读取localStorage失败:', error)
-    }
-    return []
-  })
-  
-  // 组件挂载时初始化数据，确保添加两个已确认的辅导请求和待确认的辅导请求
+  // 组件挂载时从后端获取匹配请求和已确认的请求
   useEffect(() => {
-    try {
-      // 初始化孩子列表
-      let children = []
-      const storedChildren = localStorage.getItem('children')
-      if (storedChildren) {
-        children = JSON.parse(storedChildren)
-      }
-      if (!Array.isArray(children) || children.length === 0) {
-        children = [
-          { id: 1, name: '小明', grade: '三年级', subject: '数学', status: 'active', tutoringStatus: '进行中', teacher: '陈老师' },
-          { id: 2, name: '小红', grade: '四年级', subject: '语文', status: 'active', tutoringStatus: '进行中', teacher: '张老师' }
-        ]
-        localStorage.setItem('children', JSON.stringify(children))
-      }
-      
-      // 初始化待确认的辅导请求
-      let matchRequests = []
-      const storedRequests = localStorage.getItem('matchRequests')
-      if (storedRequests) {
-        matchRequests = JSON.parse(storedRequests)
-      }
-      if (!Array.isArray(matchRequests) || matchRequests.length === 0) {
-        matchRequests = [
-          {
-            id: 3,
-            title: '辅导邀请 - 小明（三年级）',
-            status: 'pending',
-            subject: '数学',
-            requirement: '小数的加减法',
-            time: '2026-04-01 10:00',
-            teacher: {
-              name: '王老师',
-              education: '复旦大学数学专业',
-              experience: '5年',
-              location: '上海市'
-            }
-          },
-          {
-            id: 4,
-            title: '辅导请求 - 小红（四年级）',
-            status: 'pending',
-            subject: '语文',
-            requirement: '阅读理解',
-            time: '2026-04-02 14:30',
-            teacher: {
-              name: '刘老师',
-              education: '北京师范大学中文专业',
-              experience: '6年',
-              location: '北京市'
-            }
-          }
-        ]
-        localStorage.setItem('matchRequests', JSON.stringify(matchRequests))
-      }
-      
-      // 初始化已确认的辅导请求
-      let confirmedRequests = []
-      const storedConfirmedRequests = localStorage.getItem('confirmedRequests')
-      if (storedConfirmedRequests) {
-        confirmedRequests = JSON.parse(storedConfirmedRequests)
-      }
-      if (!Array.isArray(confirmedRequests) || confirmedRequests.length === 0) {
-        confirmedRequests = [
-          {
-            id: 1,
-            title: '辅导请求 - 小明（三年级）',
-            status: 'confirmed',
-            subject: '数学',
-            requirement: '分数的加减法',
-            time: '2026-03-30 09:30',
-            confirmedTime: '2026-04-20 10:00:00',
-            teacher: {
-              name: '陈老师',
-              education: '清华大学数学专业',
-              experience: '6年',
-              location: '北京市'
-            }
-          },
-          {
-            id: 2,
-            title: '辅导邀请 - 小红（四年级）',
-            status: 'confirmed',
-            subject: '语文',
-            requirement: '作文指导',
-            time: '2026-03-29 16:45',
-            confirmedTime: '2026-04-20 10:30:00',
-            teacher: {
-              name: '张老师',
-              education: '北京师范大学中文专业',
-              experience: '5年',
-              location: '上海市'
-            }
-          }
-        ]
-        localStorage.setItem('confirmedRequests', JSON.stringify(confirmedRequests))
-      }
-      
-      // 初始化老师列表
-      let teachers = []
-      const storedTeachers = localStorage.getItem('teachers')
-      if (storedTeachers) {
-        teachers = JSON.parse(storedTeachers)
-      }
-      if (!Array.isArray(teachers) || teachers.length === 0) {
-        teachers = [
-          {
-            id: 1,
-            name: '陈老师',
-            subject: '数学教师 | 三年级',
-            avatar: '陈'
-          },
-          {
-            id: 2,
-            name: '张老师',
-            subject: '语文教师 | 四年级',
-            avatar: '张'
-          }
-        ]
-        localStorage.setItem('teachers', JSON.stringify(teachers))
-      }
-      
-      // 更新状态
-      setMatchRequests(matchRequests)
-      setConfirmedRequests(confirmedRequests)
-    } catch (error) {
-      console.error('初始化LocalStorage失败:', error)
-    }
+    fetchMatchRequests()
+    fetchConfirmedRequests()
   }, [])
   
-  const handleApprove = (request) => {
-    if (window.confirm('确定要同意这个辅导请求吗？')) {
-      // 从待确认列表中移除该请求
-      const updatedPendingRequests = matchRequests.filter(req => req.id !== request.id)
-      setMatchRequests(updatedPendingRequests)
-      
-      // 保存更新后的待确认列表到localStorage
-      try {
-        localStorage.setItem('matchRequests', JSON.stringify(updatedPendingRequests))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 将该请求添加到已确认列表
-      const confirmedRequest = {
-        ...request,
-        status: 'confirmed',
-        confirmedTime: new Date().toLocaleString('zh-CN')
-      }
-      const updatedConfirmedRequests = [...confirmedRequests, confirmedRequest]
-      setConfirmedRequests(updatedConfirmedRequests)
-      
-      // 保存更新后的已确认列表到localStorage
-      try {
-        localStorage.setItem('confirmedRequests', JSON.stringify(updatedConfirmedRequests))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 更新孩子管理页面的辅导状态和辅导老师
-      // 使用localStorage存储状态，以便在不同页面之间共享
-      const childName = request.title.split(' - ')[1].split('（')[0]
-      
-      // 从localStorage获取当前孩子列表
-      let children = []
-      try {
-        const storedChildren = localStorage.getItem('children')
-        if (storedChildren) {
-          children = JSON.parse(storedChildren)
-        }
-      } catch (error) {
-        console.error('读取localStorage失败:', error)
-      }
-      
-      // 如果localStorage中没有孩子列表，使用默认数据
-      if (!Array.isArray(children) || children.length === 0) {
-        children = [
-          { id: 1, name: '小明', grade: '三年级', subject: '数学', status: 'active', tutoringStatus: '未进行', teacher: null },
-          { id: 2, name: '小红', grade: '四年级', subject: '语文', status: 'active', tutoringStatus: '未进行', teacher: null }
-        ]
-      }
-      
-      // 更新对应孩子的辅导状态和辅导老师
-      const updatedChildren = children.map(child => 
-        child.name === childName ? { ...child, tutoringStatus: '进行中', teacher: request.teacher.name } : child
-      )
-      
-      // 保存更新后的孩子列表到localStorage
-      try {
-        localStorage.setItem('children', JSON.stringify(updatedChildren))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 更新教师沟通页面的老师列表
-      let teachers = []
-      try {
-        const storedTeachers = localStorage.getItem('teachers')
-        if (storedTeachers) {
-          teachers = JSON.parse(storedTeachers)
-        }
-      } catch (error) {
-        console.error('读取localStorage失败:', error)
-      }
-      
-      if (!Array.isArray(teachers) || teachers.length === 0) {
-        teachers = [
-          {
-            id: 1,
-            name: '李老师',
-            subject: '数学教师 | 三年级',
-            avatar: '李'
-          },
-          {
-            id: 2,
-            name: '张老师',
-            subject: '语文教师 | 四年级',
-            avatar: '张'
+  // 获取匹配请求
+  const fetchMatchRequests = async () => {
+    setLoading(true)
+    try {
+      const response = await parentAPI.getMatchRequests()
+      if (response && response.data && response.data.success) {
+        // 转换数据格式，适配前端展示
+        const formattedRequests = response.data.data.map(request => ({
+          id: request.id,
+          title: `辅导请求 - ${request.studentName}（${request.grade}）`,
+          status: 'pending',
+          subject: request.subject,
+          requirement: request.requestMessage || '暂无需求描述',
+          time: request.createdAt,
+          teacher: {
+            name: request.teacherName,
+            education: '北京大学',
+            experience: '5年',
+            location: '北京市'
           }
-        ]
+        }))
+        setMatchRequests(formattedRequests)
       }
-      
-      // 检查是否已经存在该老师
-      const teacherExists = teachers.some(teacher => teacher.name === request.teacher.name)
-      if (!teacherExists) {
-        const newTeacher = {
-          id: teachers.length + 1,
-          name: request.teacher.name,
-          subject: `${request.subject}教师 | ${request.title.split('（')[1].split('）')[0]}`,
-          avatar: request.teacher.name.charAt(0)
-        }
-        teachers.push(newTeacher)
-        try {
-          localStorage.setItem('teachers', JSON.stringify(teachers))
-        } catch (error) {
-          console.error('保存localStorage失败:', error)
-        }
-      }
-      
-      alert('已同意辅导请求，辅导状态已更新')
+    } catch (error) {
+      message.error('获取匹配请求失败')
+      console.error('Error fetching match requests:', error)
+    } finally {
+      setLoading(false)
     }
   }
   
-  const handleReject = (request) => {
+  // 获取已确认的匹配请求
+  const fetchConfirmedRequests = async () => {
+    try {
+      // 由于后端没有提供获取已确认匹配请求的API，我们暂时使用模拟数据
+      // 实际项目中应该添加一个新的API接口
+      const confirmedRequests = [
+        {
+          id: 3,
+          title: '辅导请求 - 小明（三年级）',
+          status: 'confirmed',
+          subject: '数学',
+          requirement: '为小明提供数学辅导，重点加强分数的加减法',
+          time: '2026-03-30 09:30:00',
+          confirmedTime: '2026-04-20 10:00:00',
+          teacher: {
+            name: '李老师',
+            education: '北京大学',
+            experience: '8年',
+            location: '北京市'
+          }
+        },
+        {
+          id: 4,
+          title: '辅导请求 - 小红（四年级）',
+          status: 'confirmed',
+          subject: '语文',
+          requirement: '为小红提供语文辅导，重点加强作文指导',
+          time: '2026-03-29 16:45:00',
+          confirmedTime: '2026-04-20 10:00:00',
+          teacher: {
+            name: '张老师',
+            education: '北京师范大学',
+            experience: '5年',
+            location: '上海市'
+          }
+        }
+      ]
+      setConfirmedRequests(confirmedRequests)
+    } catch (error) {
+      console.error('Error fetching confirmed requests:', error)
+    }
+  }
+  
+  const handleApprove = async (request) => {
+    if (window.confirm('确定要同意这个辅导请求吗？')) {
+      try {
+        // 调用API确认匹配请求
+        await parentAPI.confirmMatchRequest(request.id, true)
+        
+        // 从待确认列表中移除该请求
+        const updatedPendingRequests = matchRequests.filter(req => req.id !== request.id)
+        setMatchRequests(updatedPendingRequests)
+        
+        // 将该请求添加到已确认列表
+        const confirmedRequest = {
+          ...request,
+          status: 'confirmed',
+          confirmedTime: new Date().toLocaleString('zh-CN')
+        }
+        const updatedConfirmedRequests = [...confirmedRequests, confirmedRequest]
+        setConfirmedRequests(updatedConfirmedRequests)
+        
+        message.success('已同意辅导请求，辅导状态已更新')
+      } catch (error) {
+        message.error('同意辅导请求失败')
+        console.error('Error approving match request:', error)
+      }
+    }
+  }
+  
+  const handleReject = async (request) => {
     if (window.confirm('确定要拒绝这个辅导请求吗？')) {
-      // 从待确认列表中移除该请求
-      const updatedPendingRequests = matchRequests.filter(req => req.id !== request.id)
-      setMatchRequests(updatedPendingRequests)
-      
-      // 保存更新后的待确认列表到localStorage
       try {
-        localStorage.setItem('matchRequests', JSON.stringify(updatedPendingRequests))
+        // 调用API拒绝匹配请求
+        await parentAPI.confirmMatchRequest(request.id, false)
+        
+        // 从待确认列表中移除该请求
+        const updatedPendingRequests = matchRequests.filter(req => req.id !== request.id)
+        setMatchRequests(updatedPendingRequests)
+        
+        message.success('已拒绝辅导请求')
       } catch (error) {
-        console.error('保存localStorage失败:', error)
+        message.error('拒绝辅导请求失败')
+        console.error('Error rejecting match request:', error)
       }
-      
-      alert('已拒绝辅导请求')
     }
   }
   
-  const handleCancel = (request) => {
+  const handleCancel = async (request) => {
     if (window.confirm('确定要撤销这个已确认的辅导请求吗？')) {
-      // 从已确认列表中移除该请求
-      const updatedConfirmedRequests = confirmedRequests.filter(req => req.id !== request.id)
-      setConfirmedRequests(updatedConfirmedRequests)
-      
-      // 保存更新后的已确认列表到localStorage
       try {
-        localStorage.setItem('confirmedRequests', JSON.stringify(updatedConfirmedRequests))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 将该请求重新添加到待确认列表
-      const pendingRequest = {
-        ...request,
-        status: 'pending'
-      }
-      delete pendingRequest.confirmedTime
-      const updatedPendingRequests = [...matchRequests, pendingRequest]
-      setMatchRequests(updatedPendingRequests)
-      
-      // 保存更新后的待确认列表到localStorage
-      try {
-        localStorage.setItem('matchRequests', JSON.stringify(updatedPendingRequests))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 更新孩子管理页面的辅导状态和辅导老师
-      const childName = request.title.split(' - ')[1].split('（')[0]
-      
-      // 从localStorage获取当前孩子列表
-      let children = []
-      try {
-        const storedChildren = localStorage.getItem('children')
-        if (storedChildren) {
-          children = JSON.parse(storedChildren)
+        // 这里需要调用API撤销匹配请求，暂时使用模拟数据
+        
+        // 从已确认列表中移除该请求
+        const updatedConfirmedRequests = confirmedRequests.filter(req => req.id !== request.id)
+        setConfirmedRequests(updatedConfirmedRequests)
+        
+        // 将该请求重新添加到待确认列表
+        const pendingRequest = {
+          ...request,
+          status: 'pending'
         }
+        delete pendingRequest.confirmedTime
+        const updatedPendingRequests = [...matchRequests, pendingRequest]
+        setMatchRequests(updatedPendingRequests)
+        
+        message.success('已撤销辅导请求，辅导状态已更新')
       } catch (error) {
-        console.error('读取localStorage失败:', error)
+        message.error('撤销辅导请求失败')
+        console.error('Error canceling match request:', error)
       }
-      
-      if (!Array.isArray(children) || children.length === 0) {
-        children = [
-          { id: 1, name: '小明', grade: '三年级', subject: '数学', status: 'active', tutoringStatus: '未进行', teacher: null },
-          { id: 2, name: '小红', grade: '四年级', subject: '语文', status: 'active', tutoringStatus: '未进行', teacher: null }
-        ]
-      }
-      
-      // 更新对应孩子的辅导状态和辅导老师
-      const updatedChildren = children.map(child => 
-        child.name === childName ? { ...child, tutoringStatus: '未进行', teacher: null } : child
-      )
-      
-      // 保存更新后的孩子列表到localStorage
-      try {
-        localStorage.setItem('children', JSON.stringify(updatedChildren))
-      } catch (error) {
-        console.error('保存localStorage失败:', error)
-      }
-      
-      // 从教师沟通页面的老师列表中移除该老师
-      let teachers = []
-      try {
-        const storedTeachers = localStorage.getItem('teachers')
-        if (storedTeachers) {
-          teachers = JSON.parse(storedTeachers)
-        }
-      } catch (error) {
-        console.error('读取localStorage失败:', error)
-      }
-      
-      if (Array.isArray(teachers)) {
-        const updatedTeachers = teachers.filter(teacher => teacher.name !== request.teacher.name)
-        try {
-          localStorage.setItem('teachers', JSON.stringify(updatedTeachers))
-        } catch (error) {
-          console.error('保存localStorage失败:', error)
-        }
-      }
-      
-      alert('已撤销辅导请求，辅导状态已更新')
     }
   }
   

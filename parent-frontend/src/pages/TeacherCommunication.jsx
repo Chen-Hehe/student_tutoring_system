@@ -1,109 +1,125 @@
 import { useState, useEffect } from 'react'
-import { Card, Avatar, Button, Input } from 'antd'
+import { Card, Avatar, Button, Input, message, Spin } from 'antd'
+import { parentAPI } from '../services/parentApi'
 const { TextArea } = Input
 const TeacherCommunication = () => {
   // 存储每个老师的沟通记录
-  const [teacherMessages, setTeacherMessages] = useState({
-    1: [
-      {
-        id: 1,
-        sender: '陈老师',
-        content: '您好，王家长！小明最近在数学学习上有很大进步，尤其是在应用题方面。建议在家多练习一些实际生活中的数学问题，帮助他巩固所学知识。',
-        time: '2026-03-30 10:00',
-        type: 'received'
-      },
-      {
-        id: 2,
-        sender: '王家长',
-        content: '谢谢陈老师的反馈！我们会按照您的建议，在家多帮助小明练习数学应用题。请问小明在课堂上的表现如何？',
-        time: '2026-03-30 10:30',
-        type: 'sent'
-      },
-      {
-        id: 3,
-        sender: '陈老师',
-        content: '小明在课堂上表现很积极，经常主动回答问题，而且作业完成质量也很好。他是个很有潜力的学生，只要继续保持，数学成绩会越来越好的。',
-        time: '2026-03-30 11:00',
-        type: 'received'
-      }
-    ],
-    2: [
-      {
-        id: 1,
-        sender: '张老师',
-        content: '您好，王家长！小红最近在语文学习上有很大进步，尤其是在作文方面。建议在家多阅读一些经典文学作品，帮助她提高写作水平。',
-        time: '2026-03-29 14:00',
-        type: 'received'
-      },
-      {
-        id: 2,
-        sender: '王家长',
-        content: '谢谢张老师的反馈！我们会按照您的建议，在家多帮助小红阅读文学作品。请问小红在课堂上的表现如何？',
-        time: '2026-03-29 14:30',
-        type: 'sent'
-      },
-      {
-        id: 3,
-        sender: '张老师',
-        content: '小红在课堂上表现很认真，总是认真听讲并做好笔记。她的作文进步很大，特别是在描写方面，已经能够生动地描述事物和场景了。',
-        time: '2026-03-29 15:00',
-        type: 'received'
-      }
-    ]
-  })
-  
+  const [teacherMessages, setTeacherMessages] = useState({})
   const [selectedTeacher, setSelectedTeacher] = useState(null) // 默认未选中老师
   const [newMessage, setNewMessage] = useState('')
+  const [teachers, setTeachers] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [studentId, setStudentId] = useState(3001) // 默认学生ID（小明）
+  const [students, setStudents] = useState([
+    { id: 3001, name: '小明（三年级）' },
+    { id: 3002, name: '小红（四年级）' }
+  ])
   
-  // 从localStorage获取老师列表，如果没有则使用空数组
-  const [teachers, setTeachers] = useState(() => {
-    try {
-      const storedTeachers = localStorage.getItem('teachers')
-      if (storedTeachers) {
-        const parsedTeachers = JSON.parse(storedTeachers)
-        if (Array.isArray(parsedTeachers)) {
-          return parsedTeachers
-        }
-      }
-    } catch (error) {
-      console.error('读取localStorage失败:', error)
-    }
-    return []
-  })
-  
-  // 组件挂载时重新从localStorage读取数据，确保显示最新状态
+  // 组件挂载时或学生ID变化时获取教师列表
   useEffect(() => {
-    try {
-      const storedTeachers = localStorage.getItem('teachers')
-      if (storedTeachers) {
-        const parsedTeachers = JSON.parse(storedTeachers)
-        if (Array.isArray(parsedTeachers)) {
-          setTeachers(parsedTeachers)
-          // 如果有老师，默认选中第一个
-          if (parsedTeachers.length > 0 && !selectedTeacher) {
-            setSelectedTeacher(parsedTeachers[0].id)
-          }
-        }
-      }
-    } catch (error) {
-      console.error('读取localStorage失败:', error)
+    fetchTeachers()
+  }, [studentId])
+  
+  // 选择教师时获取沟通记录
+  useEffect(() => {
+    if (selectedTeacher) {
+      fetchCommunicationHistory(selectedTeacher)
     }
   }, [selectedTeacher])
   
-  const handleSendMessage = () => {
-    if (newMessage.trim() && selectedTeacher) {
-      const message = {
-        id: (teacherMessages[selectedTeacher]?.length || 0) + 1,
-        sender: '王家长',
-        content: newMessage,
-        time: new Date().toLocaleString('zh-CN'),
-        type: 'sent'
+  // 获取教师列表
+  const fetchTeachers = async () => {
+    setLoading(true)
+    try {
+      console.log('Fetching teachers for studentId:', studentId)
+      const response = await parentAPI.getTeachers(studentId)
+      console.log('Response from API:', response)
+      if (response && response.data) {
+        // 检查后端返回的数据格式
+        console.log('Response data:', response.data)
+        if (response.data.success && response.data.data) {
+          const teacherList = response.data.data
+          setTeachers(teacherList)
+          // 如果有老师，默认选中第一个
+          if (teacherList.length > 0 && !selectedTeacher) {
+            setSelectedTeacher(teacherList[0].id)
+          }
+        } else if (response.data.code === 200 && response.data.data) {
+          // 处理旧的数据格式
+          const teacherList = response.data.data
+          setTeachers(teacherList)
+          // 如果有老师，默认选中第一个
+          if (teacherList.length > 0 && !selectedTeacher) {
+            setSelectedTeacher(teacherList[0].id)
+          }
+        } else {
+          message.info('暂无教师信息')
+          setTeachers([])
+        }
+      } else {
+        message.info('暂无教师信息')
+        setTeachers([])
       }
+    } catch (error) {
+      message.error('获取教师列表失败')
+      console.error('Error fetching teachers:', error)
+      setTeachers([])
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  // 获取沟通记录
+  const fetchCommunicationHistory = async (teacherId) => {
+    setLoading(true)
+    try {
+      console.log('Fetching communication history for studentId:', studentId, 'teacherId:', teacherId)
+      const response = await parentAPI.getCommunicationHistory(studentId, teacherId)
+      console.log('Response from API:', response)
+      if (response && response.data && response.data.success) {
+        const messages = response.data.data
+        setTeacherMessages({
+          ...teacherMessages,
+          [teacherId]: messages
+        })
+      } else {
+        setTeacherMessages({
+          ...teacherMessages,
+          [teacherId]: []
+        })
+      }
+    } catch (error) {
+      message.error('获取沟通记录失败')
+      console.error('Error fetching communication history:', error)
       setTeacherMessages({
         ...teacherMessages,
-        [selectedTeacher]: [...(teacherMessages[selectedTeacher] || []), message]
+        [teacherId]: []
       })
-      setNewMessage('')
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  // 发送消息
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedTeacher) return
+    
+    setLoading(true)
+    try {
+      const response = await parentAPI.sendMessage(studentId, selectedTeacher, newMessage)
+      if (response && response.data && response.data.success) {
+        // 重新获取沟通记录
+        await fetchCommunicationHistory(selectedTeacher)
+        setNewMessage('')
+        message.success('消息发送成功')
+      } else {
+        message.error('消息发送失败')
+      }
+    } catch (error) {
+      message.error('消息发送失败')
+      console.error('Error sending message:', error)
+    } finally {
+      setLoading(false)
     }
   }
   
@@ -124,7 +140,34 @@ const TeacherCommunication = () => {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>教师沟通</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>教师沟通</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '1em', color: '#666' }}>选择孩子：</span>
+            <select 
+              value={studentId}
+              onChange={(e) => {
+                setStudentId(parseInt(e.target.value))
+                setSelectedTeacher(null)
+                setTeachers([])
+                setTeacherMessages({})
+              }}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 5,
+                border: '1px solid #e0e0e0',
+                fontSize: '1em',
+                backgroundColor: '#fff'
+              }}
+            >
+              {students.map(student => (
+                <option key={student.id} value={student.id}>
+                  {student.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span>欢迎，王家长</span>
           <div style={{
@@ -152,62 +195,80 @@ const TeacherCommunication = () => {
         }}
       >
         <h2 style={{ color: '#FF9800', marginBottom: 20, fontSize: '1.5em' }}>孩子的教师</h2>
-        {teachers.map(teacher => (
-          <div 
-            key={teacher.id}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              padding: 15, 
-              borderBottom: '1px solid #e0e0e0',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <Avatar 
-              style={{ 
-                width: 60, 
-                height: 60, 
-                borderRadius: '50%', 
-                backgroundColor: '#FFF3E0', 
-                color: '#FF9800', 
-                fontWeight: 'bold',
-                fontSize: '1.5em',
-                marginRight: 15
-              }}
-            >
-              {teacher.avatar}
-            </Avatar>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold', fontSize: '1.1em', marginBottom: 5 }}>{teacher.name}</div>
-              <div style={{ fontSize: '0.9em', color: '#666', marginBottom: 10 }}>{teacher.subject}</div>
-            </div>
-            <Button 
-              style={{ 
-                backgroundColor: selectedTeacher === teacher.id ? '#F57C00' : '#FF9800', 
-                color: 'white', 
-                fontWeight: 'bold',
-                padding: '8px 16px',
-                borderRadius: 5,
-                fontSize: '14px',
-                border: 'none',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F57C00'
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = selectedTeacher === teacher.id ? '#F57C00' : '#FF9800'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-              onClick={() => handleStartCommunication(teacher.id)}
-            >
-              沟通
-            </Button>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 10, color: '#666' }}>加载中...</p>
           </div>
-        ))}
+        ) : (
+          teachers.length > 0 ? (
+            teachers.map(teacher => (
+              <div 
+                key={teacher.id}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  padding: 15, 
+                  borderBottom: '1px solid #e0e0e0',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <Avatar 
+                  style={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    backgroundColor: '#FFF3E0', 
+                    color: '#FF9800', 
+                    fontWeight: 'bold',
+                    fontSize: '1.5em',
+                    marginRight: 15
+                  }}
+                >
+                  {teacher.avatar}
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '1.1em', marginBottom: 5 }}>{teacher.name}</div>
+                  <div style={{ fontSize: '0.9em', color: '#666', marginBottom: 10 }}>{teacher.subject}</div>
+                </div>
+                <Button 
+                  style={{ 
+                    backgroundColor: selectedTeacher === teacher.id ? '#F57C00' : '#FF9800', 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    padding: '8px 16px',
+                    borderRadius: 5,
+                    fontSize: '14px',
+                    border: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F57C00'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = selectedTeacher === teacher.id ? '#F57C00' : '#FF9800'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                  onClick={() => handleStartCommunication(teacher.id)}
+                >
+                  沟通
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: 40, 
+              color: '#999',
+              fontSize: '1.1em'
+            }}>
+              暂无教师信息
+            </div>
+          )
+        )}
       </Card>
       
       {/* 沟通记录 */}
@@ -235,7 +296,12 @@ const TeacherCommunication = () => {
           )}
         </div>
         <div style={{ marginBottom: 20 }}>
-          {selectedTeacher ? (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 40 }}>
+              <Spin size="large" />
+              <p style={{ marginTop: 10, color: '#666' }}>加载中...</p>
+            </div>
+          ) : selectedTeacher ? (
             (teacherMessages[selectedTeacher] && teacherMessages[selectedTeacher].length > 0) ? (
               teacherMessages[selectedTeacher].map(message => (
                 <div 
@@ -322,6 +388,7 @@ const TeacherCommunication = () => {
                 e.currentTarget.style.transform = 'translateY(0)'
               }}
               onClick={handleSendMessage}
+              loading={loading}
             >
               发送
             </Button>
