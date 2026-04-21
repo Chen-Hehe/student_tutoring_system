@@ -23,6 +23,12 @@ export const adminAPI = {
     if (keyword) params.keyword = keyword
     if (subject) params.subject = subject
     return api.get('/api/admin/content/learning-materials', { params })
+  },
+  getAnnouncements: (keyword, status) => {
+    const params = {}
+    if (keyword) params.keyword = keyword
+    if (status) params.status = status
+    return api.get('/api/admin/content/announcements', { params })
   }
 }
 

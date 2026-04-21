@@ -1,8 +1,10 @@
 package com.tutoring.controller;
 
 import com.tutoring.dto.Result;
+import com.tutoring.entity.Announcement;
 import com.tutoring.entity.LearningMaterial;
 import com.tutoring.entity.LearningResource;
+import com.tutoring.service.AnnouncementService;
 import com.tutoring.service.LearningMaterialService;
 import com.tutoring.service.LearningResourceService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class ContentController {
 
     private final LearningResourceService learningResourceService;
     private final LearningMaterialService learningMaterialService;
+    private final AnnouncementService announcementService;
 
     /**
      * 获取教学资源列表
@@ -180,6 +183,86 @@ public class ContentController {
             return Result.success();
         } catch (Exception e) {
             return Result.error(500, "删除学习资料失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取公告列表
+     * @param keyword 关键词（可选）
+     * @param status 状态（可选）
+     * @return 公告列表
+     */
+    @GetMapping("/announcements")
+    public Result<List<Announcement>> getAnnouncements(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status) {
+        try {
+            List<Announcement> announcements = announcementService.listAnnouncements(keyword, status);
+            return Result.success(announcements);
+        } catch (Exception e) {
+            return Result.error(500, "获取公告列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取公告详情
+     * @param id 公告ID
+     * @return 公告详情
+     */
+    @GetMapping("/announcements/{id}")
+    public Result<Announcement> getAnnouncementById(@PathVariable Long id) {
+        try {
+            Announcement announcement = announcementService.getById(id);
+            return Result.success(announcement);
+        } catch (Exception e) {
+            return Result.error(500, "获取公告详情失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 新增公告
+     * @param announcement 公告信息
+     * @return 新增的公告
+     */
+    @PostMapping("/announcements")
+    public Result<Announcement> addAnnouncement(@RequestBody Announcement announcement) {
+        try {
+            announcementService.createAnnouncement(announcement);
+            return Result.success(announcement);
+        } catch (Exception e) {
+            return Result.error(500, "新增公告失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新公告
+     * @param id 公告ID
+     * @param announcement 公告信息
+     * @return 更新后的公告
+     */
+    @PutMapping("/announcements/{id}")
+    public Result<Announcement> updateAnnouncement(@PathVariable Long id, @RequestBody Announcement announcement) {
+        try {
+            announcement.setId(id);
+            announcementService.updateAnnouncement(announcement);
+            return Result.success(announcement);
+        } catch (Exception e) {
+            return Result.error(500, "更新公告失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除公告
+     * @param id 公告ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/announcements/{id}")
+    public Result<Void> deleteAnnouncement(@PathVariable Long id) {
+        try {
+            announcementService.deleteAnnouncement(id);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error(500, "删除公告失败: " + e.getMessage());
         }
     }
 }

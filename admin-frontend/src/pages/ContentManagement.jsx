@@ -9,8 +9,10 @@ const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('1')
   const [resources, setResources] = useState([])
   const [learningMaterials, setLearningMaterials] = useState([])
+  const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(false)
   const [materialsLoading, setMaterialsLoading] = useState(false)
+  const [announcementsLoading, setAnnouncementsLoading] = useState(false)
   const [searchParams, setSearchParams] = useState({
     keyword: '',
     type: '',
@@ -19,6 +21,10 @@ const ContentManagement = () => {
   const [materialsSearchParams, setMaterialsSearchParams] = useState({
     keyword: '',
     subject: ''
+  })
+  const [announcementsSearchParams, setAnnouncementsSearchParams] = useState({
+    keyword: '',
+    status: ''
   })
   const [teachers, setTeachers] = useState({})
 
@@ -77,6 +83,25 @@ const ContentManagement = () => {
     }
   }
 
+  // 获取公告列表
+  const fetchAnnouncements = async () => {
+    setAnnouncementsLoading(true)
+    try {
+      let keywordParam = announcementsSearchParams.keyword || undefined
+      let statusParam = announcementsSearchParams.status || undefined
+      
+      const response = await adminAPI.getAnnouncements(keywordParam, statusParam)
+      if (response && (response.code === 200 || response.success)) {
+        setAnnouncements(response.data)
+      }
+    } catch (error) {
+      message.error('获取公告列表失败')
+      console.error('Error fetching announcements:', error)
+    } finally {
+      setAnnouncementsLoading(false)
+    }
+  }
+
   // 组件加载时获取资源和教师信息
   useEffect(() => {
     fetchTeachers()
@@ -84,6 +109,8 @@ const ContentManagement = () => {
       fetchResources()
     } else if (activeTab === '2') {
       fetchLearningMaterials()
+    } else if (activeTab === '3') {
+      fetchAnnouncements()
     }
   }, [activeTab])
 
@@ -188,6 +215,56 @@ const ContentManagement = () => {
           <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
           <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
           <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>下载</Button>
+        </Space>
+      ),
+    },
+  ]
+
+  const announcementColumns = [
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: '标题', dataIndex: 'title', key: 'title' },
+    { title: '内容', dataIndex: 'content', key: 'content', ellipsis: true },
+    {
+      title: '发布者', 
+      dataIndex: 'authorId', 
+      key: 'authorId',
+      render: (authorId) => {
+        if (authorId === 1) {
+          return '管理员'
+        }
+        return teachers[authorId] || authorId || '未知'
+      }
+    },
+    { 
+      title: '发布时间', 
+      dataIndex: 'publishDate', 
+      key: 'publishDate',
+      render: (publishDate) => {
+        return publishDate ? new Date(publishDate).toLocaleString() : '未知'
+      }
+    },
+    { 
+      title: '状态', 
+      dataIndex: 'status', 
+      key: 'status',
+      render: (status) => {
+        const statusMap = {
+          published: { color: '#52c41a', text: '已发布' },
+          draft: { color: '#faad14', text: '草稿' },
+          archived: { color: '#999', text: '已归档' }
+        }
+        const statusInfo = statusMap[status] || { color: '#999', text: '未知' }
+        return <Tag color={statusInfo.color} style={{ fontSize: '14px', padding: '2px 8px' }}>{statusInfo.text}</Tag>
+      }
+    },
+    { title: '浏览次数', dataIndex: 'viewCount', key: 'viewCount' },
+    { 
+      title: '操作', 
+      key: 'action', 
+      render: () => (
+        <Space>
+          <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
+          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
         </Space>
       ),
     },
@@ -497,6 +574,105 @@ const ContentManagement = () => {
               size="middle"
               style={{ fontSize: '16px', marginBottom: '20px' }}
               loading={materialsLoading}
+              pagination={false}
+            />
+            
+            {/* 自定义分页 */}
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
+              <span 
+                style={{
+                  margin: '0 5px',
+                  padding: '6px 10px',
+                  borderRadius: 4,
+                  backgroundColor: '#9C27B0',
+                  color: 'white',
+                  border: '1px solid #9C27B0',
+                  display: 'inline-block',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxShadow: 'none',
+                  lineHeight: '1.5',
+                  minWidth: '30px',
+                  textAlign: 'center',
+                  boxSizing: 'border-box',
+                  userSelect: 'none'
+                }}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.currentTarget.style.outline = 'none'}
+              >
+                1
+              </span>
+              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>2</span>
+              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>3</span>
+              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
+            </div>
+          </Card>
+        </>
+      )}
+      
+      {/* 公告管理标签页 */}
+      {activeTab === '3' && (
+        <>
+          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: 20, padding: 20, borderRadius: 12 }}>
+            <Row gutter={[16, 16]} align="middle">
+              <Col>
+                <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>搜索:</span>
+                <Input 
+                  placeholder="输入公告标题" 
+                  style={{ width: 250, fontSize: '16px', padding: '8px 12px' }}
+                  value={announcementsSearchParams.keyword}
+                  onChange={(e) => setAnnouncementsSearchParams({ ...announcementsSearchParams, keyword: e.target.value })}
+                />
+              </Col>
+              <Col>
+                <span style={{ color: '#333', marginRight: 12, fontWeight: 600, fontSize: '16px' }}>状态:</span>
+                <Select 
+                  style={{ width: 150, fontSize: '16px' }} 
+                  value={announcementsSearchParams.status}
+                  onChange={(value) => setAnnouncementsSearchParams({ ...announcementsSearchParams, status: value })}
+                >
+                  <Option value="" style={{ fontSize: '16px' }}>全部</Option>
+                  <Option value="published" style={{ fontSize: '16px' }}>已发布</Option>
+                  <Option value="draft" style={{ fontSize: '16px' }}>草稿</Option>
+                  <Option value="archived" style={{ fontSize: '16px' }}>已归档</Option>
+                </Select>
+              </Col>
+              <Col>
+                <Button 
+                  style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}
+                  onClick={fetchAnnouncements}
+                >
+                  搜索
+                </Button>
+              </Col>
+              <Col>
+                <Button 
+                  style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '8px 16px' }}
+                  onClick={() => {
+                    setAnnouncementsSearchParams({ keyword: '', status: '' })
+                    setTimeout(() => fetchAnnouncements(), 0)
+                  }}
+                >
+                  重置
+                </Button>
+              </Col>
+              <Col>
+                <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>发布公告</Button>
+              </Col>
+            </Row>
+          </Card>
+          
+          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', borderRadius: 12, padding: 20 }}>
+            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.6em', fontWeight: 'bold' }}>公告列表</h3>
+            <Table 
+              columns={announcementColumns} 
+              dataSource={announcements} 
+              rowKey="id"
+              size="middle"
+              style={{ fontSize: '16px', marginBottom: '20px' }}
+              loading={announcementsLoading}
               pagination={false}
             />
             

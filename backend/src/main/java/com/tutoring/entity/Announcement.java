@@ -1,44 +1,37 @@
 package com.tutoring.entity;
 
-import java.time.LocalDateTime;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
- * 学习资料实体类
+ * 公告实体类
  */
 @Data
-@TableName("learning_materials")
-public class LearningMaterial {
+@TableName("announcements")
+public class Announcement {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private String title;
 
-    private String description;
+    private String content;
 
-    private String subject;
+    private Long authorId;
 
-    private String grade;
+    private LocalDateTime publishDate;
 
-    private String type;
-
-    private String url;
-
-    private Long uploaderId;
+    private String status;
 
     private Integer viewCount;
 
-    private Integer downloadCount;
-
-    private String tags;
-
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private Integer deleted;
 }
