@@ -25,9 +25,14 @@ public class AdminController {
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics() {
         try {
-            long teacherCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 2).eq(User::getDeleted, 0));
-            long studentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 3).eq(User::getDeleted, 0));
-            long parentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 4).eq(User::getDeleted, 0));
+            System.out.println("获取统计数据...");
+            System.out.println("userRepository: " + userRepository);
+            long teacherCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 1).eq(User::getDeleted, 0));
+            System.out.println("教师数量: " + teacherCount);
+            long studentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 2).eq(User::getDeleted, 0));
+            System.out.println("学生数量: " + studentCount);
+            long parentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 3).eq(User::getDeleted, 0));
+            System.out.println("家长数量: " + parentCount);
             long chatCount = 0;
             
             Map<String, Object> data = new HashMap<>();
@@ -36,8 +41,10 @@ public class AdminController {
             data.put("parentCount", parentCount);
             data.put("chatCount", chatCount);
             
+            System.out.println("统计数据: " + data);
             return Result.success(data);
         } catch (Exception e) {
+            e.printStackTrace();
             return Result.error(500, "获取统计失败: " + e.getMessage());
         }
     }
@@ -112,13 +119,13 @@ public class AdminController {
         }
         switch (role) {
             case 1:
-                return "admin";
-            case 2:
                 return "teacher";
-            case 3:
+            case 2:
                 return "student";
-            case 4:
+            case 3:
                 return "parent";
+            case 4:
+                return "admin";
             default:
                 return "未知";
         }

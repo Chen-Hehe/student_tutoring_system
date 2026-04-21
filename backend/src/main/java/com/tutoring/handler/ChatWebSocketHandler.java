@@ -162,5 +162,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             log.info("【WebSocket 推送】已推送给用户 {}", userId);
         } catch (Exception e) {
             log.error("处理 Redis 消息失败：channel={}, message={}", channel, messageBytes, e);
+        }
     }
 }

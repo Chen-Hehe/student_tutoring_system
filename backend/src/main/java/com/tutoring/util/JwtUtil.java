@@ -82,7 +82,7 @@ public class JwtUtil {
         try {
             Claims claims = parseToken(token);
             return !claims.getExpiration().before(new Date());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return false;
         }
     }

@@ -14,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -143,16 +146,28 @@ public class ChatRecordService {
             return new ArrayList<>();
         }
         
-        List<Long> partnerIds = chatRecordRepository.selectConversationPartners(userId);
-        if (partnerIds == null || partnerIds.isEmpty()) {
+        // 获取会话伙伴列表
+        List<Map<String, Object>> partnerMaps = chatRecordRepository.selectConversationPartners(userId);
+        if (partnerMaps == null || partnerMaps.isEmpty()) {
             return new ArrayList<>();
         }
         
-        // 去重
-        List<Long> uniquePartnerIds = partnerIds.stream().distinct().toList();
+        // 提取partnerId并去重
+        List<Long> partnerIds = partnerMaps.stream()
+                .map(map -> {
+                    Object value = map.get("partner_id");
+                    return value != null ? Long.parseLong(value.toString()) : null;
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (partnerIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         List<Conversation> conversations = new ArrayList<>();
         
-        for (Long partnerId : uniquePartnerIds) {
+        for (Long partnerId : partnerIds) {
             if (partnerId == null) {
                 continue;
             }
@@ -169,7 +184,15 @@ public class ChatRecordService {
             conversation.setUserRole(partner.getRole());
             
             // 获取最后一条消息的时间
-            LocalDateTime lastTime = chatRecordRepository.selectLastMessageTime(userId, partnerId);
+            String lastTimeStr = chatRecordRepository.selectLastMessageTime(userId, partnerId);
+            LocalDateTime lastTime = null;
+            if (lastTimeStr != null) {
+                try {
+                    lastTime = LocalDateTime.parse(lastTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                } catch (Exception e) {
+                    log.error("解析时间失败: {}", lastTimeStr, e);
+                }
+            }
             if (lastTime != null) {
                 conversation.setLastMessageTime(lastTime);
                 

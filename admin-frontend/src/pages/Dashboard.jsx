@@ -59,9 +59,15 @@ const Dashboard = () => {
       console.log('开始获取统计数据...')
       const response = await adminAPI.getStatistics()
       console.log('统计数据响应:', response)
-      if (response && response.success) {
-        console.log('统计数据:', response.data)
-        setStatistics(response.data)
+      if (response) {
+        // 支持两种响应格式
+        if (response.success) {
+          console.log('统计数据:', response.data)
+          setStatistics(response.data)
+        } else if (response.code === 200) {
+          console.log('统计数据:', response.data)
+          setStatistics(response.data)
+        }
       }
     } catch (error) {
       console.error('获取统计数据失败:', error)
@@ -81,14 +87,25 @@ const Dashboard = () => {
       console.log('开始获取用户列表...')
       const response = await adminAPI.getUsers(page, size)
       console.log('用户列表响应:', response)
-      if (response && response.success) {
-        console.log('用户列表:', response.data.list)
-        setUsers(response.data.list)
-        setPagination({
-          current: response.data.page,
-          pageSize: response.data.size,
-          total: response.data.total
-        })
+      if (response) {
+        // 支持两种响应格式
+        if (response.success) {
+          console.log('用户列表:', response.data.list)
+          setUsers(response.data.list)
+          setPagination({
+            current: response.data.page,
+            pageSize: response.data.size,
+            total: response.data.total
+          })
+        } else if (response.code === 200) {
+          console.log('用户列表:', response.data.list)
+          setUsers(response.data.list)
+          setPagination({
+            current: response.data.page,
+            pageSize: response.data.size,
+            total: response.data.total
+          })
+        }
       }
     } catch (error) {
       console.error('获取用户列表失败:', error)
