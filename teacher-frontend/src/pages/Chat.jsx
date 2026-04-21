@@ -41,9 +41,13 @@ const Chat = () => {
   const uploadRef = useRef(null)
   const selectedConversationRef = useRef(selectedConversation)
   
-  // 滚动到底部
+  // 滚动到底部 - 优化版：确保在消息加载完成且 DOM 渲染后滚动
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesEndRef.current && messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
   }
   
   useEffect(() => {
@@ -89,7 +93,11 @@ const Chat = () => {
     setSelectedConversation(conversation)
     // 持久化选中的对话到 localStorage
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
-    loadChatHistory(conversation.userId)
+    // 切换对话时自动标记为已读
+    if (conversation.userId) {
+      chatAPI.markAsRead(conversation.userId)
+      loadChatHistory(conversation.userId)
+    }
   }
   
   // 开始新聊天
@@ -218,6 +226,14 @@ const Chat = () => {
     }
   }
   
+  // 当选中对话变化时，自动标记为已读（实时同步关键）
+  useEffect(() => {
+    if (selectedConversation?.userId) {
+      console.log('切换对话，标记为已读:', selectedConversation.userId)
+      chatAPI.markAsRead(selectedConversation.userId)
+    }
+  }, [selectedConversation?.userId])
+
   // 初始化 WebSocket 连接和加载数据
   useEffect(() => {
     if (currentUser?.id) {

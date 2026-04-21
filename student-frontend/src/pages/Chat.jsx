@@ -35,13 +35,25 @@ const Chat = () => {
 
   const messagesEndRef = useRef(null)
   const selectedConversationRef = useRef(selectedConversation)
+  const isLoadingRef = useRef(false) // 标记是否正在加载消息
 
   useEffect(() => {
     selectedConversationRef.current = selectedConversation
   }, [selectedConversation])
 
+  // 滚动到底部 - 优化版：确保在消息加载完成且 DOM 渲染后滚动
+  const scrollToBottom = () => {
+    // 确保 ref 存在且消息列表不为空
+    if (messagesEndRef.current && messages.length > 0 && !isLoadingRef.current) {
+      // 使用 setTimeout 确保 DOM 已渲染
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    scrollToBottom()
   }, [messages])
 
   const loadConversations = async () => {
@@ -55,14 +67,22 @@ const Chat = () => {
   }
 
   const loadChatHistory = async (userId) => {
+    isLoadingRef.current = true
     setLoading(true)
     try {
       const result = await chatAPI.getChatHistory(userId)
       setMessages(result.data || [])
+      // 标记为已读（调用后端接口，后端会推送已读状态给发送者）
       await chatAPI.markAsRead(userId)
+      // 加载完成后滚动到底部
+      setTimeout(() => {
+        isLoadingRef.current = false
+        scrollToBottom()
+      }, 200)
     } catch (error) {
       console.error('加载聊天记录失败:', error)
       antdMessage.error('加载聊天记录失败')
+      isLoadingRef.current = false
     } finally {
       setLoading(false)
     }
@@ -71,7 +91,11 @@ const Chat = () => {
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
-    loadChatHistory(conversation.userId)
+    // 切换对话时自动标记为已读
+    if (conversation.userId) {
+      chatAPI.markAsRead(conversation.userId)
+      loadChatHistory(conversation.userId)
+    }
   }
 
   const loadTeachers = async () => {
@@ -126,6 +150,14 @@ const Chat = () => {
     }
   }
 
+  // 当选中对话变化时，自动标记为已读（实时同步关键）
+  useEffect(() => {
+    if (selectedConversation?.userId) {
+      console.log('切换对话，标记为已读:', selectedConversation.userId)
+      chatAPI.markAsRead(selectedConversation.userId)
+    }
+  }, [selectedConversation?.userId])
+
   useEffect(() => {
     if (!currentUser?.id) return
 
@@ -158,6 +190,7 @@ const Chat = () => {
           ...data,
           timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
         }])
+        // 实时标记为已读（后端会推送已读状态给发送者）
         chatAPI.markAsRead(data.senderId)
       }
       loadConversations()
