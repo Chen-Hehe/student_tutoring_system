@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { Input, Button, Avatar, List, Badge, Upload, message as antdMessage, Spin, Empty, Card, Modal, Table, Space, Tag } from 'antd'
+import { Input, Button, Avatar, List, Badge, message as antdMessage, Spin, Empty, Modal, Table, Space } from 'antd'
 import { SendOutlined, PictureOutlined, AudioOutlined, SmileOutlined, UserOutlined, PlusOutlined } from '@ant-design/icons'
 import wsService from '../services/websocket'
 import { chatAPI } from '../services/chatApi'
@@ -13,15 +13,12 @@ dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
 
 const { TextArea } = Input
+const THEME = '#52c41a'
+const THEME_LIGHT = '#f6ffed'
 
-/**
- * 聊天页面组件（学生端）
- */
 const Chat = () => {
-  // 获取当前用户信息
   const currentUser = useSelector((state) => state.auth.user)
-  
-  // 状态管理
+
   const [conversations, setConversations] = useState([])
   const [selectedConversation, setSelectedConversation] = useState(() => {
     const saved = localStorage.getItem('selectedConversation')
@@ -35,25 +32,20 @@ const Chat = () => {
   const [showTeacherModal, setShowTeacherModal] = useState(false)
   const [teachers, setTeachers] = useState([])
   const [teacherLoading, setTeacherLoading] = useState(false)
-  
-  // 引用
+
   const messagesEndRef = useRef(null)
-  
-  // 滚动到底部
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-  
+  const selectedConversationRef = useRef(selectedConversation)
+
   useEffect(() => {
-    scrollToBottom()
+    selectedConversationRef.current = selectedConversation
+  }, [selectedConversation])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
-  
-  // 加载对话列表
+
   const loadConversations = async () => {
-    if (!currentUser?.id) {
-      console.warn('用户未登录，无法加载对话列表')
-      return
-    }
+    if (!currentUser?.id) return
     try {
       const result = await chatAPI.getConversations(currentUser.id)
       setConversations(result.data || [])
@@ -61,14 +53,12 @@ const Chat = () => {
       console.error('加载对话列表失败:', error)
     }
   }
-  
-  // 加载聊天记录
+
   const loadChatHistory = async (userId) => {
     setLoading(true)
     try {
       const result = await chatAPI.getChatHistory(userId)
       setMessages(result.data || [])
-      // 标记为已读
       await chatAPI.markAsRead(userId)
     } catch (error) {
       console.error('加载聊天记录失败:', error)
@@ -77,85 +67,56 @@ const Chat = () => {
       setLoading(false)
     }
   }
-  
-  // 选择对话
+
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
     loadChatHistory(conversation.userId)
   }
-  
-  // 加载教师列表
+
   const loadTeachers = async () => {
     setTeacherLoading(true)
     try {
-      const result = await userAPI.getUsers(1) // 1=教师
+      const result = await userAPI.getUsers(1)
       setTeachers(result.data || result || [])
     } catch (error) {
       console.error('加载教师列表失败:', error)
-      // 使用模拟数据作为后备
       setTeachers([])
     } finally {
       setTeacherLoading(false)
     }
   }
-  
-  // 选择教师聊天
+
   const selectTeacherToChat = (teacher) => {
-    const conversation = {
+    selectConversation({
       userId: teacher.id,
       userName: teacher.name || teacher.username,
       userAvatar: teacher.avatar,
       unreadCount: 0
-    }
-    selectConversation(conversation)
+    })
     setShowTeacherModal(false)
   }
-  
-  // 发送消息
+
   const sendMessage = async () => {
-    if (!inputValue.trim()) {
-      antdMessage.warning('请输入消息内容')
-      return
-    }
-    
-    if (!selectedConversation?.userId) {
-      antdMessage.warning('请先选择一个聊天对象')
-      return
-    }
-    
+    if (!inputValue.trim()) return antdMessage.warning('请输入消息内容')
+    if (!selectedConversation?.userId) return antdMessage.warning('请先选择一个聊天对象')
+
     setSending(true)
-    
-    // 不发送 timestamp，由后端自动生成
-    const messageData = {
-      senderId: currentUser.id, // 当前用户 ID
-      receiverId: selectedConversation.userId,
-      message: inputValue,
-      type: 1 // 1=文字消息（确保是数字类型）
-    }
-    
-    console.log('【DEBUG】发送消息 - senderId:', currentUser.id, 'receiverId:', selectedConversation.userId, 'currentUser:', currentUser)
-    
     try {
-      // 通过 API 发送（主要方式）
-      const result = await chatAPI.sendMessage(messageData)
-      
-      // 添加到消息列表
-      const newMessage = {
+      const result = await chatAPI.sendMessage({
+        senderId: currentUser.id,
+        receiverId: selectedConversation.userId,
+        message: inputValue,
+        type: 1
+      })
+      setMessages((prev) => [...prev, {
         ...result.data,
         senderId: currentUser.id,
         senderName: currentUser.name || currentUser.username,
         timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss')
-      }
-      
-      setMessages(prev => [...prev, newMessage])
+      }])
       setInputValue('')
-      
-      // 不再通过 WebSocket 发送，只使用 HTTP API
-      
-      // 更新对话列表
       loadConversations()
-      
     } catch (error) {
       console.error('发送消息失败:', error)
       antdMessage.error('发送消息失败：' + (error.response?.data?.message || error.message))
@@ -163,340 +124,160 @@ const Chat = () => {
       setSending(false)
     }
   }
-  
-  // 处理 WebSocket 消息
+
   useEffect(() => {
     if (!currentUser?.id) return
-    
-    // 连接 WebSocket
+
     wsService.connect(currentUser.id)
-    
-    // 监听连接状态
-    const unsubscribeConnection = wsService.onConnectionChange((connected) => {
-      setIsConnected(connected)
-      console.log('WebSocket 连接状态:', connected ? '已连接' : '已断开')
-    })
-    
-    // 监听消息
-    const unsubscribeMessage = wsService.onMessage((data) => {
-      console.log('收到 WebSocket 消息:', data)
-      
-      if (data.type === 'pong' || data.type === 'ping') {
-        return
-      }
-      
-      if (data.type === 'error') {
-        antdMessage.error('消息发送失败：' + data.message)
-        return
-      }
-      
-      // 如果是自己发送的消息，忽略（已经在发送时添加了）
-      if (data.senderId === currentUser.id) {
-        return
-      }
-      
-      // 如果是当前选中对话的消息，添加到列表
-      if (selectedConversation && data.senderId === selectedConversation.userId) {
-        setMessages(prev => [...prev, {
+
+    const unsubConn = wsService.onConnectionChange((connected) => setIsConnected(connected))
+    const unsubMsg = wsService.onMessage((data) => {
+      if (data.type === 'pong' || data.type === 'ping') return
+      if (data.type === 'error') return antdMessage.error('消息发送失败：' + data.message)
+      if (data.senderId === currentUser.id) return
+
+      const active = selectedConversationRef.current
+      if (active && data.senderId === active.userId) {
+        setMessages((prev) => [...prev, {
           ...data,
           timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
         }])
-        
-        // 标记为已读
         chatAPI.markAsRead(data.senderId)
-        
-        // 更新对话列表
-        loadConversations()
-      } else {
-        // 如果不是当前对话，更新对话列表（显示未读）
-        loadConversations()
       }
+      loadConversations()
     })
-    
-    // 加载对话列表
+
     loadConversations()
-    
-    // 加载教师列表（用于选择聊天对象）
     loadTeachers()
-    
-    // 恢复选中的对话
-    if (selectedConversation) {
-      console.log('恢复选中的对话，加载聊天记录:', selectedConversation.userId)
-      loadChatHistory(selectedConversation.userId)
-    }
-    
-    // 清理
+    if (selectedConversationRef.current?.userId) loadChatHistory(selectedConversationRef.current.userId)
+
     return () => {
-      unsubscribeConnection()
-      unsubscribeMessage()
+      unsubConn()
+      unsubMsg()
     }
   }, [currentUser?.id])
-  
-  // 处理按键发送
+
+  const renderMessage = (msg, index) => {
+    const isSelf = msg.senderId === currentUser?.id
+    return (
+      <div key={msg.messageId || index} style={{ display: 'flex', justifyContent: isSelf ? 'flex-end' : 'flex-start', marginBottom: 16, alignItems: 'flex-start' }}>
+        {!isSelf && (
+          <Avatar src={msg.senderAvatar} style={{ marginRight: 8 }}>
+            {(msg.senderName || selectedConversation?.userName || '教')?.[0]}
+          </Avatar>
+        )}
+
+        <div style={{ maxWidth: '60%', padding: '12px 16px', borderRadius: 16, backgroundColor: isSelf ? THEME : '#fff', color: isSelf ? '#fff' : '#333', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', wordBreak: 'break-word' }}>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{msg.message}</div>
+          <div style={{ fontSize: 12, marginTop: 4, opacity: 0.75, textAlign: 'right' }}>
+            {msg.timestamp ? dayjs(msg.timestamp).format('HH:mm') : ''}
+          </div>
+        </div>
+
+        {isSelf && (
+          <Avatar src={currentUser?.avatar} style={{ marginLeft: 8, backgroundColor: '#87d068' }}>
+            {(currentUser?.name || currentUser?.username || '学')?.[0]}
+          </Avatar>
+        )}
+      </div>
+    )
+  }
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
   }
-  
+
   return (
-    <div style={{ height: 'calc(100vh - 200px)', display: 'flex', gap: 16 }}>
-      {/* 左侧对话列表 */}
-      <Card 
-        style={{ width: 320, display: 'flex', flexDirection: 'column' }}
-        title={
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>消息列表</span>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Badge 
-                count={isConnected ? 1 : 0} 
-                status={isConnected ? 'success' : 'error'} 
-                text={isConnected ? '在线' : '离线'}
-              />
-              <Button 
-                type="primary" 
-                size="small" 
-                icon={<PlusOutlined />}
-                onClick={() => setShowTeacherModal(true)}
-              >
-                新聊天
-              </Button>
-            </div>
+    <div style={{ display: 'flex', height: 'calc(100vh - 128px)', backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+      <div style={{ width: 320, borderRight: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: 16, borderBottom: '1px solid #f0f0f0', backgroundColor: '#fafafa' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <h3 style={{ margin: 0 }}>消息</h3>
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => setShowTeacherModal(true)} style={{ backgroundColor: THEME, borderColor: THEME }}>
+              新建聊天
+            </Button>
           </div>
-        }
-      >
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ fontSize: 12, color: isConnected ? '#52c41a' : '#ff4d4f' }}>{isConnected ? '● 已连接' : '● 已断开'}</div>
+        </div>
+
+        <div style={{ flex: 1, overflow: 'auto' }}>
           {conversations.length === 0 ? (
-            <Empty description="暂无消息" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Empty description="暂无对话" style={{ padding: 40 }} />
           ) : (
             <List
               dataSource={conversations}
               renderItem={(item) => (
                 <List.Item
                   onClick={() => selectConversation(item)}
-                  style={{
-                    padding: '12px 16px',
-                    cursor: 'pointer',
-                    background: selectedConversation?.userId === item.userId ? '#e6f7ff' : 'transparent',
-                    borderRadius: 8,
-                    marginBottom: 8,
-                    transition: 'background 0.3s'
-                  }}
+                  style={{ padding: '12px 16px', cursor: 'pointer', backgroundColor: selectedConversation?.userId === item.userId ? THEME_LIGHT : 'transparent', transition: 'background-color 0.2s' }}
                   onMouseEnter={(e) => {
-                    if (selectedConversation?.userId !== item.userId) {
-                      e.currentTarget.style.background = '#f5f5f5'
-                    }
+                    if (selectedConversation?.userId !== item.userId) e.currentTarget.style.backgroundColor = '#f5f5f5'
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedConversation?.userId !== item.userId) {
-                      e.currentTarget.style.background = 'transparent'
-                    }
+                    if (selectedConversation?.userId !== item.userId) e.currentTarget.style.backgroundColor = 'transparent'
                   }}
                 >
                   <List.Item.Meta
-                    avatar={
-                      <Avatar style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
-                    }
-                    title={
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{item.userName || '未知用户'}</span>
-                        {item.unreadCount > 0 && (
-                          <Badge count={item.unreadCount} offset={[-5, 0]} />
-                        )}
-                      </div>
-                    }
-                    description={
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#999' }}>
-                        <span style={{ 
-                          maxWidth: 200, 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {item.lastMessage || '暂无消息'}
-                        </span>
-                        <span>{item.lastMessageTime ? dayjs(item.lastMessageTime).fromNow() : ''}</span>
-                      </div>
-                    }
+                    avatar={<Badge count={item.unreadCount} offset={[-5, 5]}><Avatar src={item.userAvatar} icon={<UserOutlined />} /></Badge>}
+                    title={<div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{item.userName || '未知用户'}</span>{item.lastMessageTime && <span style={{ fontSize: 12, color: '#999' }}>{dayjs(item.lastMessageTime).fromNow()}</span>}</div>}
+                    description={<div style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: item.unreadCount > 0 ? THEME : '#999' }}>{item.lastMessageType === 2 ? '[图片] ' : item.lastMessageType === 3 ? '[语音] ' : ''}{item.lastMessage || '暂无消息'}</div>}
                   />
                 </List.Item>
               )}
             />
           )}
         </div>
-      </Card>
-      
-      {/* 右侧聊天窗口 */}
-      <Card 
-        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-        title={
-          selectedConversation ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Avatar style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
-              <div>
-                <div style={{ fontWeight: 'bold' }}>{selectedConversation.userName || '未知用户'}</div>
-                <div style={{ fontSize: 12, color: isConnected ? '#52c41a' : '#999' }}>
-                  {isConnected ? '● 在线' : '○ 离线'}
-                </div>
-              </div>
-            </div>
-          ) : (
-            '请选择聊天对象'
-          )
-        }
-      >
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {selectedConversation ? (
           <>
-            {/* 消息列表 */}
-            <div style={{ 
-              flex: 1, 
-              overflowY: 'auto', 
-              padding: 16,
-              background: '#f5f5f5',
-              marginBottom: 16
-            }}>
-              {loading ? (
-                <div style={{ textAlign: 'center', padding: 40 }}>
-                  <Spin tip="加载中..." />
-                </div>
-              ) : messages.length === 0 ? (
-                <Empty description="暂无聊天记录" />
-              ) : (
-                <List
-                  dataSource={messages}
-                  renderItem={(item) => (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: item.senderId === currentUser?.id ? 'flex-end' : 'flex-start',
-                      marginBottom: 16,
-                    }}>
-                      {item.senderId !== currentUser?.id && (
-                        <Avatar 
-                          style={{ backgroundColor: '#1890ff', marginRight: 8 }} 
-                          icon={<UserOutlined />} 
-                        />
-                      )}
-                      <div style={{
-                        maxWidth: '60%',
-                        padding: '12px 16px',
-                        borderRadius: 16,
-                        background: item.senderId === currentUser?.id ? '#1890ff' : '#fff',
-                        color: item.senderId === currentUser?.id ? '#fff' : '#333',
-                      }}>
-                        <div>{item.message}</div>
-                        <div style={{ 
-                          fontSize: 12, 
-                          opacity: 0.7, 
-                          textAlign: 'right',
-                          marginTop: 4
-                        }}>
-                          {item.timestamp ? dayjs(item.timestamp).format('HH:mm') : ''}
-                        </div>
-                      </div>
-                      {item.senderId === currentUser?.id && (
-                        <Avatar 
-                          style={{ backgroundColor: '#87d068', marginLeft: 8 }} 
-                          icon={<UserOutlined />} 
-                        />
-                      )}
-                    </div>
-                  )}
-                />
-              )}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Avatar src={selectedConversation.userAvatar}>{selectedConversation.userName?.[0]}</Avatar>
+              <div>
+                <div style={{ fontWeight: 500 }}>{selectedConversation.userName || '未知用户'}</div>
+                <div style={{ fontSize: 12, color: '#999' }}>{isConnected ? '在线' : '离线'}</div>
+              </div>
+            </div>
+
+            <div style={{ flex: 1, padding: 16, overflow: 'auto', backgroundColor: '#f5f5f5' }}>
+              {loading ? <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div> : messages.length === 0 ? <Empty description="暂无聊天记录" /> : messages.map((m, i) => renderMessage(m, i))}
               <div ref={messagesEndRef} />
             </div>
-            
-            {/* 输入区域 */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-              <Button 
-                icon={<PictureOutlined />} 
-                size="large"
-                onClick={() => antdMessage.info('图片上传功能开发中')}
-              />
-              <Button 
-                icon={<AudioOutlined />} 
-                size="large"
-                onClick={() => antdMessage.info('语音消息功能开发中')}
-              />
-              <Button 
-                icon={<SmileOutlined />} 
-                size="large"
-                onClick={() => antdMessage.info('表情功能开发中')}
-              />
-              <TextArea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="输入消息，按 Enter 发送..."
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                style={{ flex: 1 }}
-                disabled={sending}
-              />
-              <Button 
-                type="primary" 
-                icon={<SendOutlined />} 
-                size="large"
-                onClick={sendMessage}
-                loading={sending}
-              >
-                发送
-              </Button>
+
+            <div style={{ padding: 16, borderTop: '1px solid #f0f0f0', backgroundColor: '#fff' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <Button icon={<PictureOutlined />} size="small" onClick={() => antdMessage.info('图片上传功能开发中')}>图片</Button>
+                <Button icon={<AudioOutlined />} size="small" onClick={() => antdMessage.info('语音消息功能开发中')}>语音</Button>
+                <Button icon={<SmileOutlined />} size="small" onClick={() => antdMessage.info('表情功能开发中')}>表情</Button>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <TextArea value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyPress={handleKeyPress} placeholder="输入消息... (Enter 发送，Shift+Enter 换行)" autoSize={{ minRows: 2, maxRows: 4 }} style={{ flex: 1, resize: 'none' }} disabled={sending || !isConnected} />
+                <Button type="primary" icon={<SendOutlined />} onClick={sendMessage} loading={sending} disabled={!inputValue.trim() || !isConnected} style={{ height: 'auto', padding: '8px 16px', backgroundColor: THEME, borderColor: THEME }}>
+                  发送
+                </Button>
+              </div>
             </div>
           </>
         ) : (
-          <Empty 
-            description="请从左侧选择一个聊天对象" 
-            style={{ marginTop: 100 }}
-          />
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
+            <Empty description="请选择一个对话开始聊天" />
+          </div>
         )}
-      </Card>
-      
-      {/* 选择教师模态框 */}
-      <Modal
-        title="选择聊天对象"
-        open={showTeacherModal}
-        onCancel={() => setShowTeacherModal(false)}
-        footer={null}
-        width={700}
-      >
+      </div>
+
+      <Modal title="选择聊天对象" open={showTeacherModal} onCancel={() => setShowTeacherModal(false)} footer={null} width={700}>
         <Table
           rowKey="id"
           loading={teacherLoading}
           dataSource={teachers}
           columns={[
-            {
-              title: '教师',
-              dataIndex: 'name',
-              key: 'name',
-              render: (name, record) => (
-                <Space>
-                  <Avatar style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
-                  <div>
-                    <div style={{ fontWeight: 'bold' }}>{name}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{record.subject || '未知科目'}</div>
-                  </div>
-                </Space>
-              ),
-            },
-            {
-              title: '用户名',
-              dataIndex: 'username',
-              key: 'username',
-            },
-            {
-              title: '操作',
-              key: 'action',
-              render: (_, record) => (
-                <Button 
-                  type="primary" 
-                  size="small"
-                  onClick={() => selectTeacherToChat(record)}
-                >
-                  选择
-                </Button>
-              ),
-            },
+            { title: '教师', dataIndex: 'name', key: 'name', render: (name, record) => <Space><Avatar style={{ backgroundColor: THEME }} icon={<UserOutlined />} /><div><div style={{ fontWeight: 'bold' }}>{name}</div><div style={{ fontSize: 12, color: '#999' }}>{record.subject || '未知科目'}</div></div></Space> },
+            { title: '用户名', dataIndex: 'username', key: 'username' },
+            { title: '操作', key: 'action', render: (_, record) => <Button type="primary" size="small" onClick={() => selectTeacherToChat(record)} style={{ backgroundColor: THEME, borderColor: THEME }}>选择</Button> }
           ]}
           pagination={{ pageSize: 5 }}
           locale={{ emptyText: '暂无教师数据，请确保后端已创建教师账号' }}
