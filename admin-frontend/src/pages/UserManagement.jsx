@@ -151,7 +151,7 @@ const UserManagement = () => {
       }
       
       const response = await userAPI.getUsers(roleParam)
-      if (response && response.data) {
+      if (response && (response.code === 200 || response.success)) {
         setUsers(response.data)
       }
     } catch (error) {
