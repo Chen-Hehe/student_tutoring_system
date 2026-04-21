@@ -44,7 +44,7 @@ const Login = () => {
         role: selectedRole
       })
 
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         dispatch(loginSuccess(response.data.data))
         alert('登录成功')
         navigate('/dashboard')

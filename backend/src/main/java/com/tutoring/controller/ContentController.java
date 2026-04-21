@@ -1,32 +1,16 @@
 package com.tutoring.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.tutoring.dto.Result;
 import com.tutoring.entity.Announcement;
-import com.tutoring.entity.Carousel;
 import com.tutoring.entity.LearningMaterial;
 import com.tutoring.entity.LearningResource;
 import com.tutoring.service.AnnouncementService;
-import com.tutoring.service.CarouselService;
 import com.tutoring.service.LearningMaterialService;
 import com.tutoring.service.LearningResourceService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 内容管理控制器
@@ -39,7 +23,6 @@ public class ContentController {
     private final LearningResourceService learningResourceService;
     private final LearningMaterialService learningMaterialService;
     private final AnnouncementService announcementService;
-    private final CarouselService carouselService;
 
     /**
      * 获取教学资源列表
@@ -280,121 +263,6 @@ public class ContentController {
             return Result.success();
         } catch (Exception e) {
             return Result.error(500, "删除公告失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 获取轮播图列表
-     * @param status 状态（可选）
-     * @return 轮播图列表
-     */
-    @GetMapping("/carousels")
-    public Result<List<Carousel>> getCarousels(@RequestParam(required = false) Integer status) {
-        try {
-            List<Carousel> carousels = carouselService.listCarousels(status);
-            return Result.success(carousels);
-        } catch (Exception e) {
-            return Result.error(500, "获取轮播图列表失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 获取轮播图详情
-     * @param id 轮播图ID
-     * @return 轮播图详情
-     */
-    @GetMapping("/carousels/{id}")
-    public Result<Carousel> getCarouselById(@PathVariable Long id) {
-        try {
-            Carousel carousel = carouselService.getCarouselById(id);
-            return Result.success(carousel);
-        } catch (Exception e) {
-            return Result.error(500, "获取轮播图详情失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 新增轮播图
-     * @param carousel 轮播图信息
-     * @return 新增的轮播图
-     */
-    @PostMapping("/carousels")
-    public Result<Carousel> addCarousel(@RequestBody Carousel carousel) {
-        try {
-            carouselService.createCarousel(carousel);
-            return Result.success(carousel);
-        } catch (Exception e) {
-            return Result.error(500, "新增轮播图失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 更新轮播图
-     * @param id 轮播图ID
-     * @param carousel 轮播图信息
-     * @return 更新后的轮播图
-     */
-    @PutMapping("/carousels/{id}")
-    public Result<Carousel> updateCarousel(@PathVariable Long id, @RequestBody Carousel carousel) {
-        try {
-            carousel.setId(id);
-            carouselService.updateCarousel(carousel);
-            return Result.success(carousel);
-        } catch (Exception e) {
-            return Result.error(500, "更新轮播图失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 删除轮播图
-     * @param id 轮播图ID
-     * @return 操作结果
-     */
-    @DeleteMapping("/carousels/{id}")
-    public Result<Void> deleteCarousel(@PathVariable Long id) {
-        try {
-            carouselService.deleteCarousel(id);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error(500, "删除轮播图失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 文件上传
-     * @param file 上传的文件
-     * @return 上传结果
-     */
-    @PostMapping("/upload")
-    public Result<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            // 检查文件是否为空
-            if (file.isEmpty()) {
-                return Result.error(400, "文件不能为空");
-            }
-
-            // 确保上传目录存在
-            String uploadDir = "d:/qianduan/student_tutoring_system/admin-frontend/public/images/carousel/";
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            // 生成唯一文件名
-            String originalFilename = file.getOriginalFilename();
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String fileName = UUID.randomUUID().toString() + fileExtension;
-
-            // 保存文件
-            File dest = new File(uploadDir + fileName);
-            file.transferTo(dest);
-
-            // 返回文件访问URL
-            String fileUrl = "/images/carousel/" + fileName;
-            return Result.success(fileUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Result.error(500, "文件上传失败: " + e.getMessage());
         }
     }
 }

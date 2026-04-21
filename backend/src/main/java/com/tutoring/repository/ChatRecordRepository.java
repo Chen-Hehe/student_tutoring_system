@@ -4,46 +4,36 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tutoring.entity.ChatRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Map;
 
 @Mapper
 public interface ChatRecordRepository extends BaseMapper<ChatRecord> {
-
-    @Select("""
-        SELECT *
-        FROM chat_records
-        WHERE deleted = 0
-          AND (
-            (sender_id = #{userId1} AND receiver_id = #{userId2})
-            OR
-            (sender_id = #{userId2} AND receiver_id = #{userId1})
-          )
-        ORDER BY sent_at ASC
-        """)
+    
+    /**
+     * 查询聊天历史记录
+     *
+     * @param userId1 用户ID1
+     * @param userId2 用户ID2
+     * @return 聊天记录列表
+     */
     List<ChatRecord> selectChatHistory(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
-
-    @Select("""
-        SELECT
-          CASE WHEN sender_id = #{userId} THEN receiver_id ELSE sender_id END AS partner_id
-        FROM chat_records
-        WHERE deleted = 0
-          AND (sender_id = #{userId} OR receiver_id = #{userId})
-        """)
+    
+    /**
+     * 查询会话伙伴列表
+     *
+     * @param userId 用户ID
+     * @return 会话伙伴列表
+     */
     List<Map<String, Object>> selectConversationPartners(@Param("userId") Long userId);
-
-    @Select("""
-        SELECT DATE_FORMAT(MAX(sent_at), '%Y-%m-%d %H:%i:%s')
-        FROM chat_records
-        WHERE deleted = 0
-          AND (
-            (sender_id = #{userId} AND receiver_id = #{partnerId})
-            OR
-            (sender_id = #{partnerId} AND receiver_id = #{userId})
-          )
-        """)
-    String selectLastMessageTime(@Param("userId") Long userId, @Param("partnerId") Long partnerId);
+    
+    /**
+     * 查询最后一条消息的时间
+     *
+     * @param userId1 用户ID1
+     * @param userId2 用户ID2
+     * @return 最后一条消息的时间
+     */
+    String selectLastMessageTime(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 }
-

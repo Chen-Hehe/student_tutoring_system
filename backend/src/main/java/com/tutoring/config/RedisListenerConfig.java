@@ -34,6 +34,11 @@ public class RedisListenerConfig {
         
         // 订阅所有 chat:user:* 频道
         container.addMessageListener(listenerAdapter, new PatternTopic("chat:user:*"));
+        
+        log.info("【Redis 监听器】已订阅频道：chat:user:*");
+        // 订阅所有 chat:user:* 频道
+        container.addMessageListener(listenerAdapter, new PatternTopic("chat:user:*"));
+        
         log.info("【Redis 监听器】已订阅频道：chat:user:*");
         
         return container;
