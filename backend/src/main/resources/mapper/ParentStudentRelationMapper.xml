@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tutoring.repository.ParentStudentRelationRepository">
+    <!-- 根据家长ID查询关联关系 -->
+    <select id="findByParentId" resultType="com.tutoring.entity.ParentStudentRelation">
+        SELECT * FROM parent_student_relations WHERE parent_id = #{parentId} AND deleted = 0
+    </select>
+    
+    <!-- 根据家长ID和学生ID查询关联关系 -->
+    <select id="findByParentIdAndStudentId" resultType="com.tutoring.entity.ParentStudentRelation">
+        SELECT * FROM parent_student_relations WHERE parent_id = #{parentId} AND student_id = #{studentId} AND deleted = 0
+    </select>
+    
+    <!-- 插入关联关系 -->
+    <insert id="insert" parameterType="com.tutoring.entity.ParentStudentRelation">
+        INSERT INTO parent_student_relations (id, parent_id, student_id, relationship, deleted, created_at, updated_at)
+        VALUES (#{id}, #{parentId}, #{studentId}, #{relationship}, #{deleted}, #{createdAt}, #{updatedAt})
+    </insert>
+</mapper>

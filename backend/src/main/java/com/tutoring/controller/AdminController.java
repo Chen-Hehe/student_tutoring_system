@@ -104,13 +104,13 @@ public class AdminController {
         }
         switch (role.toLowerCase()) {
             case "admin":
-                return 1;
-            case "teacher":
-                return 2;
-            case "student":
-                return 3;
-            case "parent":
                 return 4;
+            case "teacher":
+                return 1;
+            case "student":
+                return 2;
+            case "parent":
+                return 3;
             default:
                 return null;
         }
@@ -137,27 +137,52 @@ public class AdminController {
     @PostMapping("/users/edit")
     public Result<Boolean> editUser(@RequestBody Map<String, Object> userData) {
         try {
-            Long id = ((Number) userData.get("id")).longValue();
+            // 处理不同类型的id参数
+            Long id;
+            Object idObj = userData.get("id");
+            if (idObj instanceof Number) {
+                id = ((Number) idObj).longValue();
+            } else if (idObj instanceof String) {
+                id = Long.parseLong((String) idObj);
+            } else {
+                return Result.error(400, "无效的用户ID");
+            }
+            
             String name = (String) userData.get("name");
             String roleStr = (String) userData.get("role");
             
+            System.out.println("编辑用户 - ID: " + id);
+            System.out.println("编辑用户 - 姓名: " + name);
+            System.out.println("编辑用户 - 角色: " + roleStr);
+            
             User user = userRepository.selectById(id);
             if (user == null) {
+                System.out.println("用户不存在: " + id);
                 return Result.error(404, "用户不存在");
             }
             
+            System.out.println("原始用户信息 - 姓名: " + user.getName());
+            
             if (name != null && !name.isEmpty()) {
                 user.setName(name);
+                System.out.println("更新后的用户信息 - 姓名: " + user.getName());
             }
             
             if (roleStr != null && !roleStr.isEmpty()) {
                 Integer roleNum = convertRoleToNumber(roleStr);
                 if (roleNum != null) {
                     user.setRole(roleNum);
+                    System.out.println("更新后的用户信息 - 角色: " + user.getRole());
                 }
             }
             
-            userRepository.updateById(user);
+            int result = userRepository.updateById(user);
+            System.out.println("更新结果: " + result);
+            
+            // 验证更新结果
+            User updatedUser = userRepository.selectById(id);
+            System.out.println("数据库中的用户信息 - 姓名: " + updatedUser.getName());
+            
             return Result.success(true);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,23 +1,31 @@
 import { useState, useEffect } from 'react'
 import { Card, Avatar, Button, Input, message, Spin } from 'antd'
+import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 const { TextArea } = Input
 const TeacherCommunication = () => {
+  // 获取当前用户信息
+  const currentUser = useSelector((state) => state.auth.user)
+  
   // 存储每个老师的沟通记录
   const [teacherMessages, setTeacherMessages] = useState({})
   const [selectedTeacher, setSelectedTeacher] = useState(null) // 默认未选中老师
   const [newMessage, setNewMessage] = useState('')
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(false)
-  const [studentId, setStudentId] = useState(3001) // 默认学生ID（小明）
-  const [students, setStudents] = useState([
-    { id: 3001, name: '小明（三年级）' },
-    { id: 3002, name: '小红（四年级）' }
-  ])
+  const [studentId, setStudentId] = useState(null) // 从API获取后设置
+  const [students, setStudents] = useState([]) // 从API获取
+  
+  // 组件挂载时获取学生列表
+  useEffect(() => {
+    fetchStudents()
+  }, [])
   
   // 组件挂载时或学生ID变化时获取教师列表
   useEffect(() => {
-    fetchTeachers()
+    if (studentId) {
+      fetchTeachers()
+    }
   }, [studentId])
   
   // 选择教师时获取沟通记录
@@ -26,6 +34,36 @@ const TeacherCommunication = () => {
       fetchCommunicationHistory(selectedTeacher)
     }
   }, [selectedTeacher])
+  
+  // 获取学生列表
+  const fetchStudents = async () => {
+    setLoading(true)
+    try {
+      console.log('获取学生列表');
+      const response = await parentAPI.getChildren()
+      console.log('获取学生列表响应：', response);
+      if (response && response.data && response.data.success && response.data.data) {
+        const studentList = response.data.data
+        setStudents(studentList.map(student => ({
+          id: student.id,
+          name: `${student.name}（${student.grade}）`
+        })))
+        // 如果有学生，默认选中第一个
+        if (studentList.length > 0) {
+          setStudentId(studentList[0].id)
+        }
+      } else {
+        message.info('暂无学生信息')
+        setStudents([])
+      }
+    } catch (error) {
+      message.error('获取学生列表失败')
+      console.error('Error fetching students:', error)
+      setStudents([])
+    } finally {
+      setLoading(false)
+    }
+  }
   
   // 获取教师列表
   const fetchTeachers = async () => {
@@ -169,7 +207,7 @@ const TeacherCommunication = () => {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，王家长</span>
+          <span>欢迎，{currentUser?.name || currentUser?.username || '家长'}</span>
           <div style={{
             width: 40,
             height: 40,
@@ -180,7 +218,7 @@ const TeacherCommunication = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>王</div>
+          }}>{(currentUser?.name || currentUser?.username || '家')[0]}</div>
         </div>
       </div>
 
