@@ -12,6 +12,8 @@ class WebSocketService {
     this.messageHandlers = []
     this.connectionHandlers = []
     this.errorHandlers = []
+    this.shouldReconnect = false
+    this.currentUserId = null
   }
   
   /**
@@ -19,8 +21,16 @@ class WebSocketService {
    * @param {number} userId - 用户 ID
    */
   connect(userId) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      console.log('WebSocket 已连接')
+    if (!userId) {
+      console.warn('缺少 userId，无法建立 WebSocket 连接')
+      return
+    }
+
+    this.currentUserId = userId
+    this.shouldReconnect = true
+
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      console.log('WebSocket 已连接或连接中')
       return
     }
     
@@ -28,16 +38,24 @@ class WebSocketService {
     const url = `${wsUrl}?userId=${userId}`
     
     try {
-      this.socket = new WebSocket(url)
+      const socket = new WebSocket(url)
+      this.socket = socket
       
-      this.socket.onopen = () => {
+      socket.onopen = () => {
+        if (this.socket !== socket) {
+          socket.close()
+          return
+        }
         console.log('WebSocket 连接成功')
         this.reconnectAttempts = 0
         this.connectionHandlers.forEach(handler => handler(true))
         this.startHeartbeat()
       }
       
-      this.socket.onmessage = (event) => {
+      socket.onmessage = (event) => {
+        if (this.socket !== socket) {
+          return
+        }
         try {
           const data = JSON.parse(event.data)
           this.messageHandlers.forEach(handler => handler(data))
@@ -46,14 +64,22 @@ class WebSocketService {
         }
       }
       
-      this.socket.onclose = (event) => {
+      socket.onclose = (event) => {
+        if (this.socket === socket) {
+          this.socket = null
+        }
         console.log('WebSocket 连接关闭:', event.code, event.reason)
         this.connectionHandlers.forEach(handler => handler(false))
         this.stopHeartbeat()
-        this.attemptReconnect(userId)
+        if (this.shouldReconnect) {
+          this.attemptReconnect(this.currentUserId)
+        }
       }
       
-      this.socket.onerror = (error) => {
+      socket.onerror = (error) => {
+        if (this.socket !== socket) {
+          return
+        }
         console.error('WebSocket 错误:', error)
         this.errorHandlers.forEach(handler => handler(error))
       }
@@ -80,14 +106,17 @@ class WebSocketService {
    * 断开连接
    */
   disconnect() {
+    this.shouldReconnect = false
+    this.currentUserId = null
     this.stopHeartbeat()
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer)
       this.reconnectTimer = null
     }
     if (this.socket) {
-      this.socket.close()
+      const socket = this.socket
       this.socket = null
+      socket.close()
     }
   }
   
@@ -96,6 +125,10 @@ class WebSocketService {
    * @param {number} userId - 用户 ID
    */
   attemptReconnect(userId) {
+    if (!this.shouldReconnect || !userId) {
+      return
+    }
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.log('达到最大重连次数，停止重连')
       return

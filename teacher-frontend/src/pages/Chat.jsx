@@ -39,6 +39,7 @@ const Chat = () => {
   // 引用
   const messagesEndRef = useRef(null)
   const uploadRef = useRef(null)
+  const selectedConversationRef = useRef(selectedConversation)
   
   // 滚动到底部
   const scrollToBottom = () => {
@@ -48,6 +49,10 @@ const Chat = () => {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    selectedConversationRef.current = selectedConversation
+  }, [selectedConversation])
   
   // 加载对话列表
   const loadConversations = async () => {
@@ -235,36 +240,28 @@ const Chat = () => {
         // 收到新消息
         if (data.senderId && data.receiverId && data.message) {
           console.log('处理收到的消息:', data)
+
+          const activeConversation = selectedConversationRef.current
+          const isIncomingForCurrentUser = data.receiverId === currentUser.id
+          const isCurrentConversation = activeConversation && data.senderId === activeConversation.userId
           
-          // 避免重复添加消息（检查是否已存在）
-          setMessages(prev => {
-            // 检查是否已存在该消息（通过 messageId 或临时 ID）
-            const exists = prev.some(msg => 
-              msg.messageId === data.messageId || 
-              (msg.messageId && msg.messageId.startsWith('temp_') && 
-               msg.senderId === data.senderId && 
-               msg.message === data.message)
-            )
+          if (isIncomingForCurrentUser && isCurrentConversation) {
+            setMessages(prev => {
+              const exists = prev.some(msg => msg.messageId === data.messageId)
+              
+              if (exists) {
+                console.log('消息已存在，跳过添加')
+                return prev
+              }
+              
+              console.log('添加新消息到状态')
+              return [...prev, data]
+            })
             
-            if (exists) {
-              console.log('消息已存在，跳过添加')
-              return prev
-            }
-            
-            console.log('添加新消息到状态')
-            return [...prev, data]
-          })
-          
-          // 如果是对话中的消息，刷新对话列表
-          if (selectedConversation && 
-              (data.senderId === selectedConversation.userId || 
-               data.receiverId === selectedConversation.userId)) {
             loadConversations()
-          }
-          
-          // 如果当前选中的是对话方，标记为已读
-          if (data.receiverId === currentUser.id && data.senderId === selectedConversation?.userId) {
             chatAPI.markAsRead(data.senderId)
+          } else {
+            loadConversations()
           }
         }
       })
@@ -283,9 +280,9 @@ const Chat = () => {
       loadConversations()
       
       // 如果有恢复的选中对话，加载聊天记录
-      if (selectedConversation?.userId) {
-        console.log('恢复选中的对话，加载聊天记录:', selectedConversation.userId)
-        loadChatHistory(selectedConversation.userId)
+      if (selectedConversationRef.current?.userId) {
+        console.log('恢复选中的对话，加载聊天记录:', selectedConversationRef.current.userId)
+        loadChatHistory(selectedConversationRef.current.userId)
       }
       
       // 清理
@@ -295,7 +292,7 @@ const Chat = () => {
         wsService.disconnect()
       }
     }
-  }, [currentUser?.id, selectedConversation?.userId])
+  }, [currentUser?.id])
   
   // 获取消息类型图标
   const getMessageTypeIcon = (type) => {
