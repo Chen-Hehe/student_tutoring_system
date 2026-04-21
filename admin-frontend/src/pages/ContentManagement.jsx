@@ -364,36 +364,7 @@ const ContentManagement = () => {
           >
             公告管理
           </div>
-          <div 
-            onClick={() => setActiveTab('4')}
-            style={{
-              backgroundColor: activeTab === '4' ? '#9C27B0' : 'white',
-              color: activeTab === '4' ? 'white' : '#333',
-              borderRadius: '12px',
-              padding: '12px 24px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              minWidth: '100px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              border: activeTab === '4' ? '2px solid #9C27B0' : 'none'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== '4') {
-                e.currentTarget.style.backgroundColor = '#f0f0f0';
-                e.currentTarget.style.color = '#333';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== '4') {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.color = '#333';
-              }
-            }}
-          >
-            轮播图
-          </div>
+
         </div>
       </Card>
       

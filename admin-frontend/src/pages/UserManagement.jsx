@@ -305,9 +305,7 @@ const UserManagement = () => {
               重置
             </Button>
           </Col>
-          <Col>
-            <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>添加用户</Button>
-          </Col>
+
         </Row>
       </Card>
 
