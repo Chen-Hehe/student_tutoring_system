@@ -1,7 +1,7 @@
 package com.tutoring.controller;
 
 import com.tutoring.dto.LearningReportDTO;
-import com.tutoring.dto.MatchRequestDTO;
+import com.tutoring.dto.SimpleMatchRequestDTO;
 import com.tutoring.dto.PsychologicalStatusDTO;
 import com.tutoring.dto.Result;
 import com.tutoring.dto.StudentInfoDTO;
@@ -198,7 +198,7 @@ public class ParentController {
      * @return 匹配请求列表
      */
     @GetMapping("/match-requests")
-    public Result<List<MatchRequestDTO>> getMatchRequests(HttpServletRequest request) {
+    public Result<List<SimpleMatchRequestDTO>> getMatchRequests(HttpServletRequest request) {
         try {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
@@ -225,7 +225,7 @@ public class ParentController {
             List<TeacherStudentMatch> matchRequests = teacherStudentMatchRepository.findByStudentIdInAndStatus(studentIds, 1);
             
             // 转换为DTO对象列表
-            List<MatchRequestDTO> matchRequestDTOs = new ArrayList<>();
+            List<SimpleMatchRequestDTO> matchRequestDTOs = new ArrayList<>();
             for (TeacherStudentMatch match : matchRequests) {
                 // 获取学生信息
                 Student student = studentRepository.selectById(match.getStudentId());
@@ -240,7 +240,7 @@ public class ParentController {
                 String subject = teacher.getSubject();
                 
                 // 创建DTO对象
-                MatchRequestDTO dto = new MatchRequestDTO(match, studentName, grade, teacherName, subject);
+                SimpleMatchRequestDTO dto = new SimpleMatchRequestDTO(match, studentName, grade, teacherName, subject);
                 matchRequestDTOs.add(dto);
             }
             

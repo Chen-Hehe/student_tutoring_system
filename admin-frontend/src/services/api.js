@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API 基础 URL
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 // 创建 axios 实例
 const api = axios.create({
@@ -37,13 +37,33 @@ api.interceptors.request.use(
 // 响应拦截器 - 处理错误
 api.interceptors.response.use(
   (response) => {
-    // 如果响应码不是 200，抛出错误
-    if (response.data && response.data.code !== 200) {
-      return Promise.reject(new Error(response.data.message || '请求失败'))
+    console.log('响应拦截器接收到响应:', response)
+    // 检查响应格式
+    if (response.data) {
+      // 支持两种响应格式：
+      // 1. { success: true, data: {...} } (简单后端)
+      // 2. { code: 200, message: "...", data: {...} } (完整后端)
+      if (response.data.success !== undefined) {
+        if (response.data.success) {
+          console.log('响应成功，返回:', response.data)
+          return response.data
+        } else {
+          return Promise.reject(new Error(response.data.message || '请求失败'))
+        }
+      } else if (response.data.code !== undefined) {
+        if (response.data.code === 200) {
+          console.log('响应成功，返回:', response.data)
+          return response.data
+        } else {
+          return Promise.reject(new Error(response.data.message || '请求失败'))
+        }
+      }
     }
+    console.log('响应格式不符合预期，直接返回:', response.data)
     return response.data
   },
   (error) => {
+    console.error('响应拦截器错误:', error)
     // 处理 401 未授权
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token')

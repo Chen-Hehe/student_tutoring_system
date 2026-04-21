@@ -2,7 +2,7 @@ import api from './api'
 
 export const adminAPI = {
   getStatistics: () => {
-    return api.get('/admin/statistics')
+    return api.get('/api/admin/statistics')
   },
 
   getUsers: (page = 1, size = 10, role = null) => {
@@ -10,7 +10,7 @@ export const adminAPI = {
     if (role) {
       params.role = role
     }
-    return api.get('/admin/users', { params })
+    return api.get('/api/admin/users', { params })
   }
 }
 

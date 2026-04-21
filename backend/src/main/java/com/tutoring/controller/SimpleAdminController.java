@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
-public class AdminController {
+public class SimpleAdminController {
     
     @Autowired
     private UserRepository userRepository;
@@ -25,16 +25,17 @@ public class AdminController {
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics() {
         try {
+            long totalUsers = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getDeleted, 0));
+            long adminCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 1).eq(User::getDeleted, 0));
             long teacherCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 2).eq(User::getDeleted, 0));
             long studentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 3).eq(User::getDeleted, 0));
             long parentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 4).eq(User::getDeleted, 0));
-            long chatCount = 0;
             
             Map<String, Object> data = new HashMap<>();
             data.put("teacherCount", teacherCount);
             data.put("studentCount", studentCount);
             data.put("parentCount", parentCount);
-            data.put("chatCount", chatCount);
+            data.put("chatCount", 0);
             
             return Result.success(data);
         } catch (Exception e) {
