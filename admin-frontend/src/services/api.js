@@ -43,10 +43,8 @@ api.interceptors.response.use(
       if (response.data.code !== undefined) {
         // 返回格式：{ code: 200, message: "success", data: [...] }
         return {
-          data: {
-            success: response.data.code === 200,
-            data: response.data.data
-          }
+          success: response.data.code === 200,
+          data: response.data.data
         }
       }
     }

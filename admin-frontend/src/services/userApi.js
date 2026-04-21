@@ -11,18 +11,12 @@ export const userAPI = {
    * @param {number} status - 状态筛选（0=活跃，1=禁用）
    * @returns {Promise} 用户列表
    */
-  getUsers: (role, keyword, status) => {
-    const params = {}
+  getUsers: (page = 1, size = 10, role = null) => {
+    const params = { page, size }
     if (role !== undefined && role !== null) {
       params.role = role
     }
-    if (keyword) {
-      params.keyword = keyword
-    }
-    if (status !== undefined && status !== null) {
-      params.status = status
-    }
-    return api.get('/auth/users/list', { params })
+    return api.get('/admin/users', { params })
   },
 
   /**
@@ -32,17 +26,16 @@ export const userAPI = {
    * @returns {Promise} 编辑结果
    */
   updateUser: (userId, userData) => {
-    return api.put(`/auth/users/${userId}`, userData)
+    return api.post('/admin/users/edit', userData)
   },
 
   /**
    * 禁用/启用用户
    * @param {number} userId - 用户ID
-   * @param {boolean} disabled - 是否禁用
    * @returns {Promise} 操作结果
    */
-  toggleUserStatus: (userId, disabled) => {
-    return api.put(`/auth/users/${userId}/status`, { disabled })
+  toggleUserStatus: (userId) => {
+    return api.post('/admin/users/disable', { id: userId })
   }
 }
 

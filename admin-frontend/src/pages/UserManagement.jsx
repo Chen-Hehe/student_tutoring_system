@@ -43,10 +43,10 @@ const UserManagement = () => {
       align: 'center',
       render: (role) => {
         const roleMap = {
-          1: { color: '#E3F2FD', textColor: '#1976D2', text: '教师' },
-          2: { color: '#E8F5E9', textColor: '#388E3C', text: '学生' },
-          3: { color: '#FFF3E0', textColor: '#F57C00', text: '家长' },
-          4: { color: '#F3E5F5', textColor: '#7B1FA2', text: '管理员' }
+          'teacher': { color: '#E3F2FD', textColor: '#1976D2', text: '教师' },
+          'student': { color: '#E8F5E9', textColor: '#388E3C', text: '学生' },
+          'parent': { color: '#FFF3E0', textColor: '#F57C00', text: '家长' },
+          'admin': { color: '#F3E5F5', textColor: '#7B1FA2', text: '管理员' }
         }
         const roleInfo = roleMap[role] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
         return (
@@ -67,15 +67,15 @@ const UserManagement = () => {
     },
     { 
       title: '状态', 
-      dataIndex: 'deleted', 
-      key: 'deleted',
+      dataIndex: 'status', 
+      key: 'status',
       align: 'center',
-      render: (deleted) => {
+      render: (status) => {
         const statusMap = {
-          0: { color: '#E8F5E9', textColor: '#388E3C', text: '活跃' },
-          1: { color: '#FFEBEE', textColor: '#C62828', text: '禁用' }
+          '活跃': { color: '#E8F5E9', textColor: '#388E3C', text: '活跃' },
+          '禁用': { color: '#FFEBEE', textColor: '#C62828', text: '禁用' }
         }
-        const statusInfo = statusMap[deleted] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
+        const statusInfo = statusMap[status] || { color: '#EEEEEE', textColor: '#999', text: '未知' }
         return (
           <span 
             style={{
@@ -129,7 +129,7 @@ const UserManagement = () => {
             }}
             onClick={() => handleToggleStatus(record)}
           >
-            {record.deleted === 0 ? '禁用' : '启用'}
+            {record.status === '活跃' ? '禁用' : '启用'}
           </Button>
         </Space>
       ),
@@ -140,27 +140,44 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      // 转换角色参数（前端使用字符串，后端使用数字）
-      let roleParam = null
-      switch (searchParams.role) {
-        case 'teacher': roleParam = 1; break
-        case 'student': roleParam = 2; break
-        case 'parent': roleParam = 3; break
-        case 'admin': roleParam = 4; break
-        default: roleParam = null
-      }
+      // 直接传递字符串角色参数，后端会处理转换
+      const roleParam = searchParams.role || null
       
-      // 转换状态参数（前端使用字符串，后端使用数字）
-      let statusParam = null
-      switch (searchParams.status) {
-        case 'active': statusParam = 0; break
-        case 'inactive': statusParam = 1; break
-        default: statusParam = null
-      }
-      
-      const response = await userAPI.getUsers(roleParam, searchParams.keyword, statusParam)
-      if (response && (response.code === 200 || response.success)) {
-        setUsers(response.data)
+      const response = await userAPI.getUsers(1, 100, roleParam) // 获取更多数据以避免分页
+      console.log('获取用户列表响应:', response)
+      if (response && response.success) {
+        // 从响应中提取用户列表
+        const userData = response.data
+        // 根据后端返回的数据结构提取用户列表
+        if (userData && userData.list) {
+          // 应用关键词搜索和状态筛选
+          let filteredUsers = userData.list
+          
+          // 关键词搜索
+          if (searchParams.keyword) {
+            const keyword = searchParams.keyword.toLowerCase()
+            filteredUsers = filteredUsers.filter(user => 
+              (user.username && user.username.toLowerCase().includes(keyword)) ||
+              (user.name && user.name.toLowerCase().includes(keyword))
+            )
+          }
+          
+          // 状态筛选
+          if (searchParams.status) {
+            const statusValue = searchParams.status === 'active' ? '活跃' : '禁用'
+            filteredUsers = filteredUsers.filter(user => user.status === statusValue)
+          }
+          
+          setUsers(filteredUsers)
+        } else if (Array.isArray(userData)) {
+          setUsers(userData)
+        } else {
+          console.error('用户数据格式错误:', userData)
+          setUsers([])
+        }
+      } else {
+        console.error('获取用户列表失败:', response)
+        message.error('获取用户列表失败')
       }
     } catch (error) {
       message.error('获取用户列表失败')
@@ -223,9 +240,8 @@ const UserManagement = () => {
   // 处理禁用/启用用户
   const handleToggleStatus = async (user) => {
     try {
-      const newStatus = user.deleted === 0 ? 1 : 0
-      await userAPI.toggleUserStatus(user.id, newStatus === 1)
-      message.success(`${newStatus === 1 ? '禁用' : '启用'}成功`)
+      await userAPI.toggleUserStatus(user.id)
+      message.success(`${user.status === '活跃' ? '禁用' : '启用'}成功`)
       fetchUsers()
     } catch (error) {
       message.error('操作失败')
