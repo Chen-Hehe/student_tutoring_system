@@ -38,25 +38,6 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
-      if (selectedRole === 3 && (username === 'admin' || username === 'parent') && password === 'admin') {
-        const mockResponse = {
-          code: 200,
-          data: {
-            token: 'mock-token',
-            user: {
-              id: 1,
-              username: username,
-              role: 3,
-              name: '王家长'
-            }
-          }
-        }
-        dispatch(loginSuccess(mockResponse.data))
-        alert('登录成功')
-        navigate('/dashboard')
-        return
-      }
-
       const response = await authAPI.login({
         username: username,
         password: password,

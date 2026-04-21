@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tutoring.repository.LearningProgressRepository">
+    <resultMap id="LearningProgressResultMap" type="com.tutoring.entity.LearningProgress">
+        <id column="id" property="id" />
+        <result column="report_id" property="reportId" />
+        <result column="subject" property="subject" />
+        <result column="progress" property="progress" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <!-- 根据报告ID查询学习进度 -->
+    <select id="findByReportId" resultMap="LearningProgressResultMap">
+        SELECT * FROM learning_progress
+        WHERE report_id = #{reportId}
+        AND deleted = 0
+        ORDER BY subject
+    </select>
+
+</mapper>

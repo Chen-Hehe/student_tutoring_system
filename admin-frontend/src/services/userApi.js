@@ -7,14 +7,22 @@ export const userAPI = {
   /**
    * 获取用户列表
    * @param {number} role - 角色筛选（可选，1=教师，2=学生，3=家长，4=管理员）
+   * @param {string} keyword - 关键词搜索（用户名或姓名）
+   * @param {number} status - 状态筛选（0=活跃，1=禁用）
    * @returns {Promise} 用户列表
    */
-  getUsers: (role) => {
+  getUsers: (role, keyword, status) => {
     const params = {}
     if (role !== undefined && role !== null) {
       params.role = role
     }
-    return api.get('/api/auth/users/list', { params })
+    if (keyword) {
+      params.keyword = keyword
+    }
+    if (status !== undefined && status !== null) {
+      params.status = status
+    }
+    return api.get('/auth/users/list', { params })
   },
 
   /**
@@ -24,7 +32,7 @@ export const userAPI = {
    * @returns {Promise} 编辑结果
    */
   updateUser: (userId, userData) => {
-    return api.put(`/api/auth/users/${userId}`, userData)
+    return api.put(`/auth/users/${userId}`, userData)
   },
 
   /**
@@ -34,7 +42,7 @@ export const userAPI = {
    * @returns {Promise} 操作结果
    */
   toggleUserStatus: (userId, disabled) => {
-    return api.put(`/api/auth/users/${userId}/status`, { disabled })
+    return api.put(`/auth/users/${userId}/status`, { disabled })
   }
 }
 

@@ -150,7 +150,15 @@ const UserManagement = () => {
         default: roleParam = null
       }
       
-      const response = await userAPI.getUsers(roleParam)
+      // 转换状态参数（前端使用字符串，后端使用数字）
+      let statusParam = null
+      switch (searchParams.status) {
+        case 'active': statusParam = 0; break
+        case 'inactive': statusParam = 1; break
+        default: statusParam = null
+      }
+      
+      const response = await userAPI.getUsers(roleParam, searchParams.keyword, statusParam)
       if (response && (response.code === 200 || response.success)) {
         setUsers(response.data)
       }
@@ -165,7 +173,7 @@ const UserManagement = () => {
   // 初始加载和参数变化时重新获取数据
   useEffect(() => {
     fetchUsers()
-  }, [searchParams.role])
+  }, [searchParams])
 
   // 处理搜索参数变化
   const handleSearch = () => {

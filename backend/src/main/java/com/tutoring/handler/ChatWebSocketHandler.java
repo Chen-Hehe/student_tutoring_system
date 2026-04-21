@@ -11,9 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 聊天 WebSocket 处理器
@@ -42,13 +40,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        // 从 URL 参数或 Session 属性中获取用户 ID
         Long userId = getUserIdFromSession(session);
         if (userId != null) {
             ONLINE_USERS.put(userId, session);
-            log.info("【WebSocket 建连】userId={}, sessionId={}, uri={}, onlineUsers={}",
-                userId, session.getId(), session.getUri(), getOnlineUserSnapshot());
-        } else {
-            log.warn("【WebSocket 建连失败】无法从 session 中解析 userId, sessionId={}, uri={}", session.getId(), session.getUri());
+            log.info("用户 {} 已连接 WebSocket，当前在线人数：{}", userId, ONLINE_USERS.size());
         }
     }
     
@@ -63,14 +59,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         log.debug("=== WebSocket 收到用户 {} 的消息：{}", userId, message.getPayload());
         
         try {
+            // 解析消息
             Map<String, Object> rawMessage = objectMapper.readValue(message.getPayload(), Map.class);
             
+            // 只处理心跳消息（ping/pong）
             if ("ping".equals(rawMessage.get("ping")) || "ping".equals(rawMessage.get("type"))) {
                 log.debug("收到用户 {} 的心跳消息，回复 pong", userId);
                 session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "pong"))));
                 return;
             }
             
+            // 不再处理业务聊天消息 - 所有消息发送必须走 HTTP REST API
             log.debug("收到非心跳消息，已忽略（消息发送请走 HTTP API）：{}", rawMessage);
             
         } catch (Exception e) {
@@ -86,21 +85,21 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Long userId = getUserIdFromSession(session);
         if (userId != null) {
             ONLINE_USERS.remove(userId);
-            log.info("【WebSocket 断连】userId={}, sessionId={}, status={}, onlineUsers={}",
-                userId, session.getId(), status, getOnlineUserSnapshot());
+            log.info("用户 {} 已断开 WebSocket 连接，当前在线人数：{}", userId, ONLINE_USERS.size());
         }
     }
     
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         Long userId = getUserIdFromSession(session);
-        log.error("【WebSocket 传输错误】userId={}, sessionId={}", userId, session != null ? session.getId() : null, exception);
+        log.error("用户 {} WebSocket 传输错误", userId, exception);
     }
     
     /**
      * 从 Session 中获取用户 ID
      */
     private Long getUserIdFromSession(WebSocketSession session) {
+        // 尝试从 URL 参数获取
         String userIdStr = session.getUri().getQuery();
         if (userIdStr != null && userIdStr.contains("userId=")) {
             String[] params = userIdStr.split("&");
@@ -115,6 +114,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             }
         }
         
+        // 尝试从 Session 属性获取（通过拦截器设置）
         Object userIdObj = session.getAttributes().get("userId");
         if (userIdObj != null) {
             return Long.parseLong(userIdObj.toString());
@@ -124,30 +124,24 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
     
     /**
-     * 发送消息给指定用户（由服务层或 Redis 消息监听器调用）
+     * 发送消息给指定用户（由 Redis 消息监听器调用）
      */
     public void sendToUser(Long userId, Object message) throws IOException {
         WebSocketSession session = ONLINE_USERS.get(userId);
-        String payloadPreview;
-        try {
-            payloadPreview = objectMapper.writeValueAsString(message);
-        } catch (Exception e) {
-            payloadPreview = String.valueOf(message);
-        }
-
-        log.info("【WebSocket 推送尝试】targetUserId={}, sessionExists={}, sessionOpen={}, onlineUsers={}, payload={}",
-            userId,
-            session != null,
-            session != null && session.isOpen(),
-            getOnlineUserSnapshot(),
-            payloadPreview);
-
         if (session != null && session.isOpen()) {
-            session.sendMessage(new TextMessage(payloadPreview));
-            log.info("【WebSocket 推送成功】targetUserId={}, sessionId={}", userId, session.getId());
+            String json = objectMapper.writeValueAsString(message);
+            session.sendMessage(new TextMessage(json));
+            log.debug("消息已推送给用户 {}", userId);
         } else {
-            log.warn("【WebSocket 推送失败】targetUserId={}, 原因=session不存在或未打开, onlineUsers={}", userId, getOnlineUserSnapshot());
+            log.debug("用户 {} 不在线，无法推送", userId);
         }
+    }
+    
+    /**
+     * 订阅用户的 Redis 频道（由 RedisListenerConfig 处理）
+     */
+    private void subscribeUserChannel(Long userId) {
+        log.debug("用户 {} 已连接，等待 Redis 消息推送", userId);
     }
     
     /**
@@ -159,33 +153,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             String message = new String(messageBytes);
             log.info("【Redis 收到消息】channel={}, message={}", channel, message);
             
+            // 提取频道中的用户 ID
             String channelId = channel.replace(REDIS_CHANNEL_PREFIX, "");
             Long userId = Long.parseLong(channelId);
             
-            log.info("【Redis 转 WebSocket】channelUserId={}, onlineUsers={}", userId, getOnlineUserSnapshot());
+            // 直接推送原始消息
             sendToUser(userId, message);
+            log.info("【WebSocket 推送】已推送给用户 {}", userId);
         } catch (Exception e) {
             log.error("处理 Redis 消息失败：channel={}, message={}", channel, messageBytes, e);
         }
-    }
-    
-    /**
-     * 发送已读状态更新给指定用户
-     */
-    public void sendReadStatus(Long userId, Long readerId) throws IOException {
-        Map<String, Object> readStatus = Map.of(
-            "type", "read",
-            "readerId", readerId,
-            "timestamp", System.currentTimeMillis()
-        );
-        log.info("【发送已读状态】userId={}, readerId={}", userId, readerId);
-        sendToUser(userId, readStatus);
-    }
-
-    private Set<Long> getOnlineUserSnapshot() {
-        return ONLINE_USERS.entrySet().stream()
-            .filter(entry -> entry.getValue() != null && entry.getValue().isOpen())
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toSet());
     }
 }

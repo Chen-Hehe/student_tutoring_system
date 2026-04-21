@@ -600,27 +600,40 @@ public class ParentController {
             }
             
             // 获取已匹配的教师
+            System.out.println("开始获取学生 " + studentId + " 的已匹配教师");
             List<TeacherStudentMatch> matches = teacherStudentMatchRepository.findByStudentIdAndStatus(studentId, 2);
+            System.out.println("获取到的匹配数量：" + (matches != null ? matches.size() : 0));
+            
             List<Long> teacherIds = matches.stream()
                     .map(TeacherStudentMatch::getTeacherId)
                     .collect(Collectors.toList());
+            System.out.println("教师ID列表：" + teacherIds);
             
             // 获取教师信息
             List<java.util.Map<String, Object>> teachers = new ArrayList<>();
             for (Long teacherId : teacherIds) {
+                System.out.println("获取教师ID：" + teacherId + " 的信息");
                 Teacher teacher = teacherRepository.selectById(teacherId);
                 if (teacher != null) {
+                    System.out.println("找到教师：" + teacher.getId());
                     User teacherUser = userRepository.selectById(teacher.getUserId());
                     if (teacherUser != null) {
+                        System.out.println("找到教师用户：" + teacherUser.getName());
                         java.util.Map<String, Object> teacherInfo = new java.util.HashMap<>();
                         teacherInfo.put("id", teacher.getId());
                         teacherInfo.put("name", teacherUser.getName());
                         teacherInfo.put("subject", teacher.getSubject());
                         teacherInfo.put("avatar", teacherUser.getName().substring(0, 1));
                         teachers.add(teacherInfo);
+                        System.out.println("添加教师信息：" + teacherUser.getName());
+                    } else {
+                        System.out.println("教师用户不存在，教师ID：" + teacherId);
                     }
+                } else {
+                    System.out.println("教师不存在，教师ID：" + teacherId);
                 }
             }
+            System.out.println("最终获取到的教师数量：" + teachers.size());
             
             return Result.success(teachers);
         } catch (RuntimeException e) {

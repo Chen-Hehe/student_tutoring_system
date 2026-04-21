@@ -22,16 +22,34 @@ const ChildManagement = () => {
       console.log('获取孩子列表响应：', response);
       if (response && response.data && response.data.success && response.data.data) {
         console.log('孩子列表数据：', response.data.data);
-        // 转换数据格式，适配前端展示
-        const formattedChildren = response.data.data.map(child => ({
-          id: child.id,
-          name: child.name,
-          grade: child.grade,
-          subject: child.subject || '未设置',
-          status: 'active',
-          tutoringStatus: '进行中',
-          teacher: '陈老师' // 暂时硬编码，后续从API获取
-        }))
+        
+        // 转换数据格式，适配前端展示，并获取每个孩子的教师信息
+        const formattedChildren = await Promise.all(response.data.data.map(async (child) => {
+          let teacherName = '无';
+          try {
+            // 获取孩子的教师列表
+            const teachersResponse = await parentAPI.getTeachers(child.id);
+            console.log(`获取孩子 ${child.name} 的教师响应：`, teachersResponse);
+            if (teachersResponse && teachersResponse.data && teachersResponse.data.success && teachersResponse.data.data && teachersResponse.data.data.length > 0) {
+              // 取第一个教师的姓名
+              teacherName = teachersResponse.data.data[0].name;
+              console.log(`孩子 ${child.name} 的教师：`, teacherName);
+            }
+          } catch (error) {
+            console.error(`获取孩子 ${child.name} 的教师信息失败：`, error);
+          }
+          
+          return {
+            id: child.id,
+            name: child.name,
+            grade: child.grade,
+            subject: child.subject || '未设置',
+            status: 'active',
+            tutoringStatus: '进行中',
+            teacher: teacherName
+          };
+        }));
+        
         setChildren(formattedChildren)
         console.log('格式化后的孩子列表：', formattedChildren);
       } else {
