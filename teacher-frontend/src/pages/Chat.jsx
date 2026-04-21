@@ -223,12 +223,10 @@ const Chat = () => {
       const unsubscribeMessage = wsService.onMessage((data) => {
         console.log('收到 WebSocket 消息:', data)
         
-        if (data.type === 'ping') {
-          // 心跳响应，忽略
+        if (data.type === 'pong' || data.type === 'ping') {
           return
         }
         
-        // 错误消息处理
         if (data.type === 'error') {
           antdMessage.error(data.message || '消息发送失败')
           return

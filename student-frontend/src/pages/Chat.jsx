@@ -181,6 +181,10 @@ const Chat = () => {
     const unsubscribeMessage = wsService.onMessage((data) => {
       console.log('收到 WebSocket 消息:', data)
       
+      if (data.type === 'pong' || data.type === 'ping') {
+        return
+      }
+      
       if (data.type === 'error') {
         antdMessage.error('消息发送失败：' + data.message)
         return
