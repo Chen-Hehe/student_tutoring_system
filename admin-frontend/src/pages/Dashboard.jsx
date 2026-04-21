@@ -1,4 +1,4 @@
-import { Card, Row, Col, Table, Tag, Space, Button, Spin } from 'antd'
+import { Card, Row, Col, Table, Tag, Space, Button, Spin, Modal, Form, Input, Select, message } from 'antd'
 import { useState, useEffect } from 'react'
 import { adminAPI } from '../services/adminApi'
 
@@ -16,6 +16,10 @@ const Dashboard = () => {
     pageSize: 10,
     total: 0
   })
+  
+  const [editModalVisible, setEditModalVisible] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [form] = Form.useForm()
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 100 },
@@ -37,13 +41,26 @@ const Dashboard = () => {
       }
     },
     { title: '状态', dataIndex: 'status', key: 'status' },
-    { 
+    {
       title: '操作', 
       key: 'action', 
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="primary" size="default" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px', padding: '6px 16px' }}>编辑</Button>
-          <Button size="default" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '6px 16px' }}>禁用</Button>
+          <Button 
+            type="primary" 
+            size="default" 
+            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px', padding: '6px 16px' }}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="default" 
+            style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '6px 16px' }}
+            onClick={() => handleDisable(record.id, record.status === '活跃')}
+          >
+            {record.status === '活跃' ? '禁用' : '启用'}
+          </Button>
         </Space>
       ),
     },
@@ -129,6 +146,52 @@ const Dashboard = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+  
+  const handleEdit = (user) => {
+    setCurrentUser(user)
+    form.setFieldsValue({
+      name: user.name,
+      role: user.role
+    })
+    setEditModalVisible(true)
+  }
+  
+  const handleDisable = async (userId, isActive) => {
+    try {
+      const response = await adminAPI.disableUser(userId)
+      if (response.success || response.code === 200) {
+        message.success(isActive ? '用户已禁用' : '用户已启用')
+        // 重新获取用户列表
+        fetchUsers(pagination.current, pagination.pageSize)
+      } else {
+        message.error('操作失败: ' + (response.message || '未知错误'))
+      }
+    } catch (error) {
+      console.error('禁用用户失败:', error)
+      message.error('操作失败，请重试')
+    }
+  }
+  
+  const handleSave = async (values) => {
+    try {
+      const response = await adminAPI.editUser({
+        id: currentUser.id,
+        name: values.name,
+        role: values.role
+      })
+      if (response.success || response.code === 200) {
+        message.success('编辑成功')
+        setEditModalVisible(false)
+        // 重新获取用户列表
+        fetchUsers(pagination.current, pagination.pageSize)
+      } else {
+        message.error('编辑失败: ' + (response.message || '未知错误'))
+      }
+    } catch (error) {
+      console.error('编辑用户失败:', error)
+      message.error('编辑失败，请重试')
     }
   }
 
@@ -227,6 +290,58 @@ const Dashboard = () => {
           style={{ fontSize: '16px', marginBottom: '20px' }}
         />
       </Card>
+      
+      {/* 编辑用户弹窗 */}
+      <Modal
+        title="编辑用户"
+        open={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        footer={null}
+        style={{ top: 20 }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSave}
+        >
+          <Form.Item
+            name="name"
+            label="真实姓名"
+            rules={[{ required: true, message: '请输入真实姓名' }]}
+          >
+            <Input placeholder="请输入真实姓名" style={{ fontSize: '16px' }} />
+          </Form.Item>
+          
+          <Form.Item
+            name="role"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select style={{ fontSize: '16px' }}>
+              <Select.Option value="teacher">教师</Select.Option>
+              <Select.Option value="student">学生</Select.Option>
+              <Select.Option value="parent">家长</Select.Option>
+              <Select.Option value="admin">管理员</Select.Option>
+            </Select>
+          </Form.Item>
+          
+          <Form.Item style={{ textAlign: 'right' }}>
+            <Button 
+              style={{ marginRight: 10, fontSize: '16px' }}
+              onClick={() => setEditModalVisible(false)}
+            >
+              取消
+            </Button>
+            <Button 
+              type="primary" 
+              htmlType="submit"
+              style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px' }}
+            >
+              保存
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

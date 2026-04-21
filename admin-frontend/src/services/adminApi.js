@@ -29,6 +29,12 @@ export const adminAPI = {
     if (keyword) params.keyword = keyword
     if (status) params.status = status
     return api.get('/api/admin/content/announcements', { params })
+  },
+  editUser: (userData) => {
+    return api.post('/api/admin/users/edit', userData)
+  },
+  disableUser: (id) => {
+    return api.post('/api/admin/users/disable', { id })
   }
 }
 

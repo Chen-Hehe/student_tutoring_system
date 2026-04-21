@@ -1,19 +1,22 @@
 package com.tutoring.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.tutoring.dto.Result;
-import com.tutoring.entity.User;
-import com.tutoring.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.tutoring.dto.Result;
+import com.tutoring.entity.User;
+import com.tutoring.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -128,6 +131,54 @@ public class AdminController {
                 return "admin";
             default:
                 return "未知";
+        }
+    }
+    
+    @PostMapping("/users/edit")
+    public Result<Boolean> editUser(@RequestBody Map<String, Object> userData) {
+        try {
+            Long id = ((Number) userData.get("id")).longValue();
+            String name = (String) userData.get("name");
+            String roleStr = (String) userData.get("role");
+            
+            User user = userRepository.selectById(id);
+            if (user == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            if (name != null && !name.isEmpty()) {
+                user.setName(name);
+            }
+            
+            if (roleStr != null && !roleStr.isEmpty()) {
+                Integer roleNum = convertRoleToNumber(roleStr);
+                if (roleNum != null) {
+                    user.setRole(roleNum);
+                }
+            }
+            
+            userRepository.updateById(user);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "编辑用户失败: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/users/disable")
+    public Result<Boolean> disableUser(@RequestParam Long id) {
+        try {
+            User user = userRepository.selectById(id);
+            if (user == null) {
+                return Result.error(404, "用户不存在");
+            }
+            
+            user.setDeleted(user.getDeleted() == 0 ? 1 : 0);
+            userRepository.updateById(user);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "禁用用户失败: " + e.getMessage());
         }
     }
 }
