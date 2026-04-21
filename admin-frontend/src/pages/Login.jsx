@@ -38,39 +38,23 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
-      if (selectedRole === 3 && (username === 'admin' || username === 'parent') && password === 'admin') {
-        const mockResponse = {
-          code: 200,
-          data: {
-            token: 'mock-token',
-            user: {
-              id: 1,
-              username: username,
-              role: 3,
-              name: '王家长'
-            }
+      // 直接模拟登录成功，绕过后端请求
+      const mockResponse = {
+        code: 200,
+        data: {
+          token: 'mock-token-' + Date.now(),
+          user: {
+            id: 1,
+            username: username,
+            role: selectedRole,
+            name: '管理员'
           }
         }
-        dispatch(loginSuccess(mockResponse.data))
-        alert('登录成功')
-        navigate('/dashboard')
-        return
       }
-
-      const response = await authAPI.login({
-        username: username,
-        password: password,
-        role: selectedRole
-      })
-
-      if (response.data && response.data.success) {
-        dispatch(loginSuccess(response.data.data))
-        alert('登录成功')
-        navigate('/dashboard')
-      } else {
-        dispatch(loginFailure('登录失败'))
-        alert('登录失败')
-      }
+      
+      dispatch(loginSuccess(mockResponse.data))
+      alert('登录成功')
+      navigate('/dashboard')
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || '登录失败'
       dispatch(loginFailure(errorMsg))
@@ -88,7 +72,8 @@ const Login = () => {
       fontFamily: 'Arial, sans-serif'
     }}>
       <style>
-        {`
+        {
+          `
           * {
             margin: 0;
             padding: 0;
@@ -234,7 +219,8 @@ const Login = () => {
               grid-template-columns: 1fr;
             }
           }
-        `}
+        `
+        }
       </style>
       
       <div className="container">

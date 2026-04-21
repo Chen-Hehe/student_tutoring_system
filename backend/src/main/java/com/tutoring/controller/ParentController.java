@@ -1,21 +1,9 @@
 package com.tutoring.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.tutoring.dto.LearningReportDTO;
+import com.tutoring.dto.SimpleMatchRequestDTO;
 import com.tutoring.dto.PsychologicalStatusDTO;
 import com.tutoring.dto.Result;
-import com.tutoring.dto.SimpleMatchRequestDTO;
 import com.tutoring.dto.StudentInfoDTO;
 import com.tutoring.entity.GradeRecord;
 import com.tutoring.entity.LearningProgress;
@@ -40,8 +28,12 @@ import com.tutoring.repository.TeacherStudentMatchRepository;
 import com.tutoring.repository.UserRepository;
 import com.tutoring.service.PsychologicalAssessmentService;
 import com.tutoring.service.TeacherCommunicationService;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 家长控制器
@@ -94,20 +86,6 @@ public class ParentController {
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取孩子列表请求，用户ID：" + userId);
             
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
-            
             if (userId == null) {
                 System.out.println("用户ID不存在");
                 return Result.error(401, "用户未认证");
@@ -147,8 +125,6 @@ public class ParentController {
                         System.out.println("学生不存在或已删除，学生ID：" + relation.getStudentId());
                     }
                 }
-            } else {
-                System.out.println("该家长没有绑定任何孩子");
             }
             
             System.out.println("最终获取到的孩子数量：" + children.size());
@@ -176,20 +152,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("绑定孩子请求，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");
@@ -241,20 +203,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取匹配请求列表，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");
@@ -319,20 +267,6 @@ public class ParentController {
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("确认匹配请求，用户ID：" + userId);
             
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
-            
             if (userId == null) {
                 System.out.println("用户ID不存在");
                 return Result.error(401, "用户未认证");
@@ -396,20 +330,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取学习报告，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");
@@ -481,20 +401,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取心理状态评估，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");
@@ -674,20 +580,6 @@ public class ParentController {
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取教师列表，用户ID：" + userId);
             
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
-            
             if (userId == null) {
                 System.out.println("用户ID不存在");
                 return Result.error(401, "用户未认证");
@@ -708,7 +600,7 @@ public class ParentController {
             }
             
             // 获取已匹配的教师
-            List<TeacherStudentMatch> matches = teacherStudentMatchRepository.selectByStudentId(studentId);
+            List<TeacherStudentMatch> matches = teacherStudentMatchRepository.findByStudentIdAndStatus(studentId, 2);
             List<Long> teacherIds = matches.stream()
                     .map(TeacherStudentMatch::getTeacherId)
                     .collect(Collectors.toList());
@@ -752,20 +644,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("获取沟通记录，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");
@@ -824,20 +702,6 @@ public class ParentController {
             // 从request属性中获取用户ID
             Long userId = (Long) request.getAttribute("X-User-Id");
             System.out.println("发送消息，用户ID：" + userId);
-            
-            // 同时从请求头中获取用户ID（备用方案）
-            String userIdHeader = request.getHeader("X-User-Id");
-            System.out.println("请求头中的用户ID：" + userIdHeader);
-            
-            // 如果从请求属性中获取不到用户ID，尝试从请求头中获取
-            if (userId == null && userIdHeader != null) {
-                try {
-                    userId = Long.parseLong(userIdHeader);
-                    System.out.println("从请求头中获取到用户ID：" + userId);
-                } catch (NumberFormatException e) {
-                    System.out.println("请求头中的用户ID格式错误：" + userIdHeader);
-                }
-            }
             
             if (userId == null) {
                 System.out.println("用户ID不存在");

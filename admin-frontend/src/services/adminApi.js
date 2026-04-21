@@ -35,21 +35,6 @@ export const adminAPI = {
   },
   disableUser: (id) => {
     return api.post('/api/admin/users/disable', { id })
-  },
-  // 轮播图管理
-  getCarousels: (status) => {
-    const params = {}
-    if (status) params.status = status
-    return api.get('/api/admin/content/carousels', { params })
-  },
-  addCarousel: (carousel) => {
-    return api.post('/api/admin/content/carousels', carousel)
-  },
-  updateCarousel: (id, carousel) => {
-    return api.put(`/api/admin/content/carousels/${id}`, carousel)
-  },
-  deleteCarousel: (id) => {
-    return api.delete(`/api/admin/content/carousels/${id}`)
   }
 }
 

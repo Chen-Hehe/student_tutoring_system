@@ -176,13 +176,11 @@ const Dashboard = () => {
   
   const handleSave = async (values) => {
     try {
-      console.log('开始编辑用户:', currentUser.id, values);
       const response = await adminAPI.editUser({
         id: currentUser.id,
         name: values.name,
         role: values.role
       })
-      console.log('编辑用户响应:', response);
       if (response.success || response.code === 200) {
         message.success('编辑成功')
         setEditModalVisible(false)
@@ -193,8 +191,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('编辑用户失败:', error)
-      console.error('错误堆栈:', error.stack);
-      message.error('编辑失败，请重试: ' + error.message)
+      message.error('编辑失败，请重试')
     }
   }
 

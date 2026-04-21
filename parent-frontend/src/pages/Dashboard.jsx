@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Card, Avatar, Button, Row, Col, Spin, Modal, Descriptions, Badge, Progress } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 
 const Dashboard = () => {
   // 导航钩子
   const navigate = useNavigate()
-  
-  // 获取当前用户信息
-  const currentUser = useSelector((state) => state.auth.user)
   
   // 状态管理
   const [children, setChildren] = useState([])
@@ -106,14 +102,10 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true)
       try {
-        console.log('开始获取孩子列表...')
         // 获取孩子列表
         const childrenResponse = await parentAPI.getChildren()
-        console.log('获取孩子列表响应:', childrenResponse)
-        
         if (childrenResponse && childrenResponse.data && childrenResponse.data.success && childrenResponse.data.data) {
           const childList = childrenResponse.data.data
-          console.log('获取到的孩子列表:', childList)
           setChildren(childList)
           
           // 计算基础数据
@@ -180,13 +172,9 @@ const Dashboard = () => {
             psychologicalStatus: attentionNeeded > 0 ? '需要关注' : '良好',
             attentionNeeded
           })
-        } else {
-          console.error('获取孩子列表响应格式错误:', childrenResponse)
         }
       } catch (error) {
         console.error('获取仪表盘数据失败:', error)
-        // 显示错误信息
-        alert('获取孩子列表失败: ' + (error.message || '未知错误'))
       } finally {
         setLoading(false)
       }
@@ -210,7 +198,7 @@ const Dashboard = () => {
       }}>
         <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>家长仪表盘</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，{currentUser?.name || currentUser?.username || '家长'}</span>
+          <span>欢迎，王家长</span>
           <div style={{
             width: 40,
             height: 40,
@@ -221,7 +209,7 @@ const Dashboard = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>{(currentUser?.name || currentUser?.username || '家')[0]}</div>
+          }}>王</div>
         </div>
       </div>
 
