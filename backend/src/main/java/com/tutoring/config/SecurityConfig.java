@@ -23,7 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -38,6 +37,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 允许访问认证接口
                 .requestMatchers("/api/auth/**").permitAll()
+                // 允许访问管理员接口
+                .requestMatchers("/api/admin/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问 Swagger/OpenAPI

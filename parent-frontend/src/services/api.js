@@ -37,11 +37,20 @@ api.interceptors.request.use(
 // 响应拦截器 - 处理错误
 api.interceptors.response.use(
   (response) => {
-    // 如果响应码不是 200，抛出错误
-    if (response.data && response.data.code !== 200) {
-      return Promise.reject(new Error(response.data.message || '请求失败'))
+    // 处理后端返回的数据格式
+    if (response.data) {
+      // 检查是否是标准的Result格式
+      if (response.data.code !== undefined) {
+        // 返回格式：{ code: 200, message: "success", data: [...] }
+        return {
+          data: {
+            success: response.data.code === 200,
+            data: response.data.data
+          }
+        }
+      }
     }
-    return response.data
+    return response
   },
   (error) => {
     // 处理 401 未授权

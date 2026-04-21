@@ -44,4 +44,22 @@ public interface TeacherStudentMatchRepository extends BaseMapper<TeacherStudent
      * @return 匹配列表
      */
     List<TeacherStudentMatch> selectPendingByStudentId(@Param("studentId") Long studentId);
+    
+    /**
+     * 根据学生ID和状态查询匹配
+     *
+     * @param studentId 学生ID
+     * @param status 状态
+     * @return 匹配列表
+     */
+    List<TeacherStudentMatch> findByStudentIdAndStatus(@Param("studentId") Long studentId, @Param("status") int status);
+    
+    /**
+     * 根据学生ID列表和状态查询匹配
+     *
+     * @param studentIds 学生ID列表
+     * @param status 状态
+     * @return 匹配列表
+     */
+    List<TeacherStudentMatch> findByStudentIdInAndStatus(@Param("studentIds") List<Long> studentIds, @Param("status") int status);
 }

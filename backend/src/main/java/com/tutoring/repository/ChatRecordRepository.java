@@ -6,42 +6,34 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
-/**
- * 聊天记录数据访问层
- */
 @Mapper
 public interface ChatRecordRepository extends BaseMapper<ChatRecord> {
     
     /**
-     * 获取两个用户之间的聊天记录
+     * 查询聊天历史记录
      *
-     * @param userId1 用户 ID 1
-     * @param userId2 用户 ID 2
+     * @param userId1 用户ID1
+     * @param userId2 用户ID2
      * @return 聊天记录列表
      */
-    List<ChatRecord> selectChatHistory(
-        @Param("userId1") Long userId1,
-        @Param("userId2") Long userId2
-    );
+    List<ChatRecord> selectChatHistory(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
     
     /**
-     * 获取用户的所有对话对象
+     * 查询会话伙伴列表
      *
-     * @param userId 用户 ID
-     * @return 对话对象列表
+     * @param userId 用户ID
+     * @return 会话伙伴列表
      */
-    List<Long> selectConversationPartners(@Param("userId") Long userId);
+    List<Map<String, Object>> selectConversationPartners(@Param("userId") Long userId);
     
     /**
-     * 获取用户最后一条消息的时间
+     * 查询最后一条消息的时间
      *
-     * @param userId1 用户 ID 1
-     * @param userId2 用户 ID 2
-     * @return 最后一条消息时间
+     * @param userId1 用户ID1
+     * @param userId2 用户ID2
+     * @return 最后一条消息的时间
      */
-    java.time.LocalDateTime selectLastMessageTime(
-        @Param("userId1") Long userId1,
-        @Param("userId2") Long userId2
-    );
+    String selectLastMessageTime(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 }

@@ -16,8 +16,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig implements WebSocketConfigurer {
     
     private final ChatWebSocketHandler chatWebSocketHandler;
-    
-    @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // 注册 WebSocket 处理器，支持从 URL 参数获取 userId
         registry.addHandler(chatWebSocketHandler, "/ws-chat")

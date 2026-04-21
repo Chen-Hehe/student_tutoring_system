@@ -14,7 +14,7 @@ export const userAPI = {
     if (role !== undefined && role !== null) {
       params.role = role
     }
-    return api.get('/auth/users/list', { params })
+    return api.get('/api/auth/users/list', { params })
   },
 
   /**
@@ -24,7 +24,7 @@ export const userAPI = {
    * @returns {Promise} 编辑结果
    */
   updateUser: (userId, userData) => {
-    return api.put(`/auth/users/${userId}`, userData)
+    return api.put(`/api/auth/users/${userId}`, userData)
   },
 
   /**
@@ -34,7 +34,7 @@ export const userAPI = {
    * @returns {Promise} 操作结果
    */
   toggleUserStatus: (userId, disabled) => {
-    return api.put(`/auth/users/${userId}/status`, { disabled })
+    return api.put(`/api/auth/users/${userId}/status`, { disabled })
   }
 }
 

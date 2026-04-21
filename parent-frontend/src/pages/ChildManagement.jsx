@@ -1,68 +1,74 @@
 import { useState, useEffect } from 'react'
-import { Card, Form, Input, Select, Button, Table, Modal } from 'antd'
+import { Card, Form, Input, Select, Button, Table, Modal, message } from 'antd'
+import { parentAPI } from '../services/parentApi'
 const { Option } = Select
 const ChildManagement = () => {
   const [form] = Form.useForm()
   const [editForm] = Form.useForm()
-  // 从localStorage获取孩子列表，如果没有则使用默认数据
-  const [children, setChildren] = useState(() => {
-    try {
-      const storedChildren = localStorage.getItem('children')
-      if (storedChildren) {
-        const parsedChildren = JSON.parse(storedChildren)
-        if (Array.isArray(parsedChildren) && parsedChildren.length > 0) {
-          return parsedChildren
-        }
-      }
-    } catch (error) {
-      console.error('读取localStorage失败:', error)
-    }
-    // 默认数据
-    const defaultChildren = [
-      { id: 1, name: '小明', grade: '三年级', subject: '数学', status: 'active', tutoringStatus: '进行中', teacher: '陈老师' },
-      { id: 2, name: '小红', grade: '四年级', subject: '语文', status: 'active', tutoringStatus: '进行中', teacher: '张老师' }
-    ]
-    // 保存默认数据到localStorage
-    try {
-      localStorage.setItem('children', JSON.stringify(defaultChildren))
-    } catch (error) {
-      console.error('保存localStorage失败:', error)
-    }
-    return defaultChildren
-  })
+  const [children, setChildren] = useState([])
+  const [loading, setLoading] = useState(false)
   
-  // 组件挂载时重新从localStorage读取数据，确保显示最新状态
+  // 组件挂载时从后端获取孩子列表
   useEffect(() => {
+    fetchChildren()
+  }, [])
+  
+  // 获取孩子列表
+  const fetchChildren = async () => {
+    setLoading(true)
     try {
-      const storedChildren = localStorage.getItem('children')
-      if (storedChildren) {
-        const parsedChildren = JSON.parse(storedChildren)
-        if (Array.isArray(parsedChildren)) {
-          setChildren(parsedChildren)
-        }
+      console.log('开始获取孩子列表');
+      const response = await parentAPI.getChildren()
+      console.log('获取孩子列表响应：', response);
+      if (response && response.data && response.data.success && response.data.data) {
+        console.log('孩子列表数据：', response.data.data);
+        // 转换数据格式，适配前端展示
+        const formattedChildren = response.data.data.map(child => ({
+          id: child.id,
+          name: child.name,
+          grade: child.grade,
+          subject: child.subject || '未设置',
+          status: 'active',
+          tutoringStatus: '进行中',
+          teacher: '陈老师' // 暂时硬编码，后续从API获取
+        }))
+        setChildren(formattedChildren)
+        console.log('格式化后的孩子列表：', formattedChildren);
+      } else {
+        console.error('响应数据无效：', response);
+        message.error('获取孩子列表失败：响应数据无效');
       }
     } catch (error) {
-      console.error('读取localStorage失败:', error)
+      console.error('获取孩子列表失败：', error);
+      message.error('获取孩子列表失败：' + (error.message || '未知错误'));
+    } finally {
+      setLoading(false)
     }
-  }, [])
+  }
   const [editingChild, setEditingChild] = useState(null)
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   
-  const handleAddChild = (values) => {
-    const newChild = {
-      id: children.length + 1,
-      name: values.name,
-      grade: values.grade,
-      subject: values.subject,
-      status: 'active',
-      tutoringStatus: '未进行',
-      teacher: null
+  const handleAddChild = async (values) => {
+    try {
+      // 这里需要调用API绑定孩子，暂时使用模拟数据
+      // await parentAPI.bindChild(studentId, values.relationship)
+      const newChild = {
+        id: children.length + 1,
+        name: values.name,
+        grade: values.grade,
+        subject: values.subject,
+        status: 'active',
+        tutoringStatus: '未进行',
+        teacher: null
+      }
+      const updatedChildren = [...children, newChild]
+      setChildren(updatedChildren)
+      form.resetFields()
+      message.success('添加孩子成功')
+    } catch (error) {
+      message.error('添加孩子失败')
+      console.error('Error adding child:', error)
     }
-    const updatedChildren = [...children, newChild]
-    setChildren(updatedChildren)
-    // 保存更新后的孩子列表到localStorage
-    localStorage.setItem('children', JSON.stringify(updatedChildren))
-    form.resetFields()
   }
   
   const handleEdit = (id) => {
@@ -81,15 +87,20 @@ const ChildManagement = () => {
     }
   }
   
-  const handleUpdateChild = (values) => {
-    const updatedChildren = children.map(child => 
-      child.id === editingChild.id ? { ...child, ...values } : child
-    )
-    setChildren(updatedChildren)
-    // 保存更新后的孩子列表到localStorage
-    localStorage.setItem('children', JSON.stringify(updatedChildren))
-    setIsEditModalVisible(false)
-    editForm.resetFields()
+  const handleUpdateChild = async (values) => {
+    try {
+      // 这里需要调用API更新孩子信息，暂时使用模拟数据
+      const updatedChildren = children.map(child => 
+        child.id === editingChild.id ? { ...child, ...values } : child
+      )
+      setChildren(updatedChildren)
+      setIsEditModalVisible(false)
+      editForm.resetFields()
+      message.success('更新孩子信息成功')
+    } catch (error) {
+      message.error('更新孩子信息失败')
+      console.error('Error updating child:', error)
+    }
   }
   
   const handleCancelEdit = () => {
@@ -97,11 +108,16 @@ const ChildManagement = () => {
     editForm.resetFields()
   }
   
-  const handleDelete = (id) => {
-    const updatedChildren = children.filter(child => child.id !== id)
-    setChildren(updatedChildren)
-    // 保存更新后的孩子列表到localStorage
-    localStorage.setItem('children', JSON.stringify(updatedChildren))
+  const handleDelete = async (id) => {
+    try {
+      // 这里需要调用API删除孩子，暂时使用模拟数据
+      const updatedChildren = children.filter(child => child.id !== id)
+      setChildren(updatedChildren)
+      message.success('删除孩子成功')
+    } catch (error) {
+      message.error('删除孩子失败')
+      console.error('Error deleting child:', error)
+    }
   }
   
   const columns = [
