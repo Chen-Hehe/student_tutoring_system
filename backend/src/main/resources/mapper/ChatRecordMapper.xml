@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tutoring.repository.ChatRecordRepository">
+    
+    <!-- 查询聊天历史记录 -->
+    <select id="selectChatHistory" parameterType="java.util.Map" resultType="com.tutoring.entity.ChatRecord">
+        SELECT * FROM chat_records 
+        WHERE deleted = 0 
+        AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+        )
+        ORDER BY sent_at ASC
+    </select>
+    
+    <!-- 查询会话伙伴列表 -->
+    <select id="selectConversationPartners" parameterType="java.lang.Long" resultType="java.util.Map">
+        SELECT 
+            CASE 
+                WHEN sender_id = #{userId} THEN receiver_id 
+                ELSE sender_id 
+            END AS partner_id,
+            MAX(sent_at) as last_message_time
+        FROM chat_records 
+        WHERE deleted = 0 
+        AND (sender_id = #{userId} OR receiver_id = #{userId})
+        GROUP BY partner_id
+        ORDER BY last_message_time DESC
+    </select>
+    
+    <!-- 查询最后一条消息的时间 -->
+    <select id="selectLastMessageTime" parameterType="java.util.Map" resultType="java.lang.String">
+        SELECT MAX(sent_at) as last_message_time 
+        FROM chat_records 
+        WHERE deleted = 0 
+        AND (
+            (sender_id = #{userId1} AND receiver_id = #{userId2})
+            OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+        )
+    </select>
+    
+</mapper>
