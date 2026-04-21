@@ -88,11 +88,11 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('获取统计数据失败:', error)
-      // 添加模拟数据作为 fallback
+      // 移除模拟数据，只保留错误处理
       setStatistics({
-        teacherCount: 3,
-        studentCount: 5,
-        parentCount: 3,
+        teacherCount: 0,
+        studentCount: 0,
+        parentCount: 0,
         chatCount: 0
       })
     }
@@ -126,23 +126,12 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('获取用户列表失败:', error)
-      // 添加模拟数据作为 fallback
-      setUsers([
-        { id: 1, username: 'admin', name: '管理员', role: 'admin', status: '活跃' },
-        { id: 101, username: 'teacher_zhang', name: '张老师', role: 'teacher', status: '活跃' },
-        { id: 102, username: 'teacher_li', name: '李老师', role: 'teacher', status: '活跃' },
-        { id: 103, username: 'teacher_wang', name: '王老师', role: 'teacher', status: '活跃' },
-        { id: 201, username: 'student_hu', name: '小红', role: 'student', status: '活跃' },
-        { id: 202, username: 'student_gao', name: '小高', role: 'student', status: '活跃' },
-        { id: 203, username: 'student_chen', name: '小陈', role: 'student', status: '活跃' },
-        { id: 301, username: 'parent_chen', name: '王家长', role: 'parent', status: '活跃' },
-        { id: 302, username: 'parent_li', name: '李家长', role: 'parent', status: '活跃' },
-        { id: 303, username: 'parent_wang', name: '王家长', role: 'parent', status: '活跃' }
-      ])
+      // 移除模拟数据，只保留错误处理
+      setUsers([])
       setPagination({
         current: 1,
         pageSize: 10,
-        total: 10
+        total: 0
       })
     } finally {
       setLoading(false)
