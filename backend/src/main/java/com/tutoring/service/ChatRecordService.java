@@ -259,15 +259,8 @@ public class ChatRecordService {
         message.setMessage(record.getMessage());
         message.setType(record.getType());
         message.setFileUrl(record.getFileUrl());
-        message.setTimestamp(record.getSentAt());
         message.setIsRead(record.getIsRead());
-        
-        User sender = userRepository.selectById(record.getSenderId());
-        if (sender != null) {
-            message.setSenderName(sender.getName());
-            message.setSenderAvatar(sender.getAvatar());
-        }
-        
+        message.setTimestamp(record.getSentAt());
         return message;
     }
     
