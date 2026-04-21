@@ -236,30 +236,35 @@ const Chat = () => {
           antdMessage.error(data.message || '消息发送失败')
           return
         }
+
+        if (data.senderId === currentUser.id) {
+          return
+        }
         
         // 收到新消息
         if (data.senderId && data.receiverId && data.message) {
           console.log('处理收到的消息:', data)
 
           const activeConversation = selectedConversationRef.current
-          const isIncomingForCurrentUser = data.receiverId === currentUser.id
-          const isCurrentConversation = activeConversation && data.senderId === activeConversation.userId
-          
-          if (isIncomingForCurrentUser && isCurrentConversation) {
+
+          if (activeConversation && data.senderId === activeConversation.userId) {
             setMessages(prev => {
               const exists = prev.some(msg => msg.messageId === data.messageId)
-              
+
               if (exists) {
                 console.log('消息已存在，跳过添加')
                 return prev
               }
-              
+
               console.log('添加新消息到状态')
-              return [...prev, data]
+              return [...prev, {
+                ...data,
+                timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
+              }]
             })
-            
-            loadConversations()
+
             chatAPI.markAsRead(data.senderId)
+            loadConversations()
           } else {
             loadConversations()
           }
@@ -289,7 +294,6 @@ const Chat = () => {
       return () => {
         unsubscribeMessage()
         unsubscribeConnection()
-        wsService.disconnect()
       }
     }
   }, [currentUser?.id])

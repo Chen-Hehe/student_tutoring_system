@@ -70,6 +70,8 @@ public class ChatRecordService {
         clearCache(chatMessage.getSenderId(), chatMessage.getReceiverId());
         
         ChatMessage pushMessage = convertToChatMessage(record);
+        log.info("【聊天推送准备】senderId={}, receiverId={}, recordId={}, pushMessage={}",
+            pushMessage.getSenderId(), pushMessage.getReceiverId(), pushMessage.getMessageId(), pushMessage);
         
         try {
             chatWebSocketHandler.sendToUser(chatMessage.getReceiverId(), pushMessage);
@@ -104,6 +106,7 @@ public class ChatRecordService {
      */
     private void pushMessageToReceiver(Long receiverId, ChatMessage message) {
         String channel = REDIS_CHANNEL_PREFIX + receiverId;
+        log.info("【Redis 发布】channel={}, receiverId={}, messageId={}", channel, receiverId, message.getMessageId());
         redisTemplate.convertAndSend(channel, message);
     }
     
