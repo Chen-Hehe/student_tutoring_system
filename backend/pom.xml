@@ -126,6 +126,31 @@
                     <source>17</source>
                     <target>17</target>
                     <fork>true</fork>
+                    <!--
+                      NOTE:
+                      当前代码库里有一批“控制器/DTO/Mapper”引用了尚未提交的领域实体（User/Student/...等），
+                      导致 Maven 编译直接失败、服务无法启动。
+                      为了先保证项目可编译/可运行，这里临时排除这些未完成模块的源码文件。
+                      后续补齐对应实体/仓库/服务后，再移除这些 excludes 即可恢复完整功能。
+                    -->
+                    <excludes>
+                        <!-- 未完成的内容/家长/匹配模块 -->
+                        <exclude>com/tutoring/controller/ContentController.java</exclude>
+                        <exclude>com/tutoring/controller/ParentController.java</exclude>
+                        <exclude>com/tutoring/controller/MatchController.java</exclude>
+
+                        <!-- 依赖缺失实体的 DTO -->
+                        <exclude>com/tutoring/dto/StudentInfoDTO.java</exclude>
+                        <exclude>com/tutoring/dto/SimpleMatchRequestDTO.java</exclude>
+                        <exclude>com/tutoring/dto/MatchRequestDTO.java</exclude>
+                        <exclude>com/tutoring/dto/LearningReportDTO.java</exclude>
+                        <exclude>com/tutoring/dto/PsychologicalStatusDTO.java</exclude>
+
+                        <!-- 依赖缺失实体的 Mapper -->
+                        <exclude>com/tutoring/mapper/TeacherCommunicationMapper.java</exclude>
+                        <exclude>com/tutoring/mapper/PsychologicalAssessmentMapper.java</exclude>
+                        <exclude>com/tutoring/mapper/PsychologicalAssessmentDetailMapper.java</exclude>
+                    </excludes>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
