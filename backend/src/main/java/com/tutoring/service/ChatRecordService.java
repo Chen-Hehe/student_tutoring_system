@@ -163,10 +163,6 @@ public class ChatRecordService {
             return new ArrayList<>();
         }
         
-<<<<<<< HEAD
-        List<Long> uniquePartnerIds = partnerIds.stream().distinct().toList();
-=======
->>>>>>> bba7cf2a3c52c1fe61c3390d7318e65ad628d124
         List<Conversation> conversations = new ArrayList<>();
         
         for (Long partnerId : partnerIds) {
@@ -185,10 +181,6 @@ public class ChatRecordService {
             conversation.setUserAvatar(partner.getAvatar());
             conversation.setUserRole(partner.getRole());
             
-<<<<<<< HEAD
-            LocalDateTime lastTime = chatRecordRepository.selectLastMessageTime(userId, partnerId);
-=======
-            // 获取最后一条消息的时间
             String lastTimeStr = chatRecordRepository.selectLastMessageTime(userId, partnerId);
             LocalDateTime lastTime = null;
             if (lastTimeStr != null) {
@@ -198,7 +190,6 @@ public class ChatRecordService {
                     log.error("解析时间失败: {}", lastTimeStr, e);
                 }
             }
->>>>>>> bba7cf2a3c52c1fe61c3390d7318e65ad628d124
             if (lastTime != null) {
                 conversation.setLastMessageTime(lastTime);
                 
@@ -267,15 +258,8 @@ public class ChatRecordService {
         message.setMessage(record.getMessage());
         message.setType(record.getType());
         message.setFileUrl(record.getFileUrl());
-        message.setTimestamp(record.getSentAt());
         message.setIsRead(record.getIsRead());
-        
-        User sender = userRepository.selectById(record.getSenderId());
-        if (sender != null) {
-            message.setSenderName(sender.getName());
-            message.setSenderAvatar(sender.getAvatar());
-        }
-        
+        message.setTimestamp(record.getSentAt());
         return message;
     }
     
