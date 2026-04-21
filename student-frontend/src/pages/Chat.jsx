@@ -40,8 +40,20 @@ const Chat = () => {
     selectedConversationRef.current = selectedConversation
   }, [selectedConversation])
 
+  // 滚动到底部 - 优化版：确保在消息加载完成且 DOM 渲染后滚动
+  const scrollToBottom = () => {
+    // 确保 ref 存在且消息列表不为空
+    if (messagesEndRef.current && messages.length > 0) {
+      // 使用 setTimeout 确保 DOM 已渲染
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 50)
+    }
+  }
+
+  // 消息变化时滚动到底部
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    scrollToBottom()
   }, [messages])
 
   const loadConversations = async () => {
@@ -59,7 +71,9 @@ const Chat = () => {
     try {
       const result = await chatAPI.getChatHistory(userId)
       setMessages(result.data || [])
+      // 标记为已读（调用后端接口，后端会推送已读状态给发送者）
       await chatAPI.markAsRead(userId)
+      // 消息设置后，useEffect 会自动滚动，这里不需要额外处理
     } catch (error) {
       console.error('加载聊天记录失败:', error)
       antdMessage.error('加载聊天记录失败')
@@ -71,7 +85,11 @@ const Chat = () => {
   const selectConversation = (conversation) => {
     setSelectedConversation(conversation)
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
-    loadChatHistory(conversation.userId)
+    // 切换对话时自动标记为已读
+    if (conversation.userId) {
+      chatAPI.markAsRead(conversation.userId)
+      loadChatHistory(conversation.userId)
+    }
   }
 
   const loadTeachers = async () => {
@@ -126,6 +144,14 @@ const Chat = () => {
     }
   }
 
+  // 当选中对话变化时，自动标记为已读（实时同步关键）
+  useEffect(() => {
+    if (selectedConversation?.userId) {
+      console.log('切换对话，标记为已读:', selectedConversation.userId)
+      chatAPI.markAsRead(selectedConversation.userId)
+    }
+  }, [selectedConversation?.userId])
+
   useEffect(() => {
     if (!currentUser?.id) return
 
@@ -158,6 +184,7 @@ const Chat = () => {
           ...data,
           timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
         }])
+        // 实时标记为已读（后端会推送已读状态给发送者）
         chatAPI.markAsRead(data.senderId)
       }
       loadConversations()
