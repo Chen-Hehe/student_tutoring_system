@@ -282,9 +282,6 @@ public class ChatRecordService {
             log.error("推送已读状态失败", e);
         }
     }
-        
-        clearCache(currentUserId, senderId);
-    }
     
     /**
      * 将 ChatRecord 转换为 ChatMessage

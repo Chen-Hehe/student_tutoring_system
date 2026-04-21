@@ -35,7 +35,6 @@ const Chat = () => {
 
   const messagesEndRef = useRef(null)
   const selectedConversationRef = useRef(selectedConversation)
-  const isLoadingRef = useRef(false) // 标记是否正在加载消息
 
   useEffect(() => {
     selectedConversationRef.current = selectedConversation
@@ -44,14 +43,15 @@ const Chat = () => {
   // 滚动到底部 - 优化版：确保在消息加载完成且 DOM 渲染后滚动
   const scrollToBottom = () => {
     // 确保 ref 存在且消息列表不为空
-    if (messagesEndRef.current && messages.length > 0 && !isLoadingRef.current) {
+    if (messagesEndRef.current && messages.length > 0) {
       // 使用 setTimeout 确保 DOM 已渲染
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+      }, 50)
     }
   }
 
+  // 消息变化时滚动到底部
   useEffect(() => {
     scrollToBottom()
   }, [messages])
@@ -67,22 +67,16 @@ const Chat = () => {
   }
 
   const loadChatHistory = async (userId) => {
-    isLoadingRef.current = true
     setLoading(true)
     try {
       const result = await chatAPI.getChatHistory(userId)
       setMessages(result.data || [])
       // 标记为已读（调用后端接口，后端会推送已读状态给发送者）
       await chatAPI.markAsRead(userId)
-      // 加载完成后滚动到底部
-      setTimeout(() => {
-        isLoadingRef.current = false
-        scrollToBottom()
-      }, 200)
+      // 消息设置后，useEffect 会自动滚动，这里不需要额外处理
     } catch (error) {
       console.error('加载聊天记录失败:', error)
       antdMessage.error('加载聊天记录失败')
-      isLoadingRef.current = false
     } finally {
       setLoading(false)
     }
