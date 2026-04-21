@@ -113,7 +113,8 @@ const Chat = () => {
         ...result.data,
         senderId: currentUser.id,
         senderName: currentUser.name || currentUser.username,
-        timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss')
+        timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        isRead: false // 刚发送的消息默认未读
       }])
       setInputValue('')
       loadConversations()
@@ -134,6 +135,21 @@ const Chat = () => {
     const unsubMsg = wsService.onMessage((data) => {
       if (data.type === 'pong' || data.type === 'ping') return
       if (data.type === 'error') return antdMessage.error('消息发送失败：' + data.message)
+      
+      // 处理已读状态更新
+      if (data.type === 'read') {
+        console.log('收到已读状态更新:', data)
+        setMessages((prev) => prev.map(msg => 
+          msg.senderId === currentUser.id && msg.receiverId === data.readerId && !msg.isRead
+            ? { ...msg, isRead: true }
+            : msg
+        ))
+        // 更新对话列表中的未读数
+        loadConversations()
+        return
+      }
+      
+      // 忽略自己发送的消息
       if (data.senderId === currentUser.id) return
 
       const active = selectedConversationRef.current
@@ -159,6 +175,8 @@ const Chat = () => {
 
   const renderMessage = (msg, index) => {
     const isSelf = msg.senderId === currentUser?.id
+    const isRead = msg.isRead === true
+    
     return (
       <div key={msg.messageId || index} style={{ display: 'flex', justifyContent: isSelf ? 'flex-end' : 'flex-start', marginBottom: 16, alignItems: 'flex-start' }}>
         {!isSelf && (
@@ -167,10 +185,19 @@ const Chat = () => {
           </Avatar>
         )}
 
-        <div style={{ maxWidth: '60%', padding: '12px 16px', borderRadius: 16, backgroundColor: isSelf ? THEME : '#fff', color: isSelf ? '#fff' : '#333', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', wordBreak: 'break-word' }}>
+        <div style={{ maxWidth: '60%', padding: '12px 16px', borderRadius: 16, backgroundColor: isSelf ? THEME : '#fff', color: isSelf ? '#fff' : '#333', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', wordBreak: 'break-word', position: 'relative' }}>
           <div style={{ whiteSpace: 'pre-wrap' }}>{msg.message}</div>
-          <div style={{ fontSize: 12, marginTop: 4, opacity: 0.75, textAlign: 'right' }}>
+          <div style={{ fontSize: 12, marginTop: 4, opacity: 0.75, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
             {msg.timestamp ? dayjs(msg.timestamp).format('HH:mm') : ''}
+            {isSelf && (
+              <span style={{ marginLeft: 4 }}>
+                {isRead ? (
+                  <span style={{ color: '#1890ff' }} title="已读">✓</span>
+                ) : (
+                  <span style={{ color: '#999' }} title="未读">⏳</span>
+                )}
+              </span>
+            )}
           </div>
         </div>
 
@@ -255,7 +282,12 @@ const Chat = () => {
                 <Button icon={<SmileOutlined />} size="small" onClick={() => antdMessage.info('表情功能开发中')}>表情</Button>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <TextArea value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyPress={handleKeyPress} placeholder="输入消息... (Enter 发送，Shift+Enter 换行)" autoSize={{ minRows: 2, maxRows: 4 }} style={{ flex: 1, resize: 'none' }} disabled={sending || !isConnected} />
+                <TextArea value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      sendMessage()
+                    }
+                  }} placeholder="输入消息... (Enter 发送，Shift+Enter 换行)" autoSize={{ minRows: 2, maxRows: 4 }} style={{ flex: 1, resize: 'none' }} disabled={sending || !isConnected} />
                 <Button type="primary" icon={<SendOutlined />} onClick={sendMessage} loading={sending} disabled={!inputValue.trim() || !isConnected} style={{ height: 'auto', padding: '8px 16px', backgroundColor: THEME, borderColor: THEME }}>
                   发送
                 </Button>

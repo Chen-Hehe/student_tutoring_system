@@ -232,10 +232,12 @@ public class ChatRecordService {
     }
     
     /**
-     * 标记消息为已读
+     * 标记消息为已读，并推送已读状态给发送者
      */
     @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long currentUserId, Long senderId) {
+        log.info("ChatRecordService.markAsRead - 标记已读：currentUserId={}, senderId={}", currentUserId, senderId);
+        
         LambdaQueryWrapper<ChatRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ChatRecord::getSenderId, senderId)
             .eq(ChatRecord::getReceiverId, currentUserId)
@@ -243,10 +245,43 @@ public class ChatRecordService {
             .eq(ChatRecord::getDeleted, 0);
         
         List<ChatRecord> records = chatRecordRepository.selectList(wrapper);
+        if (records.isEmpty()) {
+            log.debug("没有需要标记为已读的消息");
+            return;
+        }
+        
         for (ChatRecord record : records) {
             record.setIsRead(true);
             chatRecordRepository.updateById(record);
         }
+        
+        log.info("ChatRecordService.markAsRead - 已标记 {} 条消息为已读", records.size());
+        
+        clearCache(currentUserId, senderId);
+        
+        // 推送已读状态给发送者
+        pushReadStatusToSender(senderId, currentUserId, records.size());
+    }
+    
+    /**
+     * 推送已读状态给发送者
+     */
+    private void pushReadStatusToSender(Long senderId, Long readerId, int unreadCount) {
+        try {
+            Map<String, Object> readStatus = Map.of(
+                "type", "read",
+                "readerId", readerId,
+                "senderId", senderId,
+                "unreadCount", 0,
+                "timestamp", System.currentTimeMillis()
+            );
+            
+            log.info("【推送已读状态】senderId={}, readerId={}, unreadCount={}", senderId, readerId, unreadCount);
+            chatWebSocketHandler.sendToUser(senderId, readStatus);
+        } catch (IOException e) {
+            log.error("推送已读状态失败", e);
+        }
+    }
         
         clearCache(currentUserId, senderId);
     }

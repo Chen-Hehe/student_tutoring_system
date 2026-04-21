@@ -138,7 +138,7 @@ const Chat = () => {
       message: inputValue.trim(),
       type: 1,
       timestamp: tempTimestamp,
-      isRead: false,
+      isRead: false, // 刚发送的消息默认未读
       senderName: currentUser.name,
       senderAvatar: currentUser.avatar,
       sending: true // 标记为发送中
@@ -236,6 +236,18 @@ const Chat = () => {
           antdMessage.error(data.message || '消息发送失败')
           return
         }
+        
+        // 处理已读状态更新
+        if (data.type === 'read') {
+          console.log('收到已读状态更新:', data)
+          setMessages(prev => prev.map(msg => 
+            msg.senderId === currentUser.id && msg.receiverId === data.readerId && !msg.isRead
+              ? { ...msg, isRead: true }
+              : msg
+          ))
+          loadConversations()
+          return
+        }
 
         if (data.senderId === currentUser.id) {
           return
@@ -310,6 +322,7 @@ const Chat = () => {
   // 渲染消息气泡
   const renderMessage = (msg, index) => {
     const isSelf = msg.senderId === currentUser?.id
+    const isRead = msg.isRead === true
     const time = dayjs(msg.timestamp).format('HH:mm')
     
     return (
@@ -338,7 +351,8 @@ const Chat = () => {
             borderRadius: 16,
             backgroundColor: isSelf ? '#1890ff' : '#f0f0f0',
             color: isSelf ? '#fff' : '#000',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            position: 'relative'
           }}
         >
           {msg.type === 1 ? (
@@ -364,13 +378,21 @@ const Chat = () => {
               fontSize: 12,
               marginTop: 4,
               opacity: 0.7,
-              textAlign: 'right'
+              textAlign: 'right',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 4
             }}
           >
             {time}
-            {isSelf && msg.isRead !== undefined && (
+            {isSelf && (
               <span style={{ marginLeft: 4 }}>
-                {msg.isRead ? '已读' : '未读'}
+                {isRead ? (
+                  <span style={{ color: '#fff' }} title="已读">✓</span>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.6)' }} title="未读">⏳</span>
+                )}
               </span>
             )}
           </div>

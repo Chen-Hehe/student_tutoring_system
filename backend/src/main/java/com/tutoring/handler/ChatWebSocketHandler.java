@@ -168,6 +168,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             log.error("处理 Redis 消息失败：channel={}, message={}", channel, messageBytes, e);
         }
     }
+    
+    /**
+     * 发送已读状态更新给指定用户
+     */
+    public void sendReadStatus(Long userId, Long readerId) throws IOException {
+        Map<String, Object> readStatus = Map.of(
+            "type", "read",
+            "readerId", readerId,
+            "timestamp", System.currentTimeMillis()
+        );
+        log.info("【发送已读状态】userId={}, readerId={}", userId, readerId);
+        sendToUser(userId, readStatus);
+    }
 
     private Set<Long> getOnlineUserSnapshot() {
         return ONLINE_USERS.entrySet().stream()
