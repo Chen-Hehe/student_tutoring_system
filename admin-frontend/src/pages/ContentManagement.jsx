@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, message } from 'antd'
+import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, InputNumber, Modal, Form, Upload } from 'antd'
+import { UploadOutlined } from '@ant-design/icons'
 import { adminAPI } from '../services/adminApi'
+import api from '../services/api'
 
 const { TabPane } = Tabs
 const { Option } = Select
@@ -10,9 +12,15 @@ const ContentManagement = () => {
   const [resources, setResources] = useState([])
   const [learningMaterials, setLearningMaterials] = useState([])
   const [announcements, setAnnouncements] = useState([])
+  const [carousels, setCarousels] = useState([])
   const [loading, setLoading] = useState(false)
   const [materialsLoading, setMaterialsLoading] = useState(false)
   const [announcementsLoading, setAnnouncementsLoading] = useState(false)
+  const [carouselsLoading, setCarouselsLoading] = useState(false)
+  const [form] = Form.useForm()
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [currentCarousel, setCurrentCarousel] = useState(null)
+  const [isAddMode, setIsAddMode] = useState(true)
   const [searchParams, setSearchParams] = useState({
     keyword: '',
     type: '',
@@ -102,6 +110,22 @@ const ContentManagement = () => {
     }
   }
 
+  // 获取轮播图列表
+  const fetchCarousels = async () => {
+    setCarouselsLoading(true)
+    try {
+      const response = await adminAPI.getCarousels()
+      if (response && (response.code === 200 || response.success)) {
+        setCarousels(response.data)
+      }
+    } catch (error) {
+      message.error('获取轮播图列表失败')
+      console.error('Error fetching carousels:', error)
+    } finally {
+      setCarouselsLoading(false)
+    }
+  }
+
   // 组件加载时获取资源和教师信息
   useEffect(() => {
     fetchTeachers()
@@ -111,6 +135,8 @@ const ContentManagement = () => {
       fetchLearningMaterials()
     } else if (activeTab === '3') {
       fetchAnnouncements()
+    } else if (activeTab === '4') {
+      fetchCarousels()
     }
   }, [activeTab])
 
@@ -265,6 +291,170 @@ const ContentManagement = () => {
         <Space>
           <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
           <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
+        </Space>
+      ),
+    },
+  ]
+
+  // 轮播图相关方法
+  const handleAddCarousel = () => {
+    setIsAddMode(true)
+    setCurrentCarousel(null)
+    form.resetFields()
+    setIsModalVisible(true)
+  }
+
+  const handleEditCarousel = (carousel) => {
+    setIsAddMode(false)
+    setCurrentCarousel(carousel)
+    form.setFieldsValue({
+      title: carousel.title,
+      imageUrl: carousel.imageUrl,
+      linkUrl: carousel.linkUrl,
+      sort: carousel.sort,
+      status: carousel.status
+    })
+  setIsModalVisible(true)
+}
+
+  const handleSaveCarousel = async (values) => {
+    console.log('开始保存轮播图:', values);
+    try {
+      // 处理图片URL，确保是相对路径
+      let processedValues = { ...values };
+      if (processedValues.imageUrl) {
+        // 如果是完整的本地文件路径，转换为相对路径
+        if (processedValues.imageUrl.startsWith('D:') || processedValues.imageUrl.startsWith('d:')) {
+          // 提取相对路径部分
+          const relativePath = processedValues.imageUrl.replace(/.*public\\/, '/').replace(/\\/g, '/');
+          processedValues.imageUrl = relativePath;
+        }
+      }
+      
+      console.log('处理后的值:', processedValues);
+      
+      // 直接测试保存接口，不使用adminAPI
+      console.log('直接调用保存接口...');
+      const response = await fetch('http://localhost:8080/api/admin/content/carousels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(processedValues)
+      });
+      
+      console.log('保存响应状态:', response.status);
+      
+      const responseData = await response.json();
+      console.log('保存响应数据:', responseData);
+      
+      if (response.ok && (responseData.code === 200 || responseData.success)) {
+        message.success('添加轮播图成功');
+        setIsModalVisible(false);
+        fetchCarousels();
+      } else {
+        message.error('添加轮播图失败: ' + (responseData.message || '未知错误'));
+      }
+    } catch (error) {
+      console.error('保存轮播图失败:', error);
+      console.error('错误堆栈:', error.stack);
+      message.error('保存失败，请重试: ' + error.message);
+    }
+  }
+
+// 测试文件上传
+const testUpload = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('file', new Blob(['test'], { type: 'text/plain' }), 'test.txt');
+    
+    // 使用axios发送请求，这样会经过响应拦截器
+    const response = await api.post('/api/admin/content/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
+    console.log('测试上传响应:', response);
+    message.info('测试上传结果: ' + JSON.stringify(response));
+  } catch (error) {
+    console.error('测试上传失败:', error);
+    message.error('测试上传失败: ' + error.message);
+  }
+};
+
+
+
+  const handleDeleteCarousel = async (id) => {
+    try {
+      const response = await adminAPI.deleteCarousel(id)
+      if (response && (response.code === 200 || response.success)) {
+        message.success('删除轮播图成功')
+        fetchCarousels()
+      } else {
+        message.error('删除轮播图失败')
+      }
+    } catch (error) {
+      console.error('删除轮播图失败:', error)
+      message.error('删除失败，请重试')
+    }
+  }
+
+  const carouselColumns = [
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: '标题', dataIndex: 'title', key: 'title' },
+    { 
+      title: '图片', 
+      dataIndex: 'imageUrl', 
+      key: 'imageUrl',
+      render: (imageUrl) => {
+        return imageUrl ? (
+          <img src={imageUrl} alt="轮播图" style={{ width: 100, height: 50, objectFit: 'cover' }} />
+        ) : '无'
+      }
+    },
+    { title: '链接', dataIndex: 'linkUrl', key: 'linkUrl', ellipsis: true },
+    { title: '排序', dataIndex: 'sort', key: 'sort' },
+    { 
+      title: '状态', 
+      dataIndex: 'status', 
+      key: 'status',
+      render: (status) => {
+        return status === 1 ? (
+          <Tag color="#52c41a" style={{ fontSize: '14px', padding: '2px 8px' }}>启用</Tag>
+        ) : (
+          <Tag color="#999" style={{ fontSize: '14px', padding: '2px 8px' }}>禁用</Tag>
+        )
+      }
+    },
+    { 
+      title: '创建时间', 
+      dataIndex: 'createdAt', 
+      key: 'createdAt',
+      render: (createdAt) => {
+        return createdAt ? new Date(createdAt).toLocaleString() : '未知'
+      }
+    },
+    { 
+      title: '操作', 
+      key: 'action', 
+      render: (_, record) => (
+        <Space>
+          <Button 
+            type="primary" 
+            size="small" 
+            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleEditCarousel(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="small" 
+            style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleDeleteCarousel(record.id)}
+          >
+            删除
+          </Button>
         </Space>
       ),
     },
@@ -710,6 +900,185 @@ const ContentManagement = () => {
           </Card>
         </>
       )}
+
+      {/* 轮播图标签页 */}
+      {activeTab === '4' && (
+        <>
+          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: 20, padding: 20, borderRadius: 12 }}>
+            <Row gutter={[16, 16]} align="middle">
+              <Col>
+                <Button 
+                  style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}
+                  onClick={handleAddCarousel}
+                >
+                  添加轮播图
+                </Button>
+                <Button 
+                  style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px', marginLeft: '10px' }}
+                  onClick={testUpload}
+                >
+                  测试上传
+                </Button>
+              </Col>
+            </Row>
+          </Card>
+          
+          <Card style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.05)', borderRadius: 12, padding: 20 }}>
+            <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.6em', fontWeight: 'bold' }}>轮播图列表</h3>
+            <Table 
+              columns={carouselColumns} 
+              dataSource={carousels} 
+              rowKey="id"
+              size="middle"
+              style={{ fontSize: '16px', marginBottom: '20px' }}
+              loading={carouselsLoading}
+              pagination={false}
+            />
+            
+            {/* 自定义分页 */}
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
+              <span 
+                style={{
+                  margin: '0 5px',
+                  padding: '6px 10px',
+                  borderRadius: 4,
+                  backgroundColor: '#9C27B0',
+                  color: 'white',
+                  border: '1px solid #9C27B0',
+                  display: 'inline-block',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxShadow: 'none',
+                  lineHeight: '1.5',
+                  minWidth: '30px',
+                  textAlign: 'center',
+                  boxSizing: 'border-box',
+                  userSelect: 'none'
+                }}
+                onMouseDown={(e) => e.preventDefault()}
+                onFocus={(e) => e.currentTarget.style.outline = 'none'}
+              >
+                1
+              </span>
+              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>2</span>
+              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>3</span>
+              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
+            </div>
+          </Card>
+        </>
+      )}
+
+      {/* 轮播图编辑弹窗 */}
+      <Modal
+        title={isAddMode ? "添加轮播图" : "编辑轮播图"}
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSaveCarousel}
+          onFinishFailed={(errorInfo) => {
+            console.log('表单验证失败:', errorInfo);
+            message.error('请检查表单填写是否正确');
+          }}
+          autoComplete="off"
+          style={{ width: '100%' }}
+        >
+          <Form.Item
+            name="title"
+            label="标题"
+            rules={[{ required: true, message: '请输入标题' }]}
+          >
+            <Input placeholder="请输入轮播图标题" style={{ fontSize: '16px', padding: '8px 12px' }} />
+          </Form.Item>
+          <Form.Item
+            name="imageUrl"
+            label="图片"
+            rules={[{ required: true, message: '请输入图片URL' }]}
+          >
+            <div>
+              <Input placeholder="请输入图片URL，例如：/images/carousel/图片文件名.png" style={{ marginBottom: '10px', fontSize: '16px', padding: '8px 12px' }} />
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
+                或者上传图片：
+              </div>
+              <Upload.Dragger 
+                name="file" 
+                action="http://localhost:8080/api/admin/content/upload"
+                onChange={(info) => {
+                  console.log('上传状态:', info);
+                  if (info.file.status === 'done') {
+                    console.log('上传成功:', info.file.response);
+                    if (info.file.response && (info.file.response.code === 200 || info.file.response.success)) {
+                      const fileUrl = info.file.response.data;
+                      console.log('文件URL:', fileUrl);
+                      form.setFieldsValue({ imageUrl: fileUrl });
+                      message.success('上传成功');
+                    } else {
+                      message.error('上传失败: ' + (info.file.response?.message || '未知错误'));
+                    }
+                  } else if (info.file.status === 'error') {
+                    message.error('上传失败');
+                  }
+                }}
+                listType="picture"
+              >
+                <p className="ant-upload-drag-icon">
+                  <UploadOutlined />
+                </p>
+                <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+                <p className="ant-upload-hint">
+                  支持 JPG、PNG 格式，建议尺寸 1920x600
+                </p>
+              </Upload.Dragger>
+            </div>
+          </Form.Item>
+          <Form.Item
+            name="linkUrl"
+            label="链接URL"
+            rules={[{ required: false, message: '请输入链接URL' }]}
+          >
+            <Input placeholder="请输入轮播图链接URL（可选）" style={{ fontSize: '16px', padding: '8px 12px' }} />
+          </Form.Item>
+          <Form.Item
+            name="sort"
+            label="排序"
+            rules={[{ required: true, message: '请输入排序值' }]}
+          >
+            <InputNumber min={1} max={100} style={{ width: '100%', fontSize: '16px' }} />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
+          >
+            <Select style={{ fontSize: '16px' }}>
+              <Option value={1}>启用</Option>
+              <Option value={0}>禁用</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <Button 
+                style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '8px 16px' }}
+                onClick={() => setIsModalVisible(false)}
+              >
+                取消
+              </Button>
+              <Button 
+                type="primary" 
+                htmlType="submit"
+                style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px', padding: '8px 16px' }}
+              >
+                保存
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

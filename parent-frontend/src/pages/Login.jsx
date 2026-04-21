@@ -38,38 +38,19 @@ const Login = () => {
     dispatch(loginStart())
 
     try {
-      if (selectedRole === 3 && (username === 'admin' || username === 'parent') && password === 'admin') {
-        const mockResponse = {
-          code: 200,
-          data: {
-            token: 'mock-token',
-            user: {
-              id: 1,
-              username: username,
-              role: 3,
-              name: '王家长'
-            }
-          }
-        }
-        dispatch(loginSuccess(mockResponse.data))
-        alert('登录成功')
-        navigate('/dashboard')
-        return
-      }
-
       const response = await authAPI.login({
         username: username,
         password: password,
         role: selectedRole
       })
 
-      if (response.code === 200) {
-        dispatch(loginSuccess(response.data))
+      if (response.data.success) {
+        dispatch(loginSuccess(response.data.data))
         alert('登录成功')
         navigate('/dashboard')
       } else {
-        dispatch(loginFailure(response.message || '登录失败'))
-        alert(response.message || '登录失败')
+        dispatch(loginFailure('登录失败'))
+        alert('登录失败')
       }
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || '登录失败'

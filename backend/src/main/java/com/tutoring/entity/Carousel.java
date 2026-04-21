@@ -8,26 +8,26 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 公告实体类
+ * 轮播图实体类
  */
 @Data
-@TableName("announcements")
-public class Announcement {
+@TableName("carousels")
+public class Carousel {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private String title;
 
-    private String content;
+    private String imageUrl;
 
-    private Long authorId;
+    private String linkUrl;
 
-    private LocalDateTime publishDate;
+    private Integer sort;
 
-    private String status;
+    private Integer status;
 
-    private Integer viewCount;
+    private Long creatorId;
 
     private LocalDateTime createdAt;
 

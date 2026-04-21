@@ -23,8 +23,8 @@ api.interceptors.request.use(
     }
     
     // 添加用户 ID 到请求头（后端需要 X-User-Id）
-    if (user && user.id) {
-      config.headers['X-User-Id'] = user.id
+    if (user && (user.id || user.userId)) {
+      config.headers['X-User-Id'] = user.id || user.userId
     }
     
     return config
