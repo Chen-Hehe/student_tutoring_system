@@ -121,10 +121,10 @@ const Resources = () => {
           size="large"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          onPressEnter={handleSearch}
+          onPressEnter={loadResources}
           style={{ marginBottom: 16 }}
           addonAfter={
-            <Button type="primary" onClick={handleSearch}>搜索</Button>
+            <Button type="primary" onClick={loadResources}>搜索</Button>
           }
         />
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
