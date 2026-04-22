@@ -1,6 +1,7 @@
 package com.tutoring.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.tutoring.dto.ChatMessage;
 import com.tutoring.dto.Conversation;
 import com.tutoring.entity.ChatRecord;
@@ -89,6 +90,13 @@ public class ChatRecordService {
         
         log.info("ChatRecordService.saveAndPushMessage - 消息保存并推送完成，recordId={}", record.getId());
         return record;
+    }
+    
+    /**
+     * 将 ChatRecord 转换为 ChatMessage（公开方法供 Controller 使用）
+     */
+    public ChatMessage convertToChatMessagePublic(ChatRecord record) {
+        return convertToChatMessage(record);
     }
     
     /**
@@ -246,6 +254,28 @@ public class ChatRecordService {
         }
         
         clearCache(currentUserId, senderId);
+        
+        // 推送已读状态给发送者（实时同步关键）
+        if (!records.isEmpty()) {
+            ChatMessage readNotification = new ChatMessage();
+            readNotification.setType(0); // 0 表示已读通知
+            readNotification.setReaderId(currentUserId); // 已读者 ID
+            readNotification.setSenderId(senderId); // 原消息发送者 ID
+            readNotification.setReceiverId(senderId);
+            
+            try {
+                chatWebSocketHandler.sendToUser(senderId, readNotification);
+                log.info("ChatRecordService.markAsRead - 已推送已读状态给 senderId={}", senderId);
+            } catch (IOException e) {
+                log.error("ChatRecordService.markAsRead - 推送已读状态失败", e);
+            }
+            
+            try {
+                pushMessageToReceiver(senderId, readNotification);
+            } catch (Exception e) {
+                log.error("ChatRecordService.markAsRead - Redis 推送已读状态失败", e);
+            }
+        }
     }
     
     /**
@@ -290,31 +320,63 @@ public class ChatRecordService {
         log.info("ChatRecordService.recallMessage - 开始撤回消息：messageId={}, operatorId={}",
             messageId, operatorId);
         
-        // 查询消息
+        // 查询消息（直接从数据库查询，不使用缓存）
         ChatRecord record = chatRecordRepository.selectById(messageId);
+        log.info("ChatRecordService.recallMessage - 查询结果：record={}, senderId={}, recalledAt={}",
+            record != null ? "存在" : "不存在",
+            record != null ? record.getSenderId() : "N/A",
+            record != null ? record.getRecalledAt() : "N/A");
+        
         if (record == null) {
-            throw new RuntimeException("消息不存在");
+            log.error("ChatRecordService.recallMessage - 消息不存在：messageId={}", messageId);
+            throw new IllegalArgumentException("消息不存在");
         }
         
         // 检查是否是发送者本人
         if (!record.getSenderId().equals(operatorId)) {
-            throw new RuntimeException("只有消息发送者才能撤回消息");
+            log.error("ChatRecordService.recallMessage - 权限不足：record.senderId={}, operatorId={}",
+                record.getSenderId(), operatorId);
+            throw new IllegalArgumentException("只有消息发送者才能撤回消息");
         }
         
         // 检查是否已经撤回
         if (record.getRecalledAt() != null) {
-            throw new RuntimeException("消息已被撤回");
+            log.warn("ChatRecordService.recallMessage - 消息已被撤回：messageId={}, recalledAt={}",
+                messageId, record.getRecalledAt());
+            throw new IllegalArgumentException("消息已被撤回");
+        }
+        
+        // 检查是否可以撤回（2 分钟内）
+        if (!canRecall(record)) {
+            log.error("ChatRecordService.recallMessage - 超过撤回时限：sentAt={}", record.getSentAt());
+            throw new IllegalArgumentException("超过撤回时限（2 分钟）");
         }
         
         // 设置撤回信息
-        record.setRecalledAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        record.setRecalledAt(now);
         record.setRecalledBy(operatorId);
         
-        int updateResult = chatRecordRepository.updateById(record);
+        log.info("ChatRecordService.recallMessage - 准备更新数据库：recalledAt={}, recalledBy={}",
+            now, operatorId);
+        
+        // 使用 UpdateWrapper 强制更新指定字段（避免 updateById 只更新非 null 字段的问题）
+        UpdateWrapper<ChatRecord> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", messageId)
+               .set("recalled_at", now)
+               .set("recalled_by", operatorId);
+        
+        int updateResult = chatRecordRepository.update(null, wrapper);
+        log.info("ChatRecordService.recallMessage - 更新结果：affectedRows={}", updateResult);
+        
         if (updateResult == 0) {
-            log.error("ChatRecordService.recallMessage - 更新失败");
+            log.error("ChatRecordService.recallMessage - 更新失败，影响行数为 0");
             throw new RuntimeException("撤回失败");
         }
+        
+        // 重新查询以获取最新数据（确保后续操作使用更新后的记录）
+        record.setRecalledAt(now);
+        record.setRecalledBy(operatorId);
         
         // 清除缓存
         clearCache(record.getSenderId(), record.getReceiverId());
@@ -328,6 +390,7 @@ public class ChatRecordService {
         recallNotification.setTimestamp(LocalDateTime.now());
         recallNotification.setRecalledAt(record.getRecalledAt());
         recallNotification.setRecalledBy(operatorId);
+        recallNotification.setIsRecalled(true); // 明确设置已撤回标志
         
         // 推送撤回通知给接收者
         try {

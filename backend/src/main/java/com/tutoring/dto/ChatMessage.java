@@ -84,4 +84,9 @@ public class ChatMessage {
      * 撤回者 ID
      */
     private Long recalledBy;
+    
+    /**
+     * 已读者 ID（用于已读状态通知）
+     */
+    private Long readerId;
 }

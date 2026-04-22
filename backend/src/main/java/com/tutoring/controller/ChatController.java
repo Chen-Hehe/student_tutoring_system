@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 聊天控制器
@@ -30,7 +32,7 @@ public class ChatController {
      * @return 发送结果（包含真实数据库 ID 和 timestamp）
      */
     @PostMapping("/send")
-    public Result<ChatRecord> sendMessage(
+    public Result<Map<String, Object>> sendMessage(
             @Valid @RequestBody ChatMessage chatMessage,
             @RequestHeader(value = "X-User-Id", required = false) Long currentUserId) {
         try {
@@ -47,7 +49,25 @@ public class ChatController {
             
             // 调用核心方法：保存并推送
             ChatRecord record = chatRecordService.saveAndPushMessage(chatMessage);
-            return Result.success("发送成功", record);
+            
+            // 转换为 ChatMessage DTO（确保字段名一致，如 messageId）
+            ChatMessage messageDTO = chatRecordService.convertToChatMessagePublic(record);
+            
+            // 转换为 Map 以便前端使用
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("messageId", messageDTO.getMessageId());
+            responseData.put("senderId", messageDTO.getSenderId());
+            responseData.put("receiverId", messageDTO.getReceiverId());
+            responseData.put("message", messageDTO.getMessage());
+            responseData.put("type", messageDTO.getType());
+            responseData.put("fileUrl", messageDTO.getFileUrl());
+            responseData.put("isRead", messageDTO.getIsRead());
+            responseData.put("timestamp", messageDTO.getTimestamp());
+            responseData.put("isRecalled", messageDTO.getIsRecalled());
+            responseData.put("recalledAt", messageDTO.getRecalledAt());
+            responseData.put("recalledBy", messageDTO.getRecalledBy());
+            
+            return Result.success("发送成功", responseData);
         } catch (Exception e) {
             log.error("发送消息失败", e);
             return Result.error(500, "发送失败：" + e.getMessage());
@@ -120,25 +140,36 @@ public class ChatController {
      * @return 撤回结果
      */
     @PostMapping("/recall/{messageId}")
-    public Result<ChatRecord> recallMessage(
+    public Result<Map<String, Object>> recallMessage(
             @PathVariable Long messageId,
             @RequestHeader("X-User-Id") Long currentUserId) {
         try {
             log.info("【DEBUG】ChatController.recallMessage - messageId={}, currentUserId={}",
                 messageId, currentUserId);
             
-            // 检查是否可以撤回（2 分钟内）
-            ChatRecord record = chatRecordService.getMessageById(messageId);
-            if (record == null) {
-                return Result.error(404, "消息不存在");
-            }
-            
-            if (!chatRecordService.canRecall(record)) {
-                return Result.error(400, "超过撤回时限（2 分钟）");
-            }
-            
+            // 直接调用撤回方法（内部会检查）
             ChatRecord recalledRecord = chatRecordService.recallMessage(messageId, currentUserId);
-            return Result.success("撤回成功", recalledRecord);
+            
+            // 转换为 Map 以便前端使用
+            ChatMessage messageDTO = chatRecordService.convertToChatMessagePublic(recalledRecord);
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("messageId", messageDTO.getMessageId());
+            responseData.put("isRecalled", messageDTO.getIsRecalled());
+            responseData.put("recalledAt", messageDTO.getRecalledAt());
+            responseData.put("recalledBy", messageDTO.getRecalledBy());
+            
+            return Result.success("撤回成功", responseData);
+        } catch (IllegalArgumentException e) {
+            // 超过撤回时限
+            log.warn("撤回失败：{}", e.getMessage());
+            return Result.error(400, e.getMessage());
+        } catch (RuntimeException e) {
+            // 消息不存在或权限不足
+            log.warn("撤回失败：{}", e.getMessage());
+            if (e.getMessage().contains("不存在")) {
+                return Result.error(404, e.getMessage());
+            }
+            return Result.error(403, e.getMessage());
         } catch (Exception e) {
             log.error("撤回消息失败", e);
             return Result.error(500, "撤回失败：" + e.getMessage());

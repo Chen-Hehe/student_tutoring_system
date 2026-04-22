@@ -128,11 +128,13 @@ const Chat = () => {
         message: inputValue,
         type: 1
       })
+      console.log('【DEBUG】发送消息成功，result.data:', result.data)
       setMessages((prev) => [...prev, {
         ...result.data,
+        messageId: result.data.messageId, // 确保 messageId 正确设置
         senderId: currentUser.id,
         senderName: currentUser.name || currentUser.username,
-        timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        timestamp: result.data.timestamp || dayjs().format('YYYY-MM-DD HH:mm:ss'),
         isRead: false // 刚发送的消息默认未读
       }])
       setInputValue('')
@@ -187,11 +189,11 @@ const Chat = () => {
         return
       }
       
-      // 处理已读状态更新
-      if (data.type === 'read') {
-        console.log('收到已读状态更新:', data)
+      // 处理已读状态更新（type=0 表示已读通知）
+      if (data.type === 0 && data.readerId) {
+        console.log('收到已读状态更新，readerId:', data.readerId)
         setMessages((prev) => prev.map(msg => 
-          msg.senderId === currentUser.id && msg.receiverId === data.readerId && !msg.isRead
+          msg.senderId === currentUser.id && !msg.isRead
             ? { ...msg, isRead: true }
             : msg
         ))
@@ -319,8 +321,10 @@ const Chat = () => {
   
   // 撤回消息
   const recallMessage = async (messageId) => {
+    console.log('【DEBUG】前端准备撤回消息，messageId:', messageId, 'type:', typeof messageId)
     try {
-      await chatAPI.recallMessage(messageId)
+      const result = await chatAPI.recallMessage(messageId)
+      console.log('【DEBUG】撤回成功，result:', result)
       setMessages((prev) => prev.map(msg => 
         msg.messageId === messageId
           ? { ...msg, isRecalled: true, recalledAt: dayjs().format('YYYY-MM-DD HH:mm:ss'), recalledBy: currentUser.id }
@@ -330,7 +334,8 @@ const Chat = () => {
       antdMessage.success('消息已撤回')
       loadConversations()
     } catch (error) {
-      console.error('撤回消息失败:', error)
+      console.error('【DEBUG】撤回消息失败:', error)
+      console.error('【DEBUG】错误详情:', error.response?.data)
       antdMessage.error('撤回失败：' + (error.response?.data?.message || error.message))
     }
   }

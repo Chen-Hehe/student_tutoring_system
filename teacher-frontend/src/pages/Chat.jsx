@@ -305,11 +305,11 @@ const Chat = () => {
           return
         }
         
-        // 处理已读状态更新
-        if (data.type === 'read') {
-          console.log('收到已读状态更新:', data)
+        // 处理已读状态更新（type=0 表示已读通知）
+        if (data.type === 0 && data.readerId) {
+          console.log('收到已读状态更新，readerId:', data.readerId)
           setMessages(prev => prev.map(msg => 
-            msg.senderId === currentUser.id && msg.receiverId === data.readerId && !msg.isRead
+            msg.senderId === currentUser.id && !msg.isRead
               ? { ...msg, isRead: true }
               : msg
           ))
