@@ -48,6 +48,8 @@ coverage/
 .cache/
 .temp/
 
-backend\target
+backend/target/
 
+# Project docs & uploaded resources (do not commit)
 docs/
+backend/uploads/resources/
