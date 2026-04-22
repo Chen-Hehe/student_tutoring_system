@@ -320,12 +320,18 @@ public class ChatRecordService {
         log.info("ChatRecordService.recallMessage - 开始撤回消息：messageId={}, operatorId={}",
             messageId, operatorId);
         
-        // 查询消息（直接从数据库查询，不使用缓存）
-        ChatRecord record = chatRecordRepository.selectById(messageId);
-        log.info("ChatRecordService.recallMessage - 查询结果：record={}, senderId={}, recalledAt={}",
+        // 查询消息（使用 LambdaQueryWrapper 忽略逻辑删除，因为 @TableLogic 会过滤掉 deleted!=0 的记录）
+        LambdaQueryWrapper<ChatRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ChatRecord::getId, messageId);
+        // 注意：@TableLogic 会自动添加 deleted=0 条件，这是期望行为
+        // 如果消息被逻辑删除了，说明它不应该被撤回
+        ChatRecord record = chatRecordRepository.selectOne(wrapper);
+        
+        log.info("ChatRecordService.recallMessage - 查询结果：record={}, senderId={}, recalledAt={}, deleted={}",
             record != null ? "存在" : "不存在",
             record != null ? record.getSenderId() : "N/A",
-            record != null ? record.getRecalledAt() : "N/A");
+            record != null ? record.getRecalledAt() : "N/A",
+            record != null ? record.getDeleted() : "N/A");
         
         if (record == null) {
             log.error("ChatRecordService.recallMessage - 消息不存在：messageId={}", messageId);
@@ -361,12 +367,12 @@ public class ChatRecordService {
             now, operatorId);
         
         // 使用 UpdateWrapper 强制更新指定字段（避免 updateById 只更新非 null 字段的问题）
-        UpdateWrapper<ChatRecord> wrapper = new UpdateWrapper<>();
-        wrapper.eq("id", messageId)
+        UpdateWrapper<ChatRecord> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", messageId)
                .set("recalled_at", now)
                .set("recalled_by", operatorId);
         
-        int updateResult = chatRecordRepository.update(null, wrapper);
+        int updateResult = chatRecordRepository.update(null, updateWrapper);
         log.info("ChatRecordService.recallMessage - 更新结果：affectedRows={}", updateResult);
         
         if (updateResult == 0) {
@@ -444,7 +450,20 @@ public class ChatRecordService {
     }
     
     /**
-     * 获取消息记录
+     * 获取消息记录（忽略逻辑删除）
+     *
+     * @param messageId 消息 ID
+     * @return 聊天记录
+     */
+    public ChatRecord getMessageByIdIgnoreDeleted(Long messageId) {
+        // 使用原始 SQL 查询，忽略 @TableLogic 的逻辑删除条件
+        LambdaQueryWrapper<ChatRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ChatRecord::getId, messageId);
+        return chatRecordRepository.selectOne(wrapper);
+    }
+    
+    /**
+     * 获取消息记录（正常查询，受逻辑删除影响）
      *
      * @param messageId 消息 ID
      * @return 聊天记录
