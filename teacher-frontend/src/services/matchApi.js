@@ -51,5 +51,14 @@ export const matchAPI = {
    */
   getDetail: (matchId) => {
     return api.get(`/matches/${matchId}`)
+  },
+
+  /**
+   * 获取匹配统计数据
+   */
+  getStatistics: (teacherId) => {
+    return api.get('/matches/statistics', {
+      params: { teacherId }
+    })
   }
 }

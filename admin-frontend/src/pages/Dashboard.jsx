@@ -1,6 +1,13 @@
-import { Card, Row, Col, Table, Tag, Space, Button, Spin, Modal, Form, Input, Select, message } from 'antd'
+import { Card, Row, Col, Table, Tag, Space, Button, Spin, Modal, Form, Input, Select, message, Statistic } from 'antd'
 import { useState, useEffect } from 'react'
 import { adminAPI } from '../services/adminApi'
+import {
+  UsergroupAddOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  PercentageOutlined
+} from '@ant-design/icons'
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true)
@@ -9,6 +16,13 @@ const Dashboard = () => {
     studentCount: 0,
     parentCount: 0,
     chatCount: 0
+  })
+  const [matchStats, setMatchStats] = useState({
+    totalMatches: 0,
+    successfulMatches: 0,
+    pendingMatches: 0,
+    rejectedMatches: 0,
+    successRate: '0.00%'
   })
   const [users, setUsers] = useState([])
   const [pagination, setPagination] = useState({
@@ -68,6 +82,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchStatistics()
+    fetchMatchStatistics()
     fetchUsers()
   }, [])
 
@@ -88,12 +103,37 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('获取统计数据失败:', error)
-      // 移除模拟数据，只保留错误处理
       setStatistics({
         teacherCount: 0,
         studentCount: 0,
         parentCount: 0,
         chatCount: 0
+      })
+    }
+  }
+
+  const fetchMatchStatistics = async () => {
+    try {
+      console.log('开始获取匹配统计数据...')
+      const response = await adminAPI.getMatchStatistics()
+      console.log('匹配统计数据响应:', response)
+      if (response) {
+        if (response.success) {
+          console.log('匹配统计数据:', response.data)
+          setMatchStats(response.data)
+        } else if (response.code === 200) {
+          console.log('匹配统计数据:', response.data)
+          setMatchStats(response.data)
+        }
+      }
+    } catch (error) {
+      console.error('获取匹配统计数据失败:', error)
+      setMatchStats({
+        totalMatches: 0,
+        successfulMatches: 0,
+        pendingMatches: 0,
+        rejectedMatches: 0,
+        successRate: '0.00%'
       })
     }
   }
@@ -192,6 +232,92 @@ const Dashboard = () => {
         </div>
       )}
       
+      {/* 匹配统计卡片 */}
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={6}>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <Statistic
+              title="总匹配数"
+              value={matchStats.totalMatches}
+              prefix={<UsergroupAddOutlined />}
+              valueStyle={{ color: '#1890ff', fontSize: '2em', fontWeight: 'bold' }}
+            />
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>系统中所有师生匹配记录</p>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <Statistic
+              title="已匹配成功"
+              value={matchStats.successfulMatches}
+              prefix={<CheckCircleOutlined />}
+              valueStyle={{ color: '#52c41a', fontSize: '2em', fontWeight: 'bold' }}
+            />
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>状态为已匹配的师生对</p>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <Statistic
+              title="待确认"
+              value={matchStats.pendingMatches}
+              prefix={<ClockCircleOutlined />}
+              valueStyle={{ color: '#faad14', fontSize: '2em', fontWeight: 'bold' }}
+            />
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>等待确认的匹配请求</p>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }}
+          >
+            <Statistic
+              title="成功率"
+              value={parseFloat(matchStats.successRate)}
+              suffix="%"
+              prefix={<PercentageOutlined />}
+              valueStyle={{ color: '#52c41a', fontSize: '2em', fontWeight: 'bold' }}
+            />
+            <p style={{ marginTop: 10, color: '#666', fontSize: '14px' }}>匹配成功占总数的比例</p>
+          </Card>
+        </Col>
+      </Row>
+      
+      {/* 用户统计卡片 */}
       <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', transform: 'translateY(0)', cursor: 'pointer' }} 

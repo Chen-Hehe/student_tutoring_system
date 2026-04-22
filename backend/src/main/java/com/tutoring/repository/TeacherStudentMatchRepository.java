@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 师生匹配 Mapper
@@ -62,4 +63,13 @@ public interface TeacherStudentMatchRepository extends BaseMapper<TeacherStudent
      * @return 匹配列表
      */
     List<TeacherStudentMatch> findByStudentIdInAndStatus(@Param("studentIds") List<Long> studentIds, @Param("status") int status);
+    
+    /**
+     * 统计匹配数据（全局或按教师/学生筛选）
+     *
+     * @param teacherId 教师 ID（可选）
+     * @param studentId 学生 ID（可选）
+     * @return 统计结果数组 [totalMatches, successfulMatches, pendingMatches, rejectedMatches]
+     */
+    Map<String, Object> getMatchStatistics(@Param("teacherId") Long teacherId, @Param("studentId") Long studentId);
 }

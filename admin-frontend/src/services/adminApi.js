@@ -4,6 +4,9 @@ export const adminAPI = {
   getStatistics: () => {
     return api.get('/admin/statistics')
   },
+  getMatchStatistics: () => {
+    return api.get('/matches/statistics')
+  },
   getUsers: (page = 1, size = 10, role = null) => {
     const params = { page, size }
     if (role) {

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { Card, Row, Col, Statistic, Table, Tag, Button, Progress } from 'antd'
+import { Card, Row, Col, Statistic, Table, Tag, Button, Progress, Spin } from 'antd'
 import {
   UsergroupAddOutlined,
   MessageOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   TrophyOutlined,
-  FireOutlined
+  FireOutlined,
+  PercentageOutlined
 } from '@ant-design/icons'
 import { matchAPI } from '../services/matchApi'
 
@@ -17,7 +18,9 @@ const Dashboard = () => {
     totalStudents: 0,
     pendingMatches: 0,
     activeMatches: 0,
-    completedSessions: 0
+    completedSessions: 0,
+    totalMatches: 0,
+    successRate: '0.00%'
   })
   const [recentMatches, setRecentMatches] = useState([])
   const [loading, setLoading] = useState(false)
@@ -35,6 +38,10 @@ const Dashboard = () => {
       const result = await matchAPI.getTeacherMatches(currentUser.id)
       const matches = result.data || []
       
+      // 加载统计数据
+      const statsResult = await matchAPI.getStatistics(currentUser.id)
+      const statistics = statsResult.data || {}
+      
       // 统计数据
       const pending = matches.filter(m => m.status === 0 || m.status === 1).length
       const active = matches.filter(m => m.status === 2).length
@@ -44,7 +51,9 @@ const Dashboard = () => {
         totalStudents: active,
         pendingMatches: pending,
         activeMatches: active,
-        completedSessions: completed
+        completedSessions: completed,
+        totalMatches: statistics.totalMatches || matches.length,
+        successRate: statistics.successRate || '0.00%'
       })
       
       // 最近匹配
@@ -108,8 +117,8 @@ const Dashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="辅导学生数"
-              value={stats.totalStudents}
+              title="总匹配数"
+              value={stats.totalMatches}
               prefix={<UsergroupAddOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
@@ -138,10 +147,11 @@ const Dashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="已完成课程"
-              value={stats.completedSessions}
-              prefix={<TrophyOutlined />}
-              valueStyle={{ color: '#722ed1' }}
+              title="成功率"
+              value={parseFloat(stats.successRate)}
+              suffix="%"
+              prefix={<PercentageOutlined />}
+              valueStyle={{ color: '#52c41a' }}
             />
           </Card>
         </Col>

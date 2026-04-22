@@ -50,7 +50,7 @@
         ORDER BY created_at ASC
     </select>
 
-    <!-- 根据学生ID和状态查询匹配 -->
+    <!-- 根据学生 ID 和状态查询匹配 -->
     <select id="findByStudentIdAndStatus" resultMap="MatchResultMap">
         SELECT * FROM teacher_student_matches
         WHERE student_id = #{studentId}
@@ -59,7 +59,7 @@
         ORDER BY created_at DESC
     </select>
 
-    <!-- 根据学生ID列表和状态查询匹配 -->
+    <!-- 根据学生 ID 列表和状态查询匹配 -->
     <select id="findByStudentIdInAndStatus" resultMap="MatchResultMap">
         SELECT * FROM teacher_student_matches
         WHERE student_id IN
@@ -69,6 +69,23 @@
         AND status = #{status}
         AND deleted = 0
         ORDER BY created_at DESC
+    </select>
+
+    <!-- 统计匹配数据 -->
+    <select id="getMatchStatistics" resultType="java.util.HashMap">
+        SELECT
+            COUNT(*) AS totalMatches,
+            SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS successfulMatches,
+            SUM(CASE WHEN status IN (0, 1) THEN 1 ELSE 0 END) AS pendingMatches,
+            SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) AS rejectedMatches
+        FROM teacher_student_matches
+        WHERE deleted = 0
+        <if test="teacherId != null">
+            AND teacher_id = #{teacherId}
+        </if>
+        <if test="studentId != null">
+            AND student_id = #{studentId}
+        </if>
     </select>
 
 </mapper>

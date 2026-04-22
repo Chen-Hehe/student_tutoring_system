@@ -3,6 +3,7 @@ package com.tutoring.controller;
 import com.tutoring.dto.MatchRequest;
 import com.tutoring.dto.MatchResponse;
 import com.tutoring.dto.AIRecommendationResponse;
+import com.tutoring.dto.MatchStatisticsDTO;
 import com.tutoring.dto.Result;
 import com.tutoring.service.MatchService;
 import jakarta.validation.Valid;
@@ -207,6 +208,27 @@ public class MatchController {
         try {
             // TODO: 实现学生视角的推荐
             return Result.success(java.util.Collections.emptyList());
+        } catch (RuntimeException e) {
+            return Result.error(500, e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取匹配统计数据
+     * 支持全局统计（Admin 视角）或按用户筛选（教师/学生视角）
+     *
+     * @param teacherId 教师 ID（可选，教师视角）
+     * @param studentId 学生 ID（可选，学生视角）
+     * @return 统计数据
+     */
+    @GetMapping("/statistics")
+    public Result<MatchStatisticsDTO> getMatchStatistics(
+            @RequestParam(required = false) Long teacherId,
+            @RequestParam(required = false) Long studentId
+    ) {
+        try {
+            MatchStatisticsDTO statistics = matchService.getMatchStatistics(teacherId, studentId);
+            return Result.success(statistics);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
         }

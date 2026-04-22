@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.dto.AIRecommendationResponse;
 import com.tutoring.dto.MatchRequest;
 import com.tutoring.dto.MatchResponse;
+import com.tutoring.dto.MatchStatisticsDTO;
 import com.tutoring.entity.Student;
 import com.tutoring.entity.Teacher;
 import com.tutoring.entity.TeacherStudentMatch;
@@ -501,6 +502,50 @@ public class MatchService {
             case 2: return "已匹配";
             case 3: return "已拒绝";
             default: return "未知";
+        }
+    }
+    
+    /**
+     * 获取匹配统计数据
+     *
+     * @param teacherId 教师 ID（可选）
+     * @param studentId 学生 ID（可选）
+     * @return 统计数据 DTO
+     */
+    public MatchStatisticsDTO getMatchStatistics(Long teacherId, Long studentId) {
+        Map<String, Object> result = matchRepository.getMatchStatistics(teacherId, studentId);
+        
+        MatchStatisticsDTO dto = new MatchStatisticsDTO();
+        dto.setTeacherId(teacherId);
+        dto.setStudentId(studentId);
+        
+        // 从 Map 中提取数据，处理可能的 null 值
+        dto.setTotalMatches(getLongValue(result, "totalMatches"));
+        dto.setSuccessfulMatches(getLongValue(result, "successfulMatches"));
+        dto.setPendingMatches(getLongValue(result, "pendingMatches"));
+        dto.setRejectedMatches(getLongValue(result, "rejectedMatches"));
+        
+        // 计算成功率
+        dto.calculateSuccessRate();
+        
+        return dto;
+    }
+    
+    /**
+     * 从 Map 中安全获取 Long 值
+     */
+    private Long getLongValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            return 0L;
         }
     }
     
