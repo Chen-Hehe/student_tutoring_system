@@ -8,22 +8,22 @@ import Resources from './pages/Resources'
 import Psychological from './pages/Psychological'
 import AIRecommendation from './pages/AIRecommendation'
 import Match from './pages/Match'
+import Login from './pages/Login'
 
 // 受保护的路由组件
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth)
   
-  // 检查URL参数中是否有token和user信息
+  // 检查 URL 参数中是否有 token 和 user 信息
   const checkUrlParams = () => {
     const params = new URLSearchParams(window.location.search)
     return params.get('token') && params.get('user')
   }
   
-  // 如果有URL参数，等待处理完成，不立即重定向
+  // 如果有 URL 参数，等待处理完成，不立即重定向
   if (!isAuthenticated && !checkUrlParams()) {
-    // 重定向到统一入口的登录页
-    window.location.href = 'http://localhost:3001/login'
-    return null
+    // 重定向到学生端的登录页（本地路由）
+    return <Navigate to="/login" replace />
   }
   
   return children
@@ -32,6 +32,9 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
+      {/* 公开路由 */}
+      <Route path="/login" element={<Login />} />
+      
       {/* 受保护的路由 */}
       <Route 
         path="/" 

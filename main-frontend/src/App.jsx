@@ -153,10 +153,10 @@ const Login = () => {
       
       // 根据角色重定向到相应的前端
       const roleRedirects = {
-        teacher: 'http://localhost:3004/',
-        student: 'http://localhost:3006/',
-        parent: 'http://localhost:3005/',
-        admin: 'http://localhost:3008/'
+        teacher: 'http://localhost:3002/',
+        student: 'http://localhost:3003/',
+        parent: 'http://localhost:3004/',
+        admin: 'http://localhost:3001/'
       };
       
       // 构建重定向 URL，包含 token 和 user 信息作为查询参数
