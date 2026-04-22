@@ -12,7 +12,8 @@ const Home = () => {
     const fetchAnnouncements = async () => {
       try {
         const response = await contentApi.getAnnouncements();
-        setAnnouncements(response.data.data || []);
+        // 使用响应拦截器处理后的数据格式
+        setAnnouncements(response.data || []);
       } catch (error) {
         console.error('获取公告失败:', error);
       }
@@ -94,7 +95,7 @@ const Home = () => {
                 <div key={index} className="announcement-item">
                   <h3>{announcement.title}</h3>
                   <p>{announcement.content}</p>
-                  <p className="announcement-date">{announcement.createdAt}</p>
+                  <p className="announcement-date">{announcement.publishDate}</p>
                 </div>
               ))
             ) : (

@@ -1,8 +1,11 @@
 import axios from 'axios';
 
+// API 基础 URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
 // 创建axios实例
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -13,9 +16,17 @@ const api = axios.create({
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // 添加用户 ID 到请求头（后端需要 X-User-Id）
+    if (user && user.id) {
+      config.headers['X-User-Id'] = user.id;
+    }
+    
     return config;
   },
   error => {
@@ -26,6 +37,17 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   response => {
+    // 处理后端返回的数据格式
+    if (response.data) {
+      // 检查是否是标准的Result格式
+      if (response.data.code !== undefined) {
+        // 返回格式：{ code: 200, message: "success", data: [...] }
+        return {
+          success: response.data.code === 200,
+          data: response.data.data
+        };
+      }
+    }
     return response;
   },
   error => {
@@ -59,7 +81,7 @@ export const authApi = {
 export const contentApi = {
   // 获取公告
   getAnnouncements: () => {
-    return api.get('/content/announcements');
+    return api.get('/admin/content/announcements');
   }
 };
 
