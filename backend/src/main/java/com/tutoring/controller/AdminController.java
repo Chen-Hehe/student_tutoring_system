@@ -15,7 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.dto.Result;
+import com.tutoring.entity.Announcement;
+import com.tutoring.entity.LearningMaterial;
+import com.tutoring.entity.LearningResource;
 import com.tutoring.entity.User;
+import com.tutoring.repository.AnnouncementRepository;
+import com.tutoring.repository.LearningMaterialRepository;
+import com.tutoring.repository.LearningResourceRepository;
 import com.tutoring.repository.UserRepository;
 
 @RestController
@@ -24,6 +30,15 @@ public class AdminController {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private LearningResourceRepository learningResourceRepository;
+    
+    @Autowired
+    private LearningMaterialRepository learningMaterialRepository;
+    
+    @Autowired
+    private AnnouncementRepository announcementRepository;
     
     @GetMapping("/statistics")
     public Result<Map<String, Object>> getStatistics() {
@@ -179,6 +194,145 @@ public class AdminController {
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error(500, "禁用用户失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取教学资源列表
+     *
+     * @param keyword 关键词
+     * @param type 资源类型
+     * @param uploaderId 上传者ID
+     * @return 资源列表
+     */
+    @GetMapping("/content/resources")
+    public Result<List<Map<String, Object>>> getResources(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long uploaderId) {
+        try {
+            LambdaQueryWrapper<LearningResource> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(LearningResource::getDeleted, 0);
+            
+            if (keyword != null && !keyword.isEmpty()) {
+                wrapper.like(LearningResource::getTitle, keyword);
+            }
+            
+            if (type != null && !type.isEmpty()) {
+                wrapper.eq(LearningResource::getType, type);
+            }
+            
+            if (uploaderId != null) {
+                wrapper.eq(LearningResource::getUploaderId, uploaderId);
+            }
+            
+            List<LearningResource> resources = learningResourceRepository.selectList(wrapper);
+            
+            List<Map<String, Object>> resourceList = resources.stream().map(resource -> {
+                Map<String, Object> resourceInfo = new HashMap<>();
+                resourceInfo.put("id", resource.getId());
+                resourceInfo.put("title", resource.getTitle());
+                resourceInfo.put("type", resource.getType());
+                resourceInfo.put("uploaderId", resource.getUploaderId());
+                resourceInfo.put("createdAt", resource.getCreatedAt());
+                resourceInfo.put("downloadCount", 0); // 暂时返回0，实际应该从数据库获取
+                return resourceInfo;
+            }).collect(Collectors.toList());
+            
+            return Result.success(resourceList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取教学资源失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取学习资料列表
+     *
+     * @param keyword 关键词
+     * @param subject 学科
+     * @return 学习资料列表
+     */
+    @GetMapping("/content/learning-materials")
+    public Result<List<Map<String, Object>>> getLearningMaterials(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String subject) {
+        try {
+            LambdaQueryWrapper<LearningMaterial> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(LearningMaterial::getDeleted, 0);
+            
+            if (keyword != null && !keyword.isEmpty()) {
+                wrapper.like(LearningMaterial::getTitle, keyword);
+            }
+            
+            if (subject != null && !subject.isEmpty()) {
+                wrapper.eq(LearningMaterial::getSubject, subject);
+            }
+            
+            List<LearningMaterial> materials = learningMaterialRepository.selectList(wrapper);
+            
+            List<Map<String, Object>> materialList = materials.stream().map(material -> {
+                Map<String, Object> materialInfo = new HashMap<>();
+                materialInfo.put("id", material.getId());
+                materialInfo.put("title", material.getTitle());
+                materialInfo.put("subject", material.getSubject());
+                materialInfo.put("grade", material.getGrade());
+                materialInfo.put("type", material.getType());
+                materialInfo.put("viewCount", material.getViewCount());
+                materialInfo.put("downloadCount", material.getDownloadCount());
+                materialInfo.put("uploaderId", material.getUploaderId());
+                materialInfo.put("createdAt", material.getCreatedAt());
+                return materialInfo;
+            }).collect(Collectors.toList());
+            
+            return Result.success(materialList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取学习资料失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取公告列表
+     *
+     * @param keyword 关键词
+     * @param status 状态
+     * @return 公告列表
+     */
+    @GetMapping("/content/announcements")
+    public Result<List<Map<String, Object>>> getAnnouncements(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status) {
+        try {
+            LambdaQueryWrapper<Announcement> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Announcement::getDeleted, 0);
+            
+            if (keyword != null && !keyword.isEmpty()) {
+                wrapper.like(Announcement::getTitle, keyword);
+            }
+            
+            if (status != null && !status.isEmpty()) {
+                wrapper.eq(Announcement::getStatus, status);
+            }
+            
+            List<Announcement> announcements = announcementRepository.selectList(wrapper);
+            
+            List<Map<String, Object>> announcementList = announcements.stream().map(announcement -> {
+                Map<String, Object> announcementInfo = new HashMap<>();
+                announcementInfo.put("id", announcement.getId());
+                announcementInfo.put("title", announcement.getTitle());
+                announcementInfo.put("content", announcement.getContent());
+                announcementInfo.put("authorId", announcement.getAuthorId());
+                announcementInfo.put("publishDate", announcement.getPublishDate());
+                announcementInfo.put("status", announcement.getStatus());
+                announcementInfo.put("viewCount", announcement.getViewCount());
+                return announcementInfo;
+            }).collect(Collectors.toList());
+            
+            return Result.success(announcementList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取公告列表失败: " + e.getMessage());
         }
     }
 }
