@@ -43,17 +43,26 @@ const authSlice = createSlice({
       state.error = action.payload
     },
     logout: (state) => {
-      state.token = null
-      state.user = null
-      state.isAuthenticated = false
-      state.loading = false
-      state.error = null
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-    },
-    clearError: (state) => {
-      state.error = null
-    }
+    state.token = null
+    state.user = null
+    state.isAuthenticated = false
+    state.loading = false
+    state.error = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  },
+  clearError: (state) => {
+    state.error = null
+  },
+  // 从 storage 恢复状态（用于页面刷新）
+  restoreAuth: (state, action) => {
+    const { user, token } = action.payload
+    state.isAuthenticated = !!token
+    state.user = user
+    state.token = token
+    state.loading = false
+    state.error = null
+  }
   }
 })
 
@@ -65,7 +74,8 @@ export const {
   registerSuccess,
   registerFailure,
   logout,
-  clearError
+  clearError,
+  restoreAuth
 } = authSlice.actions
 
 export default authSlice.reducer

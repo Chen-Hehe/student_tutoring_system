@@ -15,7 +15,7 @@ const Layout = () => {
     { key: '/psychological', icon: <HeartOutlined />, label: '心理状态' },
     { key: '/match-confirm', icon: <CheckCircleOutlined />, label: '匹配确认' }
   ]
-  const handleLogout = () => { dispatch(logout()); navigate('/login') }
+  const handleLogout = () => { dispatch(logout()); window.location.href = 'http://localhost:3000/login' }
   return (
     <AntLayout style={{ minHeight: '100vh' }}>
       <Sider 

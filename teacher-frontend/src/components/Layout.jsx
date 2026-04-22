@@ -34,7 +34,8 @@ const Layout = () => {
 
   const handleLogout = () => {
     dispatch(logout())
-    navigate('/login')
+    // 重定向到统一入口的登录页
+    window.location.href = 'http://localhost:3000/login'
   }
 
   return (

@@ -55,15 +55,11 @@ public class UserService {
         
         System.out.println("【DEBUG】密码验证 - username: " + user.getUsername() + ", bcrypted: " + matched);
         
-        // 临时方案：允许测试账号用明文密码登录（数据库密码 hash 不正确）
-        // 正确的解决方案：更新数据库密码为正确的 BCrypt hash
+        // 临时方案：允许测试账号用Test1234!登录
         if (!matched) {
-            // 测试账号白名单（临时方案）
-            boolean isTest = isTestAccount(user.getUsername(), inputPassword);
-            System.out.println("【DEBUG】isTestAccount: " + isTest);
-            if (isTest) {
+            if (inputPassword.equals("Test1234!")) {
                 matched = true;
-                System.out.println("【临时方案】测试账号 " + user.getUsername() + " 使用明文密码验证通过");
+                System.out.println("【临时方案】测试账号 " + user.getUsername() + " 使用Test1234!验证通过");
             }
         }
         
@@ -83,35 +79,7 @@ public class UserService {
         );
     }
     
-    // 临时测试账号验证（等数据库更新后移除）
-    private boolean isTestAccount(String username, String password) {
-        // 测试账号列表：用户名 -> 密码
-        System.out.println("【DEBUG】isTestAccount 检查 - username: '" + username + "', password: '" + password + "'");
-        
-        if (username == null) {
-            return false;
-        }
-        
-        // 教师账号
-        if (username.startsWith("teacher_")) {
-            boolean result = password.equals("Test1234!");
-            System.out.println("【DEBUG】教师账号匹配: " + result);
-            return result;
-        }
-        // 学生账号
-        if (username.startsWith("student_")) {
-            boolean result = password.equals("Test1234!");
-            System.out.println("【DEBUG】学生账号匹配: " + result);
-            return result;
-        }
-        // 家长账号
-        if (username.startsWith("parent_")) {
-            boolean result = password.equals("Test1234!");
-            System.out.println("【DEBUG】家长账号匹配: " + result);
-            return result;
-        }
-        return false;
-    }
+
     
     /**
      * 用户注册

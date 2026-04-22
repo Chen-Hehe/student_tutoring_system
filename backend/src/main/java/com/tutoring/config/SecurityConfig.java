@@ -41,10 +41,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // 允许访问管理员接口
                 .requestMatchers("/api/admin/**").permitAll()
-                // 允许访问家长接口
-                .requestMatchers("/api/parent/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
+                // 允许访问测试接口
+                .requestMatchers("/api/test/**").permitAll()
                 // 允许访问 Swagger/OpenAPI
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 允许 WebSocket 连接
