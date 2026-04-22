@@ -72,6 +72,7 @@ const Chat = () => {
     try {
       const result = await chatAPI.getChatHistory(userId)
       setMessages(result.data || [])
+      console.log('【DEBUG】加载聊天记录后标记为已读:', userId)
       // 标记为已读（调用后端接口，后端会推送已读状态给发送者）
       await chatAPI.markAsRead(userId)
       // 消息设置后，useEffect 会自动滚动，这里不需要额外处理
@@ -209,9 +210,14 @@ const Chat = () => {
       }
       
       // 忽略自己发送的消息（字符串比较）
-      if (String(data.senderId) === String(currentUser.id)) return
+      if (String(data.senderId) === String(currentUser.id)) {
+        console.log('【DEBUG】忽略自己发送的消息')
+        return
+      }
 
+      console.log('【DEBUG】收到对方消息，data:', data)
       const active = selectedConversationRef.current
+      console.log('【DEBUG】active:', active, 'data.senderId:', data.senderId, 'match:', active && String(data.senderId) === String(active.userId))
       if (active && String(data.senderId) === String(active.userId)) {
         setMessages((prev) => [...prev, {
           ...data,

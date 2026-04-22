@@ -310,12 +310,14 @@ const Chat = () => {
           console.log('【DEBUG】收到已读状态更新，readerId:', data.readerId, 'currentUser.id:', currentUser.id)
           setMessages(prev => {
             const updated = prev.map(msg => {
+              // 匹配所有自己发送的未读消息（不检查 messageId，因为可能是临时 ID）
               const match = String(msg.senderId) === String(currentUser.id) && !msg.isRead
               if (match) {
-                console.log('【DEBUG】标记消息为已读:', msg.messageId, 'senderId:', msg.senderId)
+                console.log('【DEBUG】标记消息为已读:', msg.messageId, 'senderId:', msg.senderId, 'message:', msg.message?.substring(0, 20))
               }
               return match ? { ...msg, isRead: true } : msg
             })
+            console.log('【DEBUG】已读状态更新完成，更新消息数:', updated.filter(m => m.isRead).length)
             return updated
           })
           loadConversations()
