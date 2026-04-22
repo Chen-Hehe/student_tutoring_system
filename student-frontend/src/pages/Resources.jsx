@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, Input, Button, Select, Grid, Tag, message, Spin, Empty } from 'antd'
-import { SearchOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined, PresentationOutlined } from '@ant-design/icons'
+import { SearchOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined, DesktopOutlined } from '@ant-design/icons'
 import { resourcesAPI } from '../services/resourceApi'
 
 const { useBreakpoint } = Grid
@@ -35,7 +35,7 @@ const typeIcons = {
   'document': <FileTextOutlined />,
   'video': <VideoCameraOutlined />,
   'audio': <AudioOutlined />,
-  'presentation': <PresentationOutlined />
+  'presentation': <DesktopOutlined />
 }
 
 const Resources = () => {
