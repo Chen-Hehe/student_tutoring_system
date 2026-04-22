@@ -29,7 +29,13 @@ public class LearningResource {
 
     private String category;
 
+    private Integer downloadCount;
+
     private LocalDateTime createdAt;
 
     private Integer deleted;
+    
+    private String fileName;
+    
+    private Long fileSize;
 }

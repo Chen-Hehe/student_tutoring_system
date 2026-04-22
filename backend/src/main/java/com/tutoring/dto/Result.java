@@ -13,7 +13,11 @@ public class Result<T> {
     private T data;
     
     public static <T> Result<T> success() {
-        return success(null);
+        Result<T> result = new Result<>();
+        result.setCode(200);
+        result.setMessage("成功");
+        result.setData(null);
+        return result;
     }
     
     public static <T> Result<T> success(T data) {

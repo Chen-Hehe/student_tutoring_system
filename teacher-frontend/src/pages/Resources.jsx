@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { Card, Table, Button, Tag, Input, Space, Modal, message, Upload, Form, Select } from 'antd'
-import { PlusOutlined, UploadOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { Card, Table, Button, Tag, Input, Space, Modal, message, Upload, Form, Select, Typography, Row, Col, Statistic } from 'antd'
+import { PlusOutlined, UploadOutlined, DeleteOutlined, EyeOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined } from '@ant-design/icons'
+
 import { resourcesAPI } from '../services/resourceApi'
 
 const { TextArea } = Input
 const { Option } = Select
+const { Title } = Typography
 
 const Resources = () => {
   const currentUser = useSelector((state) => state.auth.user)
@@ -14,6 +16,7 @@ const Resources = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [form] = Form.useForm()
   const [uploading, setUploading] = useState(false)
+  const [fileList, setFileList] = useState([])
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -28,37 +31,49 @@ const Resources = () => {
       setResources(result.data || [])
     } catch (error) {
       console.error('加载资源列表失败:', error)
+      message.error('加载资源列表失败')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUpload = async (file) => {
+  const handleAddResource = async (values) => {
+    if (fileList.length === 0) {
+      message.warning('请选择要上传的文件')
+      return
+    }
+
+    const file = fileList[0].originFileObj
+    if (!file) {
+      message.warning('文件无效')
+      return
+    }
+
     setUploading(true)
     try {
-      // TODO: 实现文件上传到 OSS
-      message.info('文件上传功能待实现')
-      return false
-    } catch (error) {
-      message.error('上传失败')
-      return false
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleAddResource = async (values) => {
-    try {
-      await resourcesAPI.create({
-        ...values,
-        uploaderId: currentUser.id
-      })
-      message.success('添加成功')
+      console.log('【DEBUG】开始上传资源:', { ...values, fileName: file.name, fileSize: file.size })
+      
+      const result = await resourcesAPI.uploadResource(
+        file,
+        values.title,
+        values.description || '',
+        values.type,
+        values.category,
+        currentUser.id
+      )
+      
+      console.log('【DEBUG】上传成功:', result)
+      
+      message.success('资源添加成功')
       setModalVisible(false)
       form.resetFields()
+      setFileList([])
       loadResources()
     } catch (error) {
-      message.error('添加失败')
+      console.error('【DEBUG】上传失败:', error)
+      message.error('上传失败：' + (error.response?.data?.message || error.message))
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -66,6 +81,8 @@ const Resources = () => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这个资源吗？',
+      okText: '确认',
+      cancelText: '取消',
       onOk: async () => {
         try {
           await resourcesAPI.delete(id)
@@ -78,10 +95,24 @@ const Resources = () => {
     })
   }
 
-  const typeMap = {
-    document: { text: '文档', color: 'blue' },
-    video: { text: '视频', color: 'red' },
-    audio: { text: '音频', color: 'green' }
+  const typeConfig = {
+    document: { text: '文档', color: 'blue', icon: <FileTextOutlined /> },
+    video: { text: '视频', color: 'red', icon: <VideoCameraOutlined /> },
+    audio: { text: '音频', color: 'green', icon: <AudioOutlined /> },
+    other: { text: '其他', color: 'default', icon: <FileTextOutlined /> }
+  }
+
+  const categoryConfig = {
+    math: '数学',
+    chinese: '语文',
+    english: '英语',
+    physics: '物理',
+    chemistry: '化学',
+    biology: '生物',
+    history: '历史',
+    geography: '地理',
+    politics: '政治',
+    other: '其他'
   }
 
   const columns = [
@@ -90,7 +121,12 @@ const Resources = () => {
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
-        <a href={record.url} target="_blank" rel="noopener noreferrer">
+        <a href={record.url} target="_blank" rel="noopener noreferrer" onClick={(e) => {
+          e.preventDefault()
+          window.open(record.url, '_blank')
+          // 增加下载次数
+          resourcesAPI.incrementDownloadCount(record.id).catch(console.error)
+        }}>
           {text}
         </a>
       )
@@ -99,92 +135,171 @@ const Resources = () => {
       title: '类型',
       dataIndex: 'type',
       key: 'type',
-      render: (type) => (
-        <Tag color={typeMap[type]?.color}>
-          {typeMap[type]?.text || type}
-        </Tag>
-      )
+      render: (type) => {
+        const config = typeConfig[type] || typeConfig.other
+        return (
+          <Tag color={config.color} icon={config.icon}>
+            {config.text}
+          </Tag>
+        )
+      }
     },
     {
       title: '分类',
       dataIndex: 'category',
-      key: 'category'
+      key: 'category',
+      render: (category) => categoryConfig[category] || category
     },
     {
       title: '上传者',
-      dataIndex: 'uploaderName',
-      key: 'uploaderName'
+      dataIndex: 'uploaderId',
+      key: 'uploaderId',
+      render: (id) => `教师${id}`
     },
     {
-      title: '创建时间',
+      title: '大小',
+      dataIndex: 'fileSize',
+      key: 'fileSize',
+      render: (size) => {
+        if (!size) return '-'
+        if (size < 1024) return size + ' B'
+        if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB'
+        return (size / (1024 * 1024)).toFixed(2) + ' MB'
+      }
+    },
+    {
+      title: '下载次数',
+      dataIndex: 'downloadCount',
+      key: 'downloadCount',
+      render: (count) => count || 0
+    },
+    {
+      title: '上传时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (time) => new Date(time).toLocaleDateString()
+      render: (time) => time ? new Date(time).toLocaleString('zh-CN') : '-'
     },
     {
       title: '操作',
       key: 'action',
       render: (_, record) => (
-        <Space size="small">
+        <Space>
           <Button
             type="link"
             size="small"
-            icon={<EyeOutlined />}
-            onClick={() => window.open(record.url, '_blank')}
+            onClick={() => {
+              window.open(record.url, '_blank')
+              resourcesAPI.incrementDownloadCount(record.id).catch(console.error)
+            }}
           >
             查看
           </Button>
-          {record.uploaderId === currentUser?.id && (
-            <Button
-              type="link"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.id)}
-            >
-              删除
-            </Button>
-          )}
+          <Button
+            type="link"
+            size="small"
+            danger
+            onClick={() => handleDelete(record.id)}
+          >
+            <DeleteOutlined />
+          </Button>
         </Space>
       )
     }
   ]
 
-  return (
-    <div>
-      <h2 style={{ marginBottom: 24 }}>📚 教学资源</h2>
+  // 文件上传配置
+  const uploadProps = {
+    onRemove: (file) => {
+      setFileList((prev) => {
+        const index = prev.indexOf(file)
+        const newFileList = prev.slice()
+        newFileList.splice(index, 1)
+        return newFileList
+      })
+    },
+    beforeUpload: (file) => {
+      // 自动检测文件类型
+      const fileType = detectFileType(file)
+      console.log('【DEBUG】选择文件:', file.name, '类型:', fileType, '大小:', file.size)
       
+      setFileList([file])
+      
+      // 自动填充类型字段
+      form.setFieldsValue({ type: fileType })
+      
+      return false // 阻止自动上传
+    },
+    fileList,
+    maxCount: 1
+  }
+
+  const detectFileType = (file) => {
+    const type = file.type
+    const name = file.name.toLowerCase()
+    
+    if (type.startsWith('video/') || name.endsWith('.mp4') || name.endsWith('.avi')) {
+      return 'video'
+    }
+    if (type.startsWith('audio/') || name.endsWith('.mp3') || name.endsWith('.wav')) {
+      return 'audio'
+    }
+    if (type.startsWith('application/') || type.startsWith('text/') || 
+        name.endsWith('.pdf') || name.endsWith('.doc') || name.endsWith('.docx') || 
+        name.endsWith('.ppt') || name.endsWith('.pptx')) {
+      return 'document'
+    }
+    return 'other'
+  }
+
+  return (
+    <div style={{ padding: 24 }}>
       <Card>
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-          <Space>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />}
-              onClick={() => setModalVisible(true)}
-            >
-              添加资源
-            </Button>
-            <Upload
-              accept="*"
-              showUploadList={false}
-              beforeUpload={handleUpload}
-            >
-              <Button icon={<UploadOutlined />}>
-                上传文件
-              </Button>
-            </Upload>
-          </Space>
+        <Row gutter={16} style={{ marginBottom: 24 }}>
+          <Col span={8}>
+            <Statistic 
+              title="资源总数" 
+              value={resources.length} 
+              prefix={<FileTextOutlined />}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Col>
+          <Col span={8}>
+            <Statistic 
+              title="文档" 
+              value={resources.filter(r => r.type === 'document').length}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Col>
+          <Col span={8}>
+            <Statistic 
+              title="视频/音频" 
+              value={resources.filter(r => r.type === 'video' || r.type === 'audio').length}
+              valueStyle={{ color: '#faad14' }}
+            />
+          </Col>
+        </Row>
+
+        <div style={{ marginBottom: 16 }}>
+          <Title level={4}>教学资源管理</Title>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />} 
+            onClick={() => setModalVisible(true)}
+            disabled={uploading}
+          >
+            添加资源
+          </Button>
         </div>
 
         <Table
           columns={columns}
           dataSource={resources}
+          rowKey="id"
           loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 个资源`
-          }}
+          pagination={{ pageSize: 10 }}
         />
       </Card>
 
@@ -195,47 +310,57 @@ const Resources = () => {
         onCancel={() => {
           setModalVisible(false)
           form.resetFields()
+          setFileList([])
         }}
-        onOk={() => form.submit()}
-        confirmLoading={uploading}
+        footer={null}
+        width={600}
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={handleAddResource}
+          initialValues={{
+            type: 'document',
+            category: 'math'
+          }}
         >
           <Form.Item
             name="title"
             label="资源标题"
-            rules={[{ required: true, message: '请输入标题' }]}
+            rules={[{ required: true, message: '请输入资源标题' }]}
           >
-            <Input placeholder="请输入资源标题" />
+            <Input placeholder="例如：二次函数讲解课件" />
           </Form.Item>
 
           <Form.Item
             name="description"
-            label="描述"
+            label="资源描述"
           >
-            <TextArea rows={3} placeholder="请输入资源描述" />
+            <TextArea 
+              rows={3} 
+              placeholder="简要描述这个教学资源的内容和用途"
+            />
           </Form.Item>
 
           <Form.Item
             name="type"
             label="资源类型"
-            rules={[{ required: true, message: '请选择类型' }]}
+            rules={[{ required: true, message: '请选择资源类型' }]}
           >
-            <Select placeholder="请选择类型">
-              <Option value="document">文档</Option>
-              <Option value="video">视频</Option>
-              <Option value="audio">音频</Option>
+            <Select>
+              <Option value="document">📄 文档</Option>
+              <Option value="video">🎬 视频</Option>
+              <Option value="audio">🎵 音频</Option>
+              <Option value="other">📦 其他</Option>
             </Select>
           </Form.Item>
 
           <Form.Item
             name="category"
-            label="分类"
+            label="学科分类"
+            rules={[{ required: true, message: '请选择学科分类' }]}
           >
-            <Select placeholder="请选择分类">
+            <Select>
               <Option value="math">数学</Option>
               <Option value="chinese">语文</Option>
               <Option value="english">英语</Option>
@@ -244,15 +369,40 @@ const Resources = () => {
               <Option value="biology">生物</Option>
               <Option value="history">历史</Option>
               <Option value="geography">地理</Option>
+              <Option value="politics">政治</Option>
+              <Option value="other">其他</Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            name="url"
-            label="资源链接"
-            rules={[{ required: true, message: '请输入资源链接' }]}
+            label="上传文件"
+            rules={[{ required: true, message: '请选择要上传的文件' }]}
           >
-            <Input placeholder="请输入资源链接（URL）" />
+            <Upload.Dragger {...uploadProps} accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.avi,.mov,.mp3,.wav,.zip,.rar">
+              <p className="ant-upload-drag-icon">
+                <UploadOutlined />
+              </p>
+              <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+              <p className="ant-upload-hint">
+                支持单个文件上传，自动识别文件类型<br/>
+                支持格式：PDF、Word、PPT、Excel、MP4、AVI、MP3 等
+              </p>
+            </Upload.Dragger>
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={uploading}>
+                上传
+              </Button>
+              <Button onClick={() => {
+                setModalVisible(false)
+                form.resetFields()
+                setFileList([])
+              }}>
+                取消
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>

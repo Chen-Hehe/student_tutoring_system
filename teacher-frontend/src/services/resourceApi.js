@@ -19,7 +19,14 @@ export const resourcesAPI = {
   },
 
   /**
-   * 创建资源
+   * 获取资源列表（新）
+   */
+  getList: (params) => {
+    return api.get('/resources/list', { params })
+  },
+
+  /**
+   * 创建资源（新）
    */
   create: (data) => {
     return api.post('/resources', data)
@@ -40,15 +47,35 @@ export const resourcesAPI = {
   },
 
   /**
-   * 上传文件
+   * 上传资源文件（包含所有元数据）
    */
-  upload: (file) => {
+  uploadResource: (file, title, description, type, category, uploaderId) => {
     const formData = new FormData()
     formData.append('file', file)
+    formData.append('title', title)
+    formData.append('description', description)
+    formData.append('type', type)
+    formData.append('category', category)
+    formData.append('uploaderId', uploaderId)
+    
     return api.post('/resources/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+  
+  /**
+   * 删除资源
+   */
+  delete: (id) => {
+    return api.delete(`/resources/${id}`)
+  },
+  
+  /**
+   * 增加下载次数
+   */
+  incrementDownloadCount: (id) => {
+    return api.post(`/resources/${id}/download`)
   }
 }
