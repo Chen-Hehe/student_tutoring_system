@@ -136,19 +136,28 @@ public class ChatController {
     /**
      * 撤回消息
      *
-     * @param messageId 消息 ID
+     * @param messageId 消息 ID（字符串格式，避免 JS 精度丢失）
      * @return 撤回结果
      */
     @PostMapping("/recall/{messageId}")
     public Result<Map<String, Object>> recallMessage(
-            @PathVariable Long messageId,
+            @PathVariable String messageId,
             @RequestHeader("X-User-Id") Long currentUserId) {
         try {
-            log.info("【DEBUG】ChatController.recallMessage - messageId={}, currentUserId={}",
-                messageId, currentUserId);
+            // 将字符串转换为 Long（处理可能的精度问题）
+            Long messageIdLong;
+            try {
+                messageIdLong = Long.parseLong(messageId);
+            } catch (NumberFormatException e) {
+                log.error("【DEBUG】消息 ID 格式错误：{}", messageId);
+                return Result.error(400, "消息 ID 格式错误");
+            }
+            
+            log.info("【DEBUG】ChatController.recallMessage - messageId={}, messageIdLong={}, currentUserId={}",
+                messageId, messageIdLong, currentUserId);
             
             // 直接调用撤回方法（内部会检查）
-            ChatRecord recalledRecord = chatRecordService.recallMessage(messageId, currentUserId);
+            ChatRecord recalledRecord = chatRecordService.recallMessage(messageIdLong, currentUserId);
             
             // 转换为 Map 以便前端使用
             ChatMessage messageDTO = chatRecordService.convertToChatMessagePublic(recalledRecord);

@@ -2,6 +2,7 @@ package com.tutoring.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -51,7 +52,9 @@ public class ChatMessage {
     
     /**
      * 消息 ID (用于已读回执等)
+     * 使用字符串格式避免 JavaScript 精度丢失（雪花算法 ID 是 19 位数字）
      */
+    @JsonFormat(shape = Shape.STRING)
     private Long messageId;
     
     /**
