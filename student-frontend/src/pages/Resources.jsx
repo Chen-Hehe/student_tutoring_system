@@ -86,8 +86,10 @@ const Resources = () => {
       // 先增加下载次数
       await resourcesAPI.incrementDownloadCount(resource.id)
       
-      // 打开下载链接（前端代理会自动处理相对路径）
-      window.open(resource.url, '_blank')
+      // 打开下载链接（需要使用完整后端 URL，因为 window.open 不经过 Vite 代理）
+      const backendUrl = 'http://localhost:8080'
+      const downloadUrl = `${backendUrl}${resource.url}`
+      window.open(downloadUrl, '_blank')
       
       message.success('资源下载已启动！')
     } catch (error) {
