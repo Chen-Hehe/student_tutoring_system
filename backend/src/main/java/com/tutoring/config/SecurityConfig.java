@@ -45,6 +45,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问教学资源接口
                 .requestMatchers("/api/resources/**").permitAll()
+                // 允许访问匹配接口
+                .requestMatchers("/api/matches/**").permitAll()
+                // 允许访问 AI 匹配接口
+                .requestMatchers("/api/ai-match/**").permitAll()
                 // 允许访问测试接口
                 .requestMatchers("/api/test/**").permitAll()
                 // 允许访问 Swagger/OpenAPI

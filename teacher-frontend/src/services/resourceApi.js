@@ -8,7 +8,7 @@ export const resourcesAPI = {
    * 获取资源列表
    */
   getList: (params) => {
-    return api.get('/resources', { params })
+    return api.get('/resources/list', { params })
   },
 
   /**
@@ -19,14 +19,7 @@ export const resourcesAPI = {
   },
 
   /**
-   * 获取资源列表（新）
-   */
-  getList: (params) => {
-    return api.get('/resources/list', { params })
-  },
-
-  /**
-   * 创建资源（新）
+   * 创建资源
    */
   create: (data) => {
     return api.post('/resources', data)
@@ -63,13 +56,6 @@ export const resourcesAPI = {
         'Content-Type': 'multipart/form-data'
       }
     })
-  },
-  
-  /**
-   * 删除资源
-   */
-  delete: (id) => {
-    return api.delete(`/resources/${id}`)
   },
   
   /**
