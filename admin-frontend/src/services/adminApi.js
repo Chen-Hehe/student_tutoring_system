@@ -35,6 +35,27 @@ export const adminAPI = {
   },
   disableUser: (id) => {
     return api.post('/admin/users/disable', { id })
+  },
+  // 教学资源编辑和删除
+  editResource: (resourceData) => {
+    return api.post('/admin/content/resources/edit', resourceData)
+  },
+  deleteResource: (id) => {
+    return api.post('/admin/content/resources/delete', { id })
+  },
+  // 学习资料编辑和删除
+  editLearningMaterial: (materialData) => {
+    return api.post('/admin/content/learning-materials/edit', materialData)
+  },
+  deleteLearningMaterial: (id) => {
+    return api.post('/admin/content/learning-materials/delete', { id })
+  },
+  // 公告编辑和删除
+  editAnnouncement: (announcementData) => {
+    return api.post('/admin/content/announcements/edit', announcementData)
+  },
+  deleteAnnouncement: (id) => {
+    return api.post('/admin/content/announcements/delete', { id })
   }
 }
 
