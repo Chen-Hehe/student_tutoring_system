@@ -47,10 +47,10 @@ const Resources = () => {
   const loadResources = async () => {
     setLoading(true)
     try {
-      // 构建查询参数
+      // 构建查询参数（category 使用英文值，与教师端保持一致）
       const params = {}
       if (subject) {
-        params.category = subjectMap[subject]
+        params.category = subject  // 直接使用英文值：math, chinese, english, etc.
       }
       if (type) {
         params.type = type
