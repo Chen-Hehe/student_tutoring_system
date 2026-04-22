@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, message } from 'antd'
+import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, message, Modal, Form, Input as AntInput } from 'antd'
 import { adminAPI } from '../services/adminApi'
 
-const { TabPane } = Tabs
 const { Option } = Select
 
 const ContentManagement = () => {
@@ -27,6 +26,13 @@ const ContentManagement = () => {
     status: ''
   })
   const [teachers, setTeachers] = useState({})
+  
+  // 编辑和删除相关状态
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false)
+  const [currentItem, setCurrentItem] = useState(null)
+  const [editForm] = Form.useForm()
+  const [currentTab, setCurrentTab] = useState('1')
 
   // 获取教师信息
   const fetchTeachers = async () => {
@@ -113,6 +119,107 @@ const ContentManagement = () => {
       fetchAnnouncements()
     }
   }, [activeTab])
+  
+  // 编辑功能
+  const handleEdit = (record) => {
+    setCurrentItem(record)
+    setCurrentTab(activeTab)
+    setIsEditModalVisible(true)
+    // 根据当前标签页设置表单初始值
+    if (activeTab === '1') {
+      // 教学资源
+      editForm.setFieldsValue({
+        title: record.title,
+        type: record.type,
+        description: record.description || ''
+      })
+    } else if (activeTab === '2') {
+      // 学习资料
+      editForm.setFieldsValue({
+        title: record.title,
+        subject: record.subject,
+        grade: record.grade,
+        type: record.type
+      })
+    } else if (activeTab === '3') {
+      // 公告
+      editForm.setFieldsValue({
+        title: record.title,
+        content: record.content,
+        status: record.status
+      })
+    }
+  }
+  
+  // 删除功能
+  const handleDelete = (record) => {
+    setCurrentItem(record)
+    setCurrentTab(activeTab)
+    setIsDeleteModalVisible(true)
+  }
+  
+  // 确认删除
+  const confirmDelete = async () => {
+    try {
+      if (currentTab === '1') {
+        // 删除教学资源
+        await adminAPI.deleteResource(currentItem.id)
+        message.success('教学资源删除成功')
+      } else if (currentTab === '2') {
+        // 删除学习资料
+        await adminAPI.deleteLearningMaterial(currentItem.id)
+        message.success('学习资料删除成功')
+      } else if (currentTab === '3') {
+        // 删除公告
+        await adminAPI.deleteAnnouncement(currentItem.id)
+        message.success('公告删除成功')
+      }
+      setIsDeleteModalVisible(false)
+      // 重新获取列表
+      if (currentTab === '1') {
+        fetchResources()
+      } else if (currentTab === '2') {
+        fetchLearningMaterials()
+      } else if (currentTab === '3') {
+        fetchAnnouncements()
+      }
+    } catch (error) {
+      message.error('删除失败')
+      console.error('Error deleting item:', error)
+    }
+  }
+  
+  // 保存编辑
+  const handleSaveEdit = async () => {
+    try {
+      const values = await editForm.validateFields()
+      if (currentTab === '1') {
+        // 编辑教学资源
+        await adminAPI.editResource({ ...values, id: currentItem.id })
+        message.success('教学资源编辑成功')
+      } else if (currentTab === '2') {
+        // 编辑学习资料
+        await adminAPI.editLearningMaterial({ ...values, id: currentItem.id })
+        message.success('学习资料编辑成功')
+      } else if (currentTab === '3') {
+        // 编辑公告
+        await adminAPI.editAnnouncement({ ...values, id: currentItem.id })
+        message.success('公告编辑成功')
+      }
+      setIsEditModalVisible(false)
+      // 重新获取列表
+      if (currentTab === '1') {
+        fetchResources()
+      } else if (currentTab === '2') {
+        fetchLearningMaterials()
+      } else if (currentTab === '3') {
+        fetchAnnouncements()
+      }
+    } catch (error) {
+      message.error('编辑失败')
+      console.error('Error saving edit:', error)
+    }
+  }
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
@@ -158,11 +265,24 @@ const ContentManagement = () => {
     { 
       title: '操作', 
       key: 'action', 
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
-          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
-          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>下载</Button>
+          <Button 
+            type="primary" 
+            size="small" 
+            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="small" 
+            danger
+            style={{ backgroundColor: '#ff4d4f', borderColor: '#ff4d4f', color: 'white', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
         </Space>
       ),
     },
@@ -210,11 +330,24 @@ const ContentManagement = () => {
     { 
       title: '操作', 
       key: 'action', 
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
-          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
-          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>下载</Button>
+          <Button 
+            type="primary" 
+            size="small" 
+            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="small" 
+            danger
+            style={{ backgroundColor: '#ff4d4f', borderColor: '#ff4d4f', color: 'white', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
         </Space>
       ),
     },
@@ -224,10 +357,7 @@ const ContentManagement = () => {
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '标题', dataIndex: 'title', key: 'title' },
     { title: '内容', dataIndex: 'content', key: 'content', ellipsis: true },
-    {
-      title: '发布者', 
-      dataIndex: 'authorId', 
-      key: 'authorId',
+    { title: '发布者', dataIndex: 'authorId', key: 'authorId',
       render: (authorId) => {
         if (authorId === 1) {
           return '管理员'
@@ -261,10 +391,24 @@ const ContentManagement = () => {
     { 
       title: '操作', 
       key: 'action', 
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="primary" size="small" style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}>编辑</Button>
-          <Button size="small" style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '14px', padding: '4px 12px' }}>删除</Button>
+          <Button 
+            type="primary" 
+            size="small" 
+            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="small" 
+            danger
+            style={{ backgroundColor: '#ff4d4f', borderColor: '#ff4d4f', color: 'white', fontSize: '14px', padding: '4px 12px' }}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
         </Space>
       ),
     },
@@ -675,6 +819,124 @@ const ContentManagement = () => {
           </Card>
         </>
       )}
+      
+      {/* 编辑模态框 */}
+      <Modal
+        title={currentTab === '1' ? '编辑教学资源' : currentTab === '2' ? '编辑学习资料' : '编辑公告'}
+        open={isEditModalVisible}
+        onOk={handleSaveEdit}
+        onCancel={() => setIsEditModalVisible(false)}
+        width={600}
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            name="title"
+            label="标题"
+            rules={[{ required: true, message: '请输入标题' }]}
+          >
+            <AntInput style={{ fontSize: '16px' }} />
+          </Form.Item>
+          
+          {currentTab === '1' && (
+            <>
+              <Form.Item
+                name="type"
+                label="资源类型"
+                rules={[{ required: true, message: '请选择资源类型' }]}
+              >
+                <Select style={{ width: '100%', fontSize: '16px' }}>
+                  <Option value="courseware">课件</Option>
+                  <Option value="lesson_plan">教案</Option>
+                  <Option value="exercise">习题</Option>
+                  <Option value="video">视频</Option>
+                  <Option value="other">其他</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="description"
+                label="描述"
+              >
+                <AntInput.TextArea style={{ fontSize: '16px' }} rows={4} />
+              </Form.Item>
+            </>
+          )}
+          
+          {currentTab === '2' && (
+            <>
+              <Form.Item
+                name="subject"
+                label="学科"
+                rules={[{ required: true, message: '请选择学科' }]}
+              >
+                <Select style={{ width: '100%', fontSize: '16px' }}>
+                  <Option value="数学">数学</Option>
+                  <Option value="语文">语文</Option>
+                  <Option value="英语">英语</Option>
+                  <Option value="物理">物理</Option>
+                  <Option value="化学">化学</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="grade"
+                label="年级"
+                rules={[{ required: true, message: '请输入年级' }]}
+              >
+                <AntInput style={{ fontSize: '16px' }} />
+              </Form.Item>
+              <Form.Item
+                name="type"
+                label="资料类型"
+                rules={[{ required: true, message: '请选择资料类型' }]}
+              >
+                <Select style={{ width: '100%', fontSize: '16px' }}>
+                  <Option value="document">文档</Option>
+                  <Option value="video">视频</Option>
+                  <Option value="audio">音频</Option>
+                  <Option value="image">图片</Option>
+                  <Option value="other">其他</Option>
+                </Select>
+              </Form.Item>
+            </>
+          )}
+          
+          {currentTab === '3' && (
+            <>
+              <Form.Item
+                name="content"
+                label="内容"
+                rules={[{ required: true, message: '请输入内容' }]}
+              >
+                <AntInput.TextArea style={{ fontSize: '16px' }} rows={6} />
+              </Form.Item>
+              <Form.Item
+                name="status"
+                label="状态"
+                rules={[{ required: true, message: '请选择状态' }]}
+              >
+                <Select style={{ width: '100%', fontSize: '16px' }}>
+                  <Option value="published">已发布</Option>
+                  <Option value="draft">草稿</Option>
+                  <Option value="archived">已归档</Option>
+                </Select>
+              </Form.Item>
+            </>
+          )}
+        </Form>
+      </Modal>
+      
+      {/* 删除确认模态框 */}
+      <Modal
+        title="确认删除"
+        open={isDeleteModalVisible}
+        onOk={confirmDelete}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        okText="确认删除"
+        cancelText="取消"
+        okType="danger"
+      >
+        <p>确定要删除 {currentTab === '1' ? '教学资源' : currentTab === '2' ? '学习资料' : '公告'} 吗？</p>
+        <p style={{ marginTop: '8px', color: '#666' }}>删除后将无法恢复。</p>
+      </Modal>
     </div>
   )
 }

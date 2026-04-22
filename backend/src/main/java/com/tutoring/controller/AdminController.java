@@ -335,4 +335,201 @@ public class AdminController {
             return Result.error(500, "获取公告列表失败: " + e.getMessage());
         }
     }
+    
+    /**
+     * 编辑教学资源
+     *
+     * @param resourceData 资源数据
+     * @return 操作结果
+     */
+    @PostMapping("/content/resources/edit")
+    public Result<Boolean> editResource(@RequestBody Map<String, Object> resourceData) {
+        try {
+            Long id = ((Number) resourceData.get("id")).longValue();
+            String title = (String) resourceData.get("title");
+            String type = (String) resourceData.get("type");
+            String description = (String) resourceData.get("description");
+            
+            LearningResource resource = learningResourceRepository.selectById(id);
+            if (resource == null) {
+                return Result.error(404, "教学资源不存在");
+            }
+            
+            if (title != null && !title.isEmpty()) {
+                resource.setTitle(title);
+            }
+            
+            if (type != null && !type.isEmpty()) {
+                resource.setType(type);
+            }
+            
+            if (description != null) {
+                resource.setDescription(description);
+            }
+            
+            learningResourceRepository.updateById(resource);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "编辑教学资源失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 删除教学资源
+     *
+     * @param id 资源ID
+     * @return 操作结果
+     */
+    @PostMapping("/content/resources/delete")
+    public Result<Boolean> deleteResource(@RequestBody Map<String, Object> request) {
+        try {
+            Long id = ((Number) request.get("id")).longValue();
+            
+            LearningResource resource = learningResourceRepository.selectById(id);
+            if (resource == null) {
+                return Result.error(404, "教学资源不存在");
+            }
+            
+            resource.setDeleted(1);
+            learningResourceRepository.updateById(resource);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "删除教学资源失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 编辑学习资料
+     *
+     * @param materialData 资料数据
+     * @return 操作结果
+     */
+    @PostMapping("/content/learning-materials/edit")
+    public Result<Boolean> editLearningMaterial(@RequestBody Map<String, Object> materialData) {
+        try {
+            Long id = ((Number) materialData.get("id")).longValue();
+            String title = (String) materialData.get("title");
+            String subject = (String) materialData.get("subject");
+            String grade = (String) materialData.get("grade");
+            String type = (String) materialData.get("type");
+            
+            LearningMaterial material = learningMaterialRepository.selectById(id);
+            if (material == null) {
+                return Result.error(404, "学习资料不存在");
+            }
+            
+            if (title != null && !title.isEmpty()) {
+                material.setTitle(title);
+            }
+            
+            if (subject != null && !subject.isEmpty()) {
+                material.setSubject(subject);
+            }
+            
+            if (grade != null && !grade.isEmpty()) {
+                material.setGrade(grade);
+            }
+            
+            if (type != null && !type.isEmpty()) {
+                material.setType(type);
+            }
+            
+            learningMaterialRepository.updateById(material);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "编辑学习资料失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 删除学习资料
+     *
+     * @param id 资料ID
+     * @return 操作结果
+     */
+    @PostMapping("/content/learning-materials/delete")
+    public Result<Boolean> deleteLearningMaterial(@RequestBody Map<String, Object> request) {
+        try {
+            Long id = ((Number) request.get("id")).longValue();
+            
+            LearningMaterial material = learningMaterialRepository.selectById(id);
+            if (material == null) {
+                return Result.error(404, "学习资料不存在");
+            }
+            
+            material.setDeleted(1);
+            learningMaterialRepository.updateById(material);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "删除学习资料失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 编辑公告
+     *
+     * @param announcementData 公告数据
+     * @return 操作结果
+     */
+    @PostMapping("/content/announcements/edit")
+    public Result<Boolean> editAnnouncement(@RequestBody Map<String, Object> announcementData) {
+        try {
+            Long id = ((Number) announcementData.get("id")).longValue();
+            String title = (String) announcementData.get("title");
+            String content = (String) announcementData.get("content");
+            String status = (String) announcementData.get("status");
+            
+            Announcement announcement = announcementRepository.selectById(id);
+            if (announcement == null) {
+                return Result.error(404, "公告不存在");
+            }
+            
+            if (title != null && !title.isEmpty()) {
+                announcement.setTitle(title);
+            }
+            
+            if (content != null) {
+                announcement.setContent(content);
+            }
+            
+            if (status != null && !status.isEmpty()) {
+                announcement.setStatus(status);
+            }
+            
+            announcementRepository.updateById(announcement);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "编辑公告失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 删除公告
+     *
+     * @param id 公告ID
+     * @return 操作结果
+     */
+    @PostMapping("/content/announcements/delete")
+    public Result<Boolean> deleteAnnouncement(@RequestBody Map<String, Object> request) {
+        try {
+            Long id = ((Number) request.get("id")).longValue();
+            
+            Announcement announcement = announcementRepository.selectById(id);
+            if (announcement == null) {
+                return Result.error(404, "公告不存在");
+            }
+            
+            announcement.setDeleted(1);
+            announcementRepository.updateById(announcement);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "删除公告失败: " + e.getMessage());
+        }
+    }
 }
