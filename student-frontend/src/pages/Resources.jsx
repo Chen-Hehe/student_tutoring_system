@@ -1,66 +1,136 @@
-import { useState } from 'react'
-import { Card, Input, Button, Select, Grid, Tag, message } from 'antd'
-import { SearchOutlined, FileTextOutlined, VideoCameraOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Card, Input, Button, Select, Grid, Tag, message, Spin, Empty } from 'antd'
+import { SearchOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined, PresentationOutlined } from '@ant-design/icons'
+import { resourcesAPI } from '../services/resourceApi'
 
 const { useBreakpoint } = Grid
 
+// 科目映射
+const subjectMap = {
+  'math': '数学',
+  'chinese': '语文',
+  'english': '英语',
+  'physics': '物理',
+  'chemistry': '化学',
+  'biology': '生物'
+}
+
+// 年级映射
+const gradeMap = {
+  'primary': '小学',
+  'middle': '初中',
+  'high': '高中'
+}
+
+// 资源类型映射
+const typeMap = {
+  'document': '文档',
+  'video': '视频',
+  'audio': '音频',
+  'presentation': '演示文稿'
+}
+
+// 资源类型图标
+const typeIcons = {
+  'document': <FileTextOutlined />,
+  'video': <VideoCameraOutlined />,
+  'audio': <AudioOutlined />,
+  'presentation': <PresentationOutlined />
+}
+
 const Resources = () => {
   const screens = useBreakpoint()
+  
+  // 筛选状态
   const [subject, setSubject] = useState('')
   const [type, setType] = useState('')
   const [grade, setGrade] = useState('')
   const [searchText, setSearchText] = useState('')
+  
+  // 数据状态
+  const [resources, setResources] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  // 模拟资源数据
-  const resources = [
-    {
-      key: '1',
-      title: '分数加减法练习',
-      subject: '数学',
-      grade: '小学',
-      type: 'document',
-      description: '包含分数加减法的详细讲解和练习题，适合小学三年级学生使用。',
-      tags: ['分数', '加减法', '小学'],
-      icon: '📄',
-    },
-    {
-      key: '2',
-      title: '作文写作技巧',
-      subject: '语文',
-      grade: '初中',
-      type: 'video',
-      description: '详细讲解初中作文的写作技巧和方法，包括审题、立意、结构等方面。',
-      tags: ['作文', '写作技巧', '初中'],
-      icon: '🎥',
-    },
-    {
-      key: '3',
-      title: '英语单词记忆方法',
-      subject: '英语',
-      grade: '小学',
-      type: 'document',
-      description: '介绍几种有效的英语单词记忆方法，帮助小学生快速掌握英语单词。',
-      tags: ['英语', '单词记忆', '小学'],
-      icon: '📄',
-    },
-    {
-      key: '4',
-      title: '数学应用题解题思路',
-      subject: '数学',
-      grade: '初中',
-      type: 'video',
-      description: '详细讲解初中数学应用题的解题思路和方法，帮助学生提高解题能力。',
-      tags: ['数学', '应用题', '初中'],
-      icon: '🎥',
-    },
-  ]
-
-  const handleDownload = (resourceId) => {
-    message.loading('资源下载中，请稍候...', 1)
-    setTimeout(() => {
-      message.success('资源下载成功！')
-    }, 1000)
+  // 加载资源列表
+  const loadResources = async () => {
+    setLoading(true)
+    try {
+      // 构建查询参数
+      const params = {}
+      if (subject) {
+        params.category = subjectMap[subject]
+      }
+      if (type) {
+        params.type = type
+      }
+      
+      const response = await resourcesAPI.getList(params)
+      
+      if (response && response.code === 200 && response.data) {
+        setResources(response.data)
+      } else {
+        setResources([])
+        message.warning('未找到相关资源')
+      }
+    } catch (error) {
+      console.error('加载资源失败:', error)
+      message.error('加载资源失败：' + (error.message || '未知错误'))
+      setResources([])
+    } finally {
+      setLoading(false)
+    }
   }
+
+  // 初始加载
+  useEffect(() => {
+    loadResources()
+  }, [])
+
+  // 处理搜索
+  const handleSearch = () => {
+    loadResources()
+  }
+
+  // 处理下载
+  const handleDownload = async (resource) => {
+    try {
+      // 先增加下载次数
+      await resourcesAPI.incrementDownloadCount(resource.id)
+      
+      // 然后打开下载链接
+      const downloadUrl = `${window.location.protocol}//${window.location.host}${resource.url}`
+      window.open(downloadUrl, '_blank')
+      
+      message.success('资源下载已启动！')
+    } catch (error) {
+      console.error('下载资源失败:', error)
+      message.error('下载失败：' + (error.message || '未知错误'))
+    }
+  }
+
+  // 筛选资源（前端搜索）
+  const filteredResources = resources.filter(resource => {
+    // 搜索文本过滤（标题、描述）
+    if (searchText) {
+      const searchLower = searchText.toLowerCase()
+      const titleMatch = resource.title.toLowerCase().includes(searchLower)
+      const descMatch = resource.description.toLowerCase().includes(searchLower)
+      if (!titleMatch && !descMatch) {
+        return false
+      }
+    }
+    
+    // 年级过滤（从标签中匹配）
+    if (grade) {
+      const gradeName = gradeMap[grade]
+      const hasGrade = resource.tags && resource.tags.some(tag => tag.includes(gradeName))
+      if (!hasGrade) {
+        return false
+      }
+    }
+    
+    return true
+  })
 
   return (
     <div>
@@ -74,9 +144,10 @@ const Resources = () => {
           size="large"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
+          onPressEnter={handleSearch}
           style={{ marginBottom: 16 }}
           addonAfter={
-            <Button type="primary">搜索</Button>
+            <Button type="primary" onClick={handleSearch}>搜索</Button>
           }
         />
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -121,64 +192,73 @@ const Resources = () => {
       </Card>
 
       {/* 资源列表 */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: screens.xs ? '1fr' : screens.sm ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-        gap: 24,
-      }}>
-        {resources.map((resource) => (
-          <Card
-            key={resource.key}
-            hoverable
-            style={{ borderRadius: 12 }}
-            cover={
-              <div style={{ 
-                height: 120, 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 48
-              }}>
-                {resource.icon}
-              </div>
-            }
-            actions={[
-              <Button 
-                key="download" 
-                type="primary" 
-                onClick={() => handleDownload(resource.key)}
-              >
-                下载
-              </Button>,
-            ]}
-          >
-            <Card.Meta
-              title={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>{resource.title}</span>
-                  <Tag color="blue">{resource.subject}</Tag>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+          <Spin size="large" tip="加载中..." />
+        </div>
+      ) : filteredResources.length === 0 ? (
+        <Empty description="暂无学习资源" />
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: screens.xs ? '1fr' : screens.sm ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+          gap: 24,
+        }}>
+          {filteredResources.map((resource) => (
+            <Card
+              key={resource.id}
+              hoverable
+              style={{ borderRadius: 12 }}
+              cover={
+                <div style={{ 
+                  height: 120, 
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 48,
+                  color: 'white'
+                }}>
+                  {typeIcons[resource.type] || <FileTextOutlined />}
                 </div>
               }
-              description={
-                <div>
-                  <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                    {resource.grade} · {resource.type === 'document' ? '文档' : '视频'}
+              actions={[
+                <Button 
+                  key="download" 
+                  type="primary" 
+                  onClick={() => handleDownload(resource)}
+                >
+                  下载
+                </Button>,
+              ]}
+            >
+              <Card.Meta
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{resource.title}</span>
+                    <Tag color="blue">{resource.category || resource.subject}</Tag>
                   </div>
-                  <div style={{ marginBottom: 8 }}>{resource.description}</div>
+                }
+                description={
                   <div>
-                    {resource.tags.map((tag) => (
-                      <Tag key={tag} color="green" style={{ marginBottom: 4 }}>
-                        {tag}
-                      </Tag>
-                    ))}
+                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                      {resource.fileName || '未知文件'} · {resource.fileSize ? `${(resource.fileSize / 1024).toFixed(1)} KB` : ''}
+                    </div>
+                    <div style={{ marginBottom: 8 }}>{resource.description}</div>
+                    <div>
+                      {resource.tags && resource.tags.map((tag, index) => (
+                        <Tag key={index} color="green" style={{ marginBottom: 4 }}>
+                          {tag}
+                        </Tag>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              }
-            />
-          </Card>
-        ))}
-      </div>
+                }
+              />
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
