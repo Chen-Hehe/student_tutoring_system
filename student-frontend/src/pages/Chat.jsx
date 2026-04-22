@@ -180,7 +180,7 @@ const Chat = () => {
       if (data.type === 100 || data.isRecalled) {
         console.log('收到撤回通知:', data)
         setMessages((prev) => prev.map(msg => 
-          msg.messageId === data.messageId
+          String(msg.messageId) === String(data.messageId)
             ? { ...msg, isRecalled: true, recalledAt: data.recalledAt, recalledBy: data.recalledBy }
             : msg
         ))
@@ -193,7 +193,7 @@ const Chat = () => {
       if (data.type === 0 && data.readerId) {
         console.log('收到已读状态更新，readerId:', data.readerId)
         setMessages((prev) => prev.map(msg => 
-          msg.senderId === currentUser.id && !msg.isRead
+          String(msg.senderId) === String(currentUser.id) && !msg.isRead
             ? { ...msg, isRead: true }
             : msg
         ))
@@ -202,11 +202,11 @@ const Chat = () => {
         return
       }
       
-      // 忽略自己发送的消息
-      if (data.senderId === currentUser.id) return
+      // 忽略自己发送的消息（字符串比较）
+      if (String(data.senderId) === String(currentUser.id)) return
 
       const active = selectedConversationRef.current
-      if (active && data.senderId === active.userId) {
+      if (active && String(data.senderId) === String(active.userId)) {
         setMessages((prev) => [...prev, {
           ...data,
           timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
@@ -228,7 +228,8 @@ const Chat = () => {
   }, [currentUser?.id])
 
   const renderMessage = (msg, index) => {
-    const isSelf = msg.senderId === currentUser?.id
+    // 注意：后端返回的 ID 现在是字符串，需要统一类型比较
+    const isSelf = String(msg.senderId) === String(currentUser?.id)
     const isRead = msg.isRead === true
     const isRecalled = msg.isRecalled === true
     const showRecallBtn = isSelf && canRecall(msg) && recallMenuVisible === msg.messageId

@@ -174,9 +174,9 @@ const Chat = () => {
         timestamp: result.data.timestamp || tempTimestamp
       }
       
-      // 替换临时消息为真实消息
+      // 替换临时消息为真实消息（字符串比较）
       setMessages(prev => prev.map(msg => 
-        msg.messageId === tempMessageId ? realMessage : msg
+        String(msg.messageId) === String(tempMessageId) ? realMessage : msg
       ))
       
       // 刷新对话列表
@@ -309,7 +309,7 @@ const Chat = () => {
         if (data.type === 0 && data.readerId) {
           console.log('收到已读状态更新，readerId:', data.readerId)
           setMessages(prev => prev.map(msg => 
-            msg.senderId === currentUser.id && !msg.isRead
+            String(msg.senderId) === String(currentUser.id) && !msg.isRead
               ? { ...msg, isRead: true }
               : msg
           ))
@@ -317,7 +317,8 @@ const Chat = () => {
           return
         }
 
-        if (data.senderId === currentUser.id) {
+        // 忽略自己发送的消息（字符串比较）
+        if (String(data.senderId) === String(currentUser.id)) {
           return
         }
         
@@ -327,7 +328,8 @@ const Chat = () => {
 
           const activeConversation = selectedConversationRef.current
 
-          if (activeConversation && data.senderId === activeConversation.userId) {
+          // 字符串比较
+          if (activeConversation && String(data.senderId) === String(activeConversation.userId)) {
             setMessages(prev => {
               const exists = prev.some(msg => msg.messageId === data.messageId)
 
@@ -389,7 +391,8 @@ const Chat = () => {
   
   // 渲染消息气泡
   const renderMessage = (msg, index) => {
-    const isSelf = msg.senderId === currentUser?.id
+    // 注意：后端返回的 ID 现在是字符串，需要统一类型比较
+    const isSelf = String(msg.senderId) === String(currentUser?.id)
     const isRead = msg.isRead === true
     const isRecalled = msg.isRecalled === true
     const time = dayjs(msg.timestamp).format('HH:mm')
