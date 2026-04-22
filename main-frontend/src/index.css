@@ -135,11 +135,18 @@ code {
   padding: 1.5rem;
   text-align: center;
   transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .role-card:hover {
   background-color: #f0f8f0;
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-color: #45a049;
 }
 
 .role-card h3 {
