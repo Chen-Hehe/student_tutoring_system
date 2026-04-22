@@ -15,13 +15,6 @@ const subjectMap = {
   'biology': '生物'
 }
 
-// 年级映射
-const gradeMap = {
-  'primary': '小学',
-  'middle': '初中',
-  'high': '高中'
-}
-
 // 资源类型映射
 const typeMap = {
   'document': '文档',
@@ -44,7 +37,6 @@ const Resources = () => {
   // 筛选状态
   const [subject, setSubject] = useState('')
   const [type, setType] = useState('')
-  const [grade, setGrade] = useState('')
   const [searchText, setSearchText] = useState('')
   
   // 数据状态
@@ -81,15 +73,12 @@ const Resources = () => {
     }
   }
 
-  // 初始加载
+  // 初始加载及筛选条件变化时自动拉取
   useEffect(() => {
     loadResources()
-  }, [])
+  }, [subject, type])
 
-  // 处理搜索
-  const handleSearch = () => {
-    loadResources()
-  }
+
 
   // 处理下载
   const handleDownload = async (resource) => {
@@ -97,9 +86,8 @@ const Resources = () => {
       // 先增加下载次数
       await resourcesAPI.incrementDownloadCount(resource.id)
       
-      // 然后打开下载链接
-      const downloadUrl = `${window.location.protocol}//${window.location.host}${resource.url}`
-      window.open(downloadUrl, '_blank')
+      // 打开下载链接（前端代理会自动处理相对路径）
+      window.open(resource.url, '_blank')
       
       message.success('资源下载已启动！')
     } catch (error) {
@@ -108,27 +96,16 @@ const Resources = () => {
     }
   }
 
-  // 筛选资源（前端搜索）
+  // 前端搜索过滤（仅按标题和描述）
   const filteredResources = resources.filter(resource => {
-    // 搜索文本过滤（标题、描述）
     if (searchText) {
       const searchLower = searchText.toLowerCase()
-      const titleMatch = resource.title.toLowerCase().includes(searchLower)
-      const descMatch = resource.description.toLowerCase().includes(searchLower)
+      const titleMatch = (resource.title || '').toLowerCase().includes(searchLower)
+      const descMatch = (resource.description || '').toLowerCase().includes(searchLower)
       if (!titleMatch && !descMatch) {
         return false
       }
     }
-    
-    // 年级过滤（从标签中匹配）
-    if (grade) {
-      const gradeName = gradeMap[grade]
-      const hasGrade = resource.tags && resource.tags.some(tag => tag.includes(gradeName))
-      if (!hasGrade) {
-        return false
-      }
-    }
-    
     return true
   })
 
@@ -177,17 +154,7 @@ const Resources = () => {
             <Select.Option value="audio">音频</Select.Option>
             <Select.Option value="presentation">演示文稿</Select.Option>
           </Select>
-          <Select
-            placeholder="年级"
-            style={{ width: 150 }}
-            value={grade}
-            onChange={setGrade}
-            allowClear
-          >
-            <Select.Option value="primary">小学</Select.Option>
-            <Select.Option value="middle">初中</Select.Option>
-            <Select.Option value="high">高中</Select.Option>
-          </Select>
+
         </div>
       </Card>
 
@@ -242,16 +209,9 @@ const Resources = () => {
                 description={
                   <div>
                     <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                      {resource.fileName || '未知文件'} · {resource.fileSize ? `${(resource.fileSize / 1024).toFixed(1)} KB` : ''}
+                      {resource.fileName || '未知文件'} · {resource.fileSize ? `${(resource.fileSize / 1024).toFixed(1)} KB` : '未知大小'}
                     </div>
-                    <div style={{ marginBottom: 8 }}>{resource.description}</div>
-                    <div>
-                      {resource.tags && resource.tags.map((tag, index) => (
-                        <Tag key={index} color="green" style={{ marginBottom: 4 }}>
-                          {tag}
-                        </Tag>
-                      ))}
-                    </div>
+                    <div style={{ marginBottom: 8 }}>{resource.description || '暂无描述'}</div>
                   </div>
                 }
               />
