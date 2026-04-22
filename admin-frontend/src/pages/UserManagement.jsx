@@ -4,6 +4,8 @@ import { userAPI } from '../services/userApi'
 
 const { Option } = Select
 
+const PAGE_SIZE = 7
+
 const UserManagement = () => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
@@ -15,8 +17,16 @@ const UserManagement = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [form] = Form.useForm()
+  const [pagination, setPagination] = useState({ current: 1, pageSize: PAGE_SIZE })
 
   const columns = [
+    { 
+      title: '序号', 
+      key: 'index', 
+      width: 80,
+      align: 'center',
+      render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1
+    },
     { 
       title: 'ID', 
       dataIndex: 'id', 
@@ -319,40 +329,19 @@ const UserManagement = () => {
             dataSource={users} 
             rowKey="id"
             size="large"
-            pagination={false}
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: users.length,
+              onChange: (page, pageSize) => {
+                setPagination({ current: page, pageSize });
+              },
+              showSizeChanger: false,
+              showQuickJumper: false,
+            }}
             style={{ marginBottom: '20px' }}
           />
         </Spin>
-        
-        {/* 自定义分页 */}
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
-          <span 
-            style={{
-              margin: '0 5px',
-              padding: '6px 10px',
-              borderRadius: 4,
-              backgroundColor: '#9C27B0',
-              color: 'white',
-              border: '1px solid #9C27B0',
-              display: 'inline-block',
-              cursor: 'pointer',
-              fontSize: '14px',
-              outline: 'none',
-              boxShadow: 'none',
-              lineHeight: '1.5',
-              minWidth: '30px',
-              textAlign: 'center',
-              boxSizing: 'border-box',
-              userSelect: 'none'
-            }}
-            onMouseDown={(e) => e.preventDefault()}
-            onFocus={(e) => e.currentTarget.style.outline = 'none'}
-          >
-            1
-          </span>
-          <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
-        </div>
       </Card>
 
       {/* 编辑用户模态框 */}

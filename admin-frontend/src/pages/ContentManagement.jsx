@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, message, Modal, Form, Input as AntInput } from 'antd'
+import { Card, Tabs, Input, Select, Button, Table, Tag, Space, Row, Col, message, Modal, Form, Input as AntInput, Pagination } from 'antd'
 import { adminAPI } from '../services/adminApi'
 
 const { Option } = Select
+
+const PAGE_SIZE = 7
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('1')
@@ -26,6 +28,10 @@ const ContentManagement = () => {
     status: ''
   })
   const [teachers, setTeachers] = useState({})
+  
+  const [resourcesPagination, setResourcesPagination] = useState({ current: 1, pageSize: PAGE_SIZE })
+  const [materialsPagination, setMaterialsPagination] = useState({ current: 1, pageSize: PAGE_SIZE })
+  const [announcementsPagination, setAnnouncementsPagination] = useState({ current: 1, pageSize: PAGE_SIZE })
   
   // 编辑和删除相关状态
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
@@ -607,40 +613,17 @@ const ContentManagement = () => {
               size="middle"
               style={{ fontSize: '16px', marginBottom: '20px' }}
               loading={loading}
-              pagination={false}
+              pagination={{
+                current: resourcesPagination.current,
+                pageSize: resourcesPagination.pageSize,
+                total: resources.length,
+                onChange: (page, pageSize) => {
+                  setResourcesPagination({ current: page, pageSize });
+                },
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }}
             />
-            
-            {/* 自定义分页 */}
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
-              <span 
-                style={{
-                  margin: '0 5px',
-                  padding: '6px 10px',
-                  borderRadius: 4,
-                  backgroundColor: '#9C27B0',
-                  color: 'white',
-                  border: '1px solid #9C27B0',
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxShadow: 'none',
-                  lineHeight: '1.5',
-                  minWidth: '30px',
-                  textAlign: 'center',
-                  boxSizing: 'border-box',
-                  userSelect: 'none'
-                }}
-                onMouseDown={(e) => e.preventDefault()}
-                onFocus={(e) => e.currentTarget.style.outline = 'none'}
-              >
-                1
-              </span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>2</span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>3</span>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
-            </div>
           </Card>
         </>
       )}
@@ -705,40 +688,17 @@ const ContentManagement = () => {
               size="middle"
               style={{ fontSize: '16px', marginBottom: '20px' }}
               loading={materialsLoading}
-              pagination={false}
+              pagination={{
+                current: materialsPagination.current,
+                pageSize: materialsPagination.pageSize,
+                total: learningMaterials.length,
+                onChange: (page, pageSize) => {
+                  setMaterialsPagination({ current: page, pageSize });
+                },
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }}
             />
-            
-            {/* 自定义分页 */}
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
-              <span 
-                style={{
-                  margin: '0 5px',
-                  padding: '6px 10px',
-                  borderRadius: 4,
-                  backgroundColor: '#9C27B0',
-                  color: 'white',
-                  border: '1px solid #9C27B0',
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxShadow: 'none',
-                  lineHeight: '1.5',
-                  minWidth: '30px',
-                  textAlign: 'center',
-                  boxSizing: 'border-box',
-                  userSelect: 'none'
-                }}
-                onMouseDown={(e) => e.preventDefault()}
-                onFocus={(e) => e.currentTarget.style.outline = 'none'}
-              >
-                1
-              </span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>2</span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>3</span>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
-            </div>
           </Card>
         </>
       )}
@@ -809,40 +769,17 @@ const ContentManagement = () => {
               size="middle"
               style={{ fontSize: '16px', marginBottom: '20px' }}
               loading={announcementsLoading}
-              pagination={false}
+              pagination={{
+                current: announcementsPagination.current,
+                pageSize: announcementsPagination.pageSize,
+                total: announcements.length,
+                onChange: (page, pageSize) => {
+                  setAnnouncementsPagination({ current: page, pageSize });
+                },
+                showSizeChanger: false,
+                showQuickJumper: false,
+              }}
             />
-            
-            {/* 自定义分页 */}
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>上一页</span>
-              <span 
-                style={{
-                  margin: '0 5px',
-                  padding: '6px 10px',
-                  borderRadius: 4,
-                  backgroundColor: '#9C27B0',
-                  color: 'white',
-                  border: '1px solid #9C27B0',
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxShadow: 'none',
-                  lineHeight: '1.5',
-                  minWidth: '30px',
-                  textAlign: 'center',
-                  boxSizing: 'border-box',
-                  userSelect: 'none'
-                }}
-                onMouseDown={(e) => e.preventDefault()}
-                onFocus={(e) => e.currentTarget.style.outline = 'none'}
-              >
-                1
-              </span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>2</span>
-              <span style={{ margin: '0 5px', cursor: 'pointer', fontSize: '14px' }}>3</span>
-              <span style={{ margin: '0 8px', cursor: 'pointer', fontSize: '14px' }}>下一页</span>
-            </div>
           </Card>
         </>
       )}
