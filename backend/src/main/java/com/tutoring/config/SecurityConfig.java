@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
+                // 允许访问教学资源接口
+                .requestMatchers("/api/resources/**").permitAll()
                 // 允许访问测试接口
                 .requestMatchers("/api/test/**").permitAll()
                 // 允许访问 Swagger/OpenAPI
