@@ -256,25 +256,30 @@ public class ChatRecordService {
         clearCache(currentUserId, senderId);
         
         // 推送已读状态给发送者（实时同步关键）
-        if (!records.isEmpty()) {
-            ChatMessage readNotification = new ChatMessage();
-            readNotification.setType(0); // 0 表示已读通知
-            readNotification.setReaderId(currentUserId); // 已读者 ID
-            readNotification.setSenderId(senderId); // 原消息发送者 ID
-            readNotification.setReceiverId(senderId);
-            
-            try {
-                chatWebSocketHandler.sendToUser(senderId, readNotification);
-                log.info("ChatRecordService.markAsRead - 已推送已读状态给 senderId={}", senderId);
-            } catch (IOException e) {
-                log.error("ChatRecordService.markAsRead - 推送已读状态失败", e);
-            }
-            
-            try {
-                pushMessageToReceiver(senderId, readNotification);
-            } catch (Exception e) {
-                log.error("ChatRecordService.markAsRead - Redis 推送已读状态失败", e);
-            }
+        // 注意：即使没有未读消息，也要推送（可能是重复标记或实时同步）
+        ChatMessage readNotification = new ChatMessage();
+        readNotification.setType(0); // 0 表示已读通知
+        readNotification.setReaderId(currentUserId); // 已读者 ID
+        readNotification.setSenderId(senderId); // 原消息发送者 ID
+        readNotification.setReceiverId(senderId);
+        
+        log.info("ChatRecordService.markAsRead - 准备推送已读状态：readerId={}, senderId={}, 更新消息数={}",
+            currentUserId, senderId, records.size());
+        
+        // 1. 直接 WebSocket 推送
+        try {
+            chatWebSocketHandler.sendToUser(senderId, readNotification);
+            log.info("ChatRecordService.markAsRead - WebSocket 推送成功给 senderId={}", senderId);
+        } catch (IOException e) {
+            log.warn("ChatRecordService.markAsRead - WebSocket 推送失败（用户可能不在线）", e);
+        }
+        
+        // 2. Redis 推送（备用通道）
+        try {
+            pushMessageToReceiver(senderId, readNotification);
+            log.info("ChatRecordService.markAsRead - Redis 推送成功");
+        } catch (Exception e) {
+            log.error("ChatRecordService.markAsRead - Redis 推送失败", e);
         }
     }
     

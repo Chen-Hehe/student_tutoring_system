@@ -88,6 +88,7 @@ const Chat = () => {
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
     // 切换对话时自动标记为已读
     if (conversation.userId) {
+      console.log('【DEBUG】切换对话，标记为已读:', conversation.userId)
       chatAPI.markAsRead(conversation.userId)
       loadChatHistory(conversation.userId)
     }
@@ -150,7 +151,7 @@ const Chat = () => {
   // 当选中对话变化时，自动标记为已读（实时同步关键）
   useEffect(() => {
     if (selectedConversation?.userId) {
-      console.log('切换对话，标记为已读:', selectedConversation.userId)
+      console.log('【DEBUG】useEffect 标记为已读:', selectedConversation.userId)
       chatAPI.markAsRead(selectedConversation.userId)
     }
   }, [selectedConversation?.userId])
@@ -191,12 +192,17 @@ const Chat = () => {
       
       // 处理已读状态更新（type=0 表示已读通知）
       if (data.type === 0 && data.readerId) {
-        console.log('收到已读状态更新，readerId:', data.readerId)
-        setMessages((prev) => prev.map(msg => 
-          String(msg.senderId) === String(currentUser.id) && !msg.isRead
-            ? { ...msg, isRead: true }
-            : msg
-        ))
+        console.log('【DEBUG】收到已读状态更新，readerId:', data.readerId, 'currentUser.id:', currentUser.id)
+        setMessages((prev) => {
+          const updated = prev.map(msg => {
+            const match = String(msg.senderId) === String(currentUser.id) && !msg.isRead
+            if (match) {
+              console.log('【DEBUG】标记消息为已读:', msg.messageId, 'senderId:', msg.senderId)
+            }
+            return match ? { ...msg, isRead: true } : msg
+          })
+          return updated
+        })
         // 更新对话列表中的未读数
         loadConversations()
         return
