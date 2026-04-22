@@ -153,9 +153,9 @@ const Login = () => {
       
       // 根据角色重定向到相应的前端
       const roleRedirects = {
-        teacher: 'http://localhost:3004/',
-        student: 'http://localhost:3006/',
-        parent: 'http://localhost:3005/',
+        teacher: 'http://localhost:3005/',
+        student: 'http://localhost:3003/',
+        parent: 'http://localhost:3004/',
         admin: 'http://localhost:3008/'
       };
       
