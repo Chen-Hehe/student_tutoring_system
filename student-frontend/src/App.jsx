@@ -1,8 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Layout from './components/Layout'
-import Login from './pages/Login'
-import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import TeacherSelection from './pages/TeacherSelection'
 import Chat from './pages/Chat'
@@ -15,8 +13,17 @@ import Match from './pages/Match'
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth)
   
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+  // 检查URL参数中是否有token和user信息
+  const checkUrlParams = () => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('token') && params.get('user')
+  }
+  
+  // 如果有URL参数，等待处理完成，不立即重定向
+  if (!isAuthenticated && !checkUrlParams()) {
+    // 重定向到统一入口的登录页
+    window.location.href = 'http://localhost:3001/login'
+    return null
   }
   
   return children
@@ -25,10 +32,6 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
-      {/* 公开路由 */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
       {/* 受保护的路由 */}
       <Route 
         path="/" 
