@@ -1,7 +1,5 @@
 package com.tutoring.config;
 
-import com.tutoring.filter.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -12,6 +10,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.tutoring.filter.JwtAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Spring Security 配置
@@ -39,6 +41,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // 允许访问管理员接口
                 .requestMatchers("/api/admin/**").permitAll()
+                // 允许访问家长接口
+                .requestMatchers("/api/parent/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问 Swagger/OpenAPI

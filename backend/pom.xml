@@ -136,15 +136,15 @@
                     <excludes>
                         <!-- 未完成的内容/家长/匹配模块 -->
                         <exclude>com/tutoring/controller/ContentController.java</exclude>
-                        <exclude>com/tutoring/controller/ParentController.java</exclude>
                         <exclude>com/tutoring/controller/MatchController.java</exclude>
 
                         <!-- 依赖缺失实体的 DTO -->
-                        <exclude>com/tutoring/dto/StudentInfoDTO.java</exclude>
-                        <exclude>com/tutoring/dto/SimpleMatchRequestDTO.java</exclude>
-                        <exclude>com/tutoring/dto/MatchRequestDTO.java</exclude>
-                        <exclude>com/tutoring/dto/LearningReportDTO.java</exclude>
-                        <exclude>com/tutoring/dto/PsychologicalStatusDTO.java</exclude>
+                        <!-- 这些DTO类现在已经可用 -->
+                        <!-- <exclude>com/tutoring/dto/StudentInfoDTO.java</exclude> -->
+                        <!-- <exclude>com/tutoring/dto/SimpleMatchRequestDTO.java</exclude> -->
+                        <!-- <exclude>com/tutoring/dto/MatchRequestDTO.java</exclude> -->
+                        <!-- <exclude>com/tutoring/dto/LearningReportDTO.java</exclude> -->
+                        <!-- <exclude>com/tutoring/dto/PsychologicalStatusDTO.java</exclude> -->
 
                         <!-- 依赖缺失实体的 Mapper -->
                         <exclude>com/tutoring/mapper/TeacherCommunicationMapper.java</exclude>
