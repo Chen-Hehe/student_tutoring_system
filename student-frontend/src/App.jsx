@@ -22,8 +22,7 @@ const ProtectedRoute = ({ children }) => {
   // 如果有URL参数，等待处理完成，不立即重定向
   if (!isAuthenticated && !checkUrlParams()) {
     // 重定向到统一入口的登录页
-    window.location.href = 'http://localhost:3001/login'
-    return null
+    window.location.href = `${window.location.origin}/login`
   }
   
   return children
