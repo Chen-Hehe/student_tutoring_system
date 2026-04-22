@@ -35,6 +35,7 @@ const Chat = () => {
   const [isConnected, setIsConnected] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
   const [pendingMessage, setPendingMessage] = useState('')
+  const [recallMenuVisible, setRecallMenuVisible] = useState(null) // 显示撤回菜单的消息 ID
   
   // 引用
   const messagesEndRef = useRef(null)
@@ -226,6 +227,44 @@ const Chat = () => {
     }
   }
   
+  // 撤回消息
+  const recallMessage = async (messageId) => {
+    try {
+      await chatAPI.recallMessage(messageId)
+      setMessages(prev => prev.map(msg => 
+        msg.messageId === messageId
+          ? { ...msg, isRecalled: true, recalledAt: dayjs().format('YYYY-MM-DD HH:mm:ss'), recalledBy: currentUser.id }
+          : msg
+      ))
+      setRecallMenuVisible(null)
+      antdMessage.success('消息已撤回')
+      loadConversations()
+    } catch (error) {
+      console.error('撤回消息失败:', error)
+      antdMessage.error('撤回失败：' + (error.response?.data?.message || error.message))
+    }
+  }
+  
+  // 检查是否可以撤回（2 分钟内）
+  const canRecall = (msg) => {
+    if (!msg.timestamp || msg.isRecalled) return false
+    const now = dayjs()
+    const sentTime = dayjs(msg.timestamp)
+    const diffMinutes = now.diff(sentTime, 'minute')
+    return diffMinutes <= 2
+  }
+  
+  // 点击其他地方关闭撤回菜单
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (recallMenuVisible !== null) {
+        setRecallMenuVisible(null)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [recallMenuVisible])
+  
   // 当选中对话变化时，自动标记为已读（实时同步关键）
   useEffect(() => {
     if (selectedConversation?.userId) {
@@ -250,6 +289,19 @@ const Chat = () => {
         
         if (data.type === 'error') {
           antdMessage.error(data.message || '消息发送失败')
+          return
+        }
+        
+        // 处理撤回通知（type=100 表示撤回通知）
+        if (data.type === 100 || data.isRecalled) {
+          console.log('收到撤回通知:', data)
+          setMessages(prev => prev.map(msg => 
+            msg.messageId === data.messageId
+              ? { ...msg, isRecalled: true, recalledAt: data.recalledAt, recalledBy: data.recalledBy }
+              : msg
+          ))
+          antdMessage.success('对方撤回了一条消息')
+          loadConversations()
           return
         }
         
@@ -339,7 +391,9 @@ const Chat = () => {
   const renderMessage = (msg, index) => {
     const isSelf = msg.senderId === currentUser?.id
     const isRead = msg.isRead === true
+    const isRecalled = msg.isRecalled === true
     const time = dayjs(msg.timestamp).format('HH:mm')
+    const showRecallBtn = isSelf && canRecall(msg) && recallMenuVisible === msg.messageId
     
     return (
       <div
@@ -348,7 +402,8 @@ const Chat = () => {
           display: 'flex',
           justifyContent: isSelf ? 'flex-end' : 'flex-start',
           marginBottom: 16,
-          alignItems: 'flex-start'
+          alignItems: 'flex-start',
+          position: 'relative'
         }}
       >
         {!isSelf && (
@@ -361,17 +416,26 @@ const Chat = () => {
         )}
         
         <div
+          onContextMenu={(e) => {
+            e.preventDefault()
+            if (isSelf && canRecall(msg)) {
+              setRecallMenuVisible(msg.messageId)
+            }
+          }}
           style={{
             maxWidth: '60%',
             padding: '12px 16px',
             borderRadius: 16,
-            backgroundColor: isSelf ? '#1890ff' : '#f0f0f0',
-            color: isSelf ? '#fff' : '#000',
+            backgroundColor: isRecalled ? '#f5f5f5' : (isSelf ? '#1890ff' : '#f0f0f0'),
+            color: isRecalled ? '#999' : (isSelf ? '#fff' : '#000'),
             wordBreak: 'break-word',
-            position: 'relative'
+            position: 'relative',
+            fontStyle: isRecalled ? 'italic' : 'normal'
           }}
         >
-          {msg.type === 1 ? (
+          {isRecalled ? (
+            <div>↩️ 消息已撤回</div>
+          ) : (msg.type === 1 ? (
             <div style={{ whiteSpace: 'pre-wrap' }}>{msg.message}</div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -388,7 +452,7 @@ const Chat = () => {
                 </a>
               )}
             </div>
-          )}
+          ))}
           <div
             style={{
               fontSize: 12,
@@ -402,7 +466,7 @@ const Chat = () => {
             }}
           >
             {time}
-            {isSelf && (
+            {!isRecalled && isSelf && (
               <span style={{ marginLeft: 4 }}>
                 {isRead ? (
                   <span style={{ color: '#fff' }} title="已读">✓</span>
@@ -412,6 +476,30 @@ const Chat = () => {
               </span>
             )}
           </div>
+          
+          {/* 撤回按钮 */}
+          {showRecallBtn && (
+            <div style={{
+              position: 'absolute',
+              top: -35,
+              right: 0,
+              backgroundColor: '#fff',
+              borderRadius: 4,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              padding: '4px 8px',
+              fontSize: 12,
+              zIndex: 1000
+            }}>
+              <Button 
+                size="small" 
+                danger 
+                onClick={() => recallMessage(msg.messageId)}
+                style={{ fontSize: 12 }}
+              >
+                撤回
+              </Button>
+            </div>
+          )}
         </div>
         
         {isSelf && (

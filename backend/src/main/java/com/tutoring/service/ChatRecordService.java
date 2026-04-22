@@ -261,6 +261,10 @@ public class ChatRecordService {
         message.setFileUrl(record.getFileUrl());
         message.setIsRead(record.getIsRead());
         message.setTimestamp(record.getSentAt());
+        // 撤回相关字段
+        message.setIsRecalled(record.getRecalledAt() != null);
+        message.setRecalledAt(record.getRecalledAt());
+        message.setRecalledBy(record.getRecalledBy());
         return message;
     }
     
@@ -272,5 +276,117 @@ public class ChatRecordService {
         String key2 = "chat:history:" + userId2 + ":" + userId1;
         redisTemplate.delete(key1);
         redisTemplate.delete(key2);
+    }
+    
+    /**
+     * 撤回消息
+     *
+     * @param messageId 消息 ID
+     * @param operatorId 操作者 ID（必须是发送者）
+     * @return 撤回后的聊天记录
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ChatRecord recallMessage(Long messageId, Long operatorId) {
+        log.info("ChatRecordService.recallMessage - 开始撤回消息：messageId={}, operatorId={}",
+            messageId, operatorId);
+        
+        // 查询消息
+        ChatRecord record = chatRecordRepository.selectById(messageId);
+        if (record == null) {
+            throw new RuntimeException("消息不存在");
+        }
+        
+        // 检查是否是发送者本人
+        if (!record.getSenderId().equals(operatorId)) {
+            throw new RuntimeException("只有消息发送者才能撤回消息");
+        }
+        
+        // 检查是否已经撤回
+        if (record.getRecalledAt() != null) {
+            throw new RuntimeException("消息已被撤回");
+        }
+        
+        // 设置撤回信息
+        record.setRecalledAt(LocalDateTime.now());
+        record.setRecalledBy(operatorId);
+        
+        int updateResult = chatRecordRepository.updateById(record);
+        if (updateResult == 0) {
+            log.error("ChatRecordService.recallMessage - 更新失败");
+            throw new RuntimeException("撤回失败");
+        }
+        
+        // 清除缓存
+        clearCache(record.getSenderId(), record.getReceiverId());
+        
+        // 构建撤回通知消息
+        ChatMessage recallNotification = new ChatMessage();
+        recallNotification.setMessageId(messageId);
+        recallNotification.setType(100); // 100 表示撤回通知
+        recallNotification.setSenderId(operatorId);
+        recallNotification.setReceiverId(record.getReceiverId());
+        recallNotification.setTimestamp(LocalDateTime.now());
+        recallNotification.setRecalledAt(record.getRecalledAt());
+        recallNotification.setRecalledBy(operatorId);
+        
+        // 推送撤回通知给接收者
+        try {
+            chatWebSocketHandler.sendToUser(record.getReceiverId(), recallNotification);
+            log.info("ChatRecordService.recallMessage - 已推送撤回通知给 receiverId={}",
+                record.getReceiverId());
+        } catch (IOException e) {
+            log.error("ChatRecordService.recallMessage - 推送撤回通知失败", e);
+        }
+        
+        // 通过 Redis 推送
+        try {
+            pushMessageToReceiver(record.getReceiverId(), recallNotification);
+            log.info("ChatRecordService.recallMessage - 已通过 Redis 推送撤回通知");
+        } catch (Exception e) {
+            log.error("ChatRecordService.recallMessage - Redis 推送失败", e);
+        }
+        
+        log.info("ChatRecordService.recallMessage - 消息撤回成功，messageId={}", messageId);
+        return record;
+    }
+    
+    /**
+     * 检查是否可以撤回消息（2 分钟内）
+     *
+     * @param record 聊天记录
+     * @return 是否可以撤回
+     */
+    public boolean canRecall(ChatRecord record) {
+        if (record == null || record.getSentAt() == null) {
+            return false;
+        }
+        if (record.getRecalledAt() != null) {
+            return false; // 已经撤回
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        long minutes = java.time.Duration.between(record.getSentAt(), now).toMinutes();
+        return minutes <= 2; // 2 分钟内可以撤回
+    }
+    
+    /**
+     * 检查消息是否可以撤回（通过消息 ID）
+     *
+     * @param messageId 消息 ID
+     * @return 是否可以撤回
+     */
+    public boolean canRecallById(Long messageId) {
+        ChatRecord record = chatRecordRepository.selectById(messageId);
+        return canRecall(record);
+    }
+    
+    /**
+     * 获取消息记录
+     *
+     * @param messageId 消息 ID
+     * @return 聊天记录
+     */
+    public ChatRecord getMessageById(Long messageId) {
+        return chatRecordRepository.selectById(messageId);
     }
 }

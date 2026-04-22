@@ -61,4 +61,16 @@ public class ChatRecord {
      */
     @TableLogic
     private Integer deleted;
+    
+    /**
+     * 消息撤回时间
+     */
+    @TableField("recalled_at")
+    private LocalDateTime recalledAt;
+    
+    /**
+     * 撤回者 ID
+     */
+    @TableField("recalled_by")
+    private Long recalledBy;
 }

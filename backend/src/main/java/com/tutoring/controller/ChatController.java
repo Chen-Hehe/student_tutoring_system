@@ -112,4 +112,36 @@ public class ChatController {
             return Result.error(500, "标记已读失败：" + e.getMessage());
         }
     }
+    
+    /**
+     * 撤回消息
+     *
+     * @param messageId 消息 ID
+     * @return 撤回结果
+     */
+    @PostMapping("/recall/{messageId}")
+    public Result<ChatRecord> recallMessage(
+            @PathVariable Long messageId,
+            @RequestHeader("X-User-Id") Long currentUserId) {
+        try {
+            log.info("【DEBUG】ChatController.recallMessage - messageId={}, currentUserId={}",
+                messageId, currentUserId);
+            
+            // 检查是否可以撤回（2 分钟内）
+            ChatRecord record = chatRecordService.getMessageById(messageId);
+            if (record == null) {
+                return Result.error(404, "消息不存在");
+            }
+            
+            if (!chatRecordService.canRecall(record)) {
+                return Result.error(400, "超过撤回时限（2 分钟）");
+            }
+            
+            ChatRecord recalledRecord = chatRecordService.recallMessage(messageId, currentUserId);
+            return Result.success("撤回成功", recalledRecord);
+        } catch (Exception e) {
+            log.error("撤回消息失败", e);
+            return Result.error(500, "撤回失败：" + e.getMessage());
+        }
+    }
 }

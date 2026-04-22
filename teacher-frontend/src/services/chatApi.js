@@ -41,6 +41,14 @@ export const chatAPI = {
    */
   markAsRead: (senderId) => {
     return api.post(`/chat/read/${senderId}`)
+  },
+  
+  /**
+   * 撤回消息
+   * @param {number} messageId - 消息 ID
+   */
+  recallMessage: (messageId) => {
+    return api.post(`/chat/recall/${messageId}`)
   }
 }
 

@@ -68,4 +68,20 @@ public class ChatMessage {
      * 已读状态
      */
     private Boolean isRead;
+    
+    /**
+     * 是否已撤回
+     */
+    private Boolean isRecalled;
+    
+    /**
+     * 撤回时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime recalledAt;
+    
+    /**
+     * 撤回者 ID
+     */
+    private Long recalledBy;
 }
