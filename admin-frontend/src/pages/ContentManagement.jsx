@@ -429,9 +429,6 @@ const ContentManagement = () => {
                   重置
                 </Button>
               </Col>
-              <Col>
-                <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>上传资源</Button>
-              </Col>
             </Row>
           </Card>
           
@@ -529,9 +526,6 @@ const ContentManagement = () => {
                 >
                   重置
                 </Button>
-              </Col>
-              <Col>
-                <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>上传资料</Button>
               </Col>
             </Row>
           </Card>
