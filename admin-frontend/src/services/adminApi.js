@@ -56,6 +56,10 @@ export const adminAPI = {
   },
   deleteAnnouncement: (id) => {
     return api.post('/admin/content/announcements/delete', { id })
+  },
+  // 发布公告
+  createAnnouncement: (announcementData) => {
+    return api.post('/admin/content/announcements/create', announcementData)
   }
 }
 

@@ -30,8 +30,10 @@ const ContentManagement = () => {
   // 编辑和删除相关状态
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false)
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
   const [editForm] = Form.useForm()
+  const [createForm] = Form.useForm()
   const [currentTab, setCurrentTab] = useState('1')
 
   // 获取教师信息
@@ -220,9 +222,29 @@ const ContentManagement = () => {
       console.error('Error saving edit:', error)
     }
   }
+  
+  // 发布公告
+  const handleCreateAnnouncement = () => {
+    setIsCreateModalVisible(true)
+    createForm.resetFields()
+  }
+  
+  // 保存发布公告
+  const handleSaveCreate = async () => {
+    try {
+      const values = await createForm.validateFields()
+      await adminAPI.createAnnouncement(values)
+      message.success('公告发布成功')
+      setIsCreateModalVisible(false)
+      fetchAnnouncements()
+    } catch (error) {
+      message.error('发布失败')
+      console.error('Error creating announcement:', error)
+    }
+  }
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: '序号', key: 'index', width: 80, render: (_, __, index) => index + 1 },
     { title: '标题', dataIndex: 'title', key: 'title' },
     { 
       title: '类型', 
@@ -289,7 +311,7 @@ const ContentManagement = () => {
   ]
 
   const materialColumns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: '序号', key: 'index', width: 80, render: (_, __, index) => index + 1 },
     { title: '标题', dataIndex: 'title', key: 'title' },
     { title: '学科', dataIndex: 'subject', key: 'subject' },
     { title: '年级', dataIndex: 'grade', key: 'grade' },
@@ -354,7 +376,7 @@ const ContentManagement = () => {
   ]
 
   const announcementColumns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: '序号', key: 'index', width: 80, render: (_, __, index) => index + 1 },
     { title: '标题', dataIndex: 'title', key: 'title' },
     { title: '内容', dataIndex: 'content', key: 'content', ellipsis: true },
     { title: '发布者', dataIndex: 'authorId', key: 'authorId',
@@ -768,7 +790,12 @@ const ContentManagement = () => {
                 </Button>
               </Col>
               <Col>
-                <Button style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}>发布公告</Button>
+                <Button 
+                  style={{ backgroundColor: '#9C27B0', color: 'white', border: 'none', fontSize: '16px', padding: '8px 16px' }}
+                  onClick={handleCreateAnnouncement}
+                >
+                  发布公告
+                </Button>
               </Col>
             </Row>
           </Card>
@@ -936,6 +963,43 @@ const ContentManagement = () => {
       >
         <p>确定要删除 {currentTab === '1' ? '教学资源' : currentTab === '2' ? '学习资料' : '公告'} 吗？</p>
         <p style={{ marginTop: '8px', color: '#666' }}>删除后将无法恢复。</p>
+      </Modal>
+      
+      {/* 发布公告模态框 */}
+      <Modal
+        title="发布公告"
+        open={isCreateModalVisible}
+        onOk={handleSaveCreate}
+        onCancel={() => setIsCreateModalVisible(false)}
+        width={600}
+      >
+        <Form form={createForm} layout="vertical">
+          <Form.Item
+            name="title"
+            label="标题"
+            rules={[{ required: true, message: '请输入标题' }]}
+          >
+            <AntInput style={{ fontSize: '16px' }} />
+          </Form.Item>
+          <Form.Item
+            name="content"
+            label="内容"
+            rules={[{ required: true, message: '请输入内容' }]}
+          >
+            <AntInput.TextArea style={{ fontSize: '16px' }} rows={6} />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
+          >
+            <Select style={{ width: '100%', fontSize: '16px' }}>
+              <Option value="published">已发布</Option>
+              <Option value="draft">草稿</Option>
+              <Option value="archived">已归档</Option>
+            </Select>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )
