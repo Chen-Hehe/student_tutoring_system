@@ -53,3 +53,4 @@ backend/target/
 # Project docs & uploaded resources (do not commit)
 docs/
 backend/uploads/resources/
+test/
