@@ -1,0 +1,27 @@
+fix: 修复雪花算法 ID 精度丢失问题
+
+问题诊断:
+- 前端传递的 messageId 与数据库中的真实 ID 不匹配
+- 雪花算法生成的 ID 是 19 位数字，超出 JavaScript 安全整数范围
+- JavaScript 的 Number.MAX_SAFE_INTEGER = 9007199254740991 (16 位)
+- 19 位 ID 在 JS 中精度丢失，导致最后 3 位变成 000
+
+解决方案:
+- ChatMessage.messageId 添加 @JsonFormat(shape = STRING) 注解
+- Jackson 序列化时将 Long 转为字符串返回给前端
+- Controller 撤回接口使用 String 接收 messageId，然后转换为 Long
+
+技术细节:
+- 前端接收到的 messageId 现在是字符串："2046797294497960123"
+- 避免了精度丢失，保持完整的 19 位数字
+- 行业标准做法（阿里、腾讯、字节都使用此方案）
+
+影响范围:
+- POST /api/chat/send - 返回的 messageId 是字符串
+- GET /api/chat/history - 返回的消息列表中 messageId 是字符串
+- POST /api/chat/recall/{messageId} - 路径参数是字符串
+
+测试要点:
+- 发送消息后检查 messageId 类型（应该是 string）
+- 撤回消息时后端日志显示正确的 ID
+- 撤回成功后刷新页面，消息仍然显示为已撤回

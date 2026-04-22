@@ -1,5 +1,6 @@
 package com.tutoring.config;
 
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -33,6 +34,11 @@ public class JacksonConfig {
             // 配置 LocalDateTime 序列化器和反序列化器
             builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
             builder.deserializers(new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+            
+            // 【关键】将所有 Long 类型序列化为字符串，避免 JavaScript 精度丢失
+            // 雪花算法生成的 ID 是 19 位数字，超出 JS 安全整数范围（16 位）
+            builder.serializerByType(Long.class, ToStringSerializer.instance);
+            builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
         };
     }
 }
