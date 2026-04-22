@@ -212,7 +212,6 @@ public class AdminController {
             @RequestParam(required = false) Long uploaderId) {
         try {
             LambdaQueryWrapper<LearningResource> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(LearningResource::getDeleted, 0);
             
             if (keyword != null && !keyword.isEmpty()) {
                 wrapper.like(LearningResource::getTitle, keyword);
@@ -259,7 +258,6 @@ public class AdminController {
             @RequestParam(required = false) String subject) {
         try {
             LambdaQueryWrapper<LearningMaterial> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(LearningMaterial::getDeleted, 0);
             
             if (keyword != null && !keyword.isEmpty()) {
                 wrapper.like(LearningMaterial::getTitle, keyword);
@@ -305,7 +303,6 @@ public class AdminController {
             @RequestParam(required = false) String status) {
         try {
             LambdaQueryWrapper<Announcement> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Announcement::getDeleted, 0);
             
             if (keyword != null && !keyword.isEmpty()) {
                 wrapper.like(Announcement::getTitle, keyword);
@@ -391,8 +388,7 @@ public class AdminController {
                 return Result.error(404, "教学资源不存在");
             }
             
-            resource.setDeleted(1);
-            learningResourceRepository.updateById(resource);
+            learningResourceRepository.deleteById(id);
             return Result.success(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -460,8 +456,7 @@ public class AdminController {
                 return Result.error(404, "学习资料不存在");
             }
             
-            material.setDeleted(1);
-            learningMaterialRepository.updateById(material);
+            learningMaterialRepository.deleteById(id);
             return Result.success(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -524,12 +519,42 @@ public class AdminController {
                 return Result.error(404, "公告不存在");
             }
             
-            announcement.setDeleted(1);
-            announcementRepository.updateById(announcement);
+            announcementRepository.deleteById(id);
             return Result.success(true);
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error(500, "删除公告失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 发布公告
+     *
+     * @param announcementData 公告数据
+     * @return 操作结果
+     */
+    @PostMapping("/content/announcements/create")
+    public Result<Boolean> createAnnouncement(@RequestBody Map<String, Object> announcementData) {
+        try {
+            String title = (String) announcementData.get("title");
+            String content = (String) announcementData.get("content");
+            String status = (String) announcementData.get("status");
+            
+            // 创建新公告
+            Announcement announcement = new Announcement();
+            announcement.setTitle(title);
+            announcement.setContent(content);
+            announcement.setStatus(status);
+            announcement.setAuthorId(1L); // 默认作者为管理员
+            announcement.setPublishDate(java.time.LocalDateTime.now());
+            announcement.setViewCount(0);
+            announcement.setDeleted(0);
+            
+            announcementRepository.insert(announcement);
+            return Result.success(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "发布公告失败: " + e.getMessage());
         }
     }
 }
