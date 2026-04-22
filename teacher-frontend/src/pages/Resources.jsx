@@ -43,7 +43,8 @@ const Resources = () => {
       return
     }
 
-    const file = fileList[0].originFileObj
+    // 直接使用 fileList[0]，因为 beforeUpload 中已经保存了原始 file 对象
+    const file = fileList[0]
     if (!file) {
       message.warning('文件无效')
       return

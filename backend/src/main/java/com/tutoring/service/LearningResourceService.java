@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.entity.LearningResource;
 import com.tutoring.repository.LearningResourceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import java.util.List;
 /**
  * 学习资源服务类
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LearningResourceService {
@@ -25,16 +27,24 @@ public class LearningResourceService {
      * @return 资源列表
      */
     public List<LearningResource> getList(String category, String type) {
-        LambdaQueryWrapper<LearningResource> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(LearningResource::getDeleted, 0)
-               .orderByDesc(LearningResource::getCreatedAt);
-        if (category != null && !category.isEmpty()) {
-            wrapper.eq(LearningResource::getCategory, category);
+        try {
+            log.info("【DEBUG】Service 获取资源列表 - category={}, type={}", category, type);
+            LambdaQueryWrapper<LearningResource> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(LearningResource::getDeleted, 0)
+                   .orderByDesc(LearningResource::getCreatedAt);
+            if (category != null && !category.isEmpty()) {
+                wrapper.eq(LearningResource::getCategory, category);
+            }
+            if (type != null && !type.isEmpty()) {
+                wrapper.eq(LearningResource::getType, type);
+            }
+            List<LearningResource> result = learningResourceRepository.selectList(wrapper);
+            log.info("【DEBUG】Service 查询成功，共 {} 条", result.size());
+            return result;
+        } catch (Exception e) {
+            log.error("【DEBUG】Service 查询失败", e);
+            throw e;
         }
-        if (type != null && !type.isEmpty()) {
-            wrapper.eq(LearningResource::getType, type);
-        }
-        return learningResourceRepository.selectList(wrapper);
     }
     
     /**

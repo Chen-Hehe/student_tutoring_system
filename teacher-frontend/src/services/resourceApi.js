@@ -8,7 +8,7 @@ export const resourcesAPI = {
    * 获取资源列表
    */
   getList: (params) => {
-    return api.get('/resources', { params })
+    return api.get('/resources/list', { params })
   },
 
   /**
@@ -19,31 +19,10 @@ export const resourcesAPI = {
   },
 
   /**
-   * 获取资源列表（新）
-   */
-  getList: (params) => {
-    return api.get('/resources/list', { params })
-  },
-
-  /**
-   * 创建资源（新）
-   */
-  create: (data) => {
-    return api.post('/resources', data)
-  },
-
-  /**
    * 更新资源
    */
   update: (id, data) => {
     return api.put(`/resources/${id}`, data)
-  },
-
-  /**
-   * 删除资源
-   */
-  delete: (id) => {
-    return api.delete(`/resources/${id}`)
   },
 
   /**

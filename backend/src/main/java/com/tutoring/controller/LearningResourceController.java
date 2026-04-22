@@ -41,10 +41,13 @@ public class LearningResourceController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "type", required = false) String type) {
         try {
+            log.info("【DEBUG】获取资源列表 - category={}, type={}", category, type);
             List<LearningResource> resources = learningResourceService.getList(category, type);
+            log.info("【DEBUG】获取资源列表成功，共 {} 条", resources.size());
             return Result.success(resources);
         } catch (Exception e) {
-            log.error("获取资源列表失败", e);
+            log.error("【DEBUG】获取资源列表失败", e);
+            e.printStackTrace();
             return Result.error(500, "获取资源列表失败：" + e.getMessage());
         }
     }
