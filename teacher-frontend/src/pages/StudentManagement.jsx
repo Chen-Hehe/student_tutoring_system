@@ -26,20 +26,29 @@ const StudentManagement = () => {
       const result = await matchAPI.getTeacherMatches(currentUser.id)
       const matches = result.data || []
       
-      // 过滤已匹配的学生
-      const matchedStudents = matches
+      // 过滤已匹配的学生并去重
+      const studentMap = new Map()
+      matches
         .filter(m => m.status === 2) // 已匹配状态
-        .map(m => ({
-          key: m.studentId,
-          id: m.studentId,
-          name: m.studentName,
-          grade: m.studentGrade,
-          school: m.studentSchool,
-          subject: m.subject,
-          learningNeeds: m.studentLearningNeeds,
-          matchTime: m.createdAt,
-          status: 'active'
-        }))
+        .forEach(m => {
+          // 如果学生 ID 不存在于 map 中，添加它
+          if (!studentMap.has(m.studentId)) {
+            studentMap.set(m.studentId, {
+              key: m.studentId,
+              id: m.studentId,
+              name: m.studentName,
+              grade: m.studentGrade,
+              school: m.studentSchool,
+              subject: m.subject,
+              learningNeeds: m.studentLearningNeeds,
+              matchTime: m.createdAt,
+              status: 'active'
+            })
+          }
+        })
+      
+      // 将 map 转换为数组
+      const matchedStudents = Array.from(studentMap.values())
       
       setStudents(matchedStudents)
     } catch (error) {

@@ -7,15 +7,15 @@ export const matchAPI = {
   /**
    * 获取教师的匹配列表
    */
-  getTeacherMatches: (teacherId) => {
-    return api.get(`/matches/teacher/${teacherId}`)
+  getTeacherMatches: () => {
+    return api.get('/api/matches/teacher')
   },
 
   /**
    * 获取 AI 推荐的学生列表
    */
-  getTeacherRecommendations: (teacherId) => {
-    return api.get(`/ai-match/recommendations/teacher/${teacherId}`)
+  getTeacherRecommendations: () => {
+    return api.get('/api/matches/recommendations/teacher')
   },
 
   /**
@@ -56,9 +56,7 @@ export const matchAPI = {
   /**
    * 获取匹配统计数据
    */
-  getStatistics: (teacherId) => {
-    return api.get('/matches/statistics', {
-      params: { teacherId }
-    })
+  getStatistics: () => {
+    return api.get('/api/matches/statistics')
   }
 }

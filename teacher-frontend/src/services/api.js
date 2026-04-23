@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API 基础 URL
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 // 创建 axios 实例
 const api = axios.create({
@@ -24,7 +24,7 @@ api.interceptors.request.use(
     
     // 添加用户 ID 到请求头（后端需要 X-User-Id）
     if (user && user.id) {
-      config.headers['X-User-Id'] = user.id
+      config.headers['X-User-Id'] = Number(user.id)
     }
     
     return config
