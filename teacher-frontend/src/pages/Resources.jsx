@@ -31,7 +31,9 @@ const Resources = () => {
     try {
       const result = await userAPI.getUsers(1)
       const teacherMap = {}
-      (result.data || result || []).forEach(teacher => {
+      // 检查响应结构，确保正确获取教师列表
+      const teachersList = result.data?.data || result.data || result || []
+      teachersList.forEach(teacher => {
         teacherMap[teacher.id] = teacher.name || teacher.username
       })
       setTeachers(teacherMap)

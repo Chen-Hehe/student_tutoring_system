@@ -1,14 +1,16 @@
 package com.tutoring.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.tutoring.entity.LearningResource;
-import com.tutoring.repository.LearningResourceRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.tutoring.entity.LearningResource;
+import com.tutoring.repository.LearningResourceRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 学习资源服务类
@@ -30,8 +32,8 @@ public class LearningResourceService {
         try {
             log.info("【DEBUG】Service 获取资源列表 - category={}, type={}", category, type);
             LambdaQueryWrapper<LearningResource> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(LearningResource::getDeleted, 0)
-                   .orderByDesc(LearningResource::getCreatedAt);
+            // 不再过滤 deleted 字段，因为我们现在使用物理删除
+            wrapper.orderByDesc(LearningResource::getCreatedAt);
             if (category != null && !category.isEmpty()) {
                 wrapper.eq(LearningResource::getCategory, category);
             }
@@ -75,15 +77,12 @@ public class LearningResourceService {
     }
     
     /**
-     * 删除资源（软删除）
+     * 删除资源（物理删除）
      * @param id 资源 ID
      */
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        LearningResource resource = new LearningResource();
-        resource.setId(id);
-        resource.setDeleted(1);
-        learningResourceRepository.updateById(resource);
+        learningResourceRepository.deleteById(id);
     }
     
     /**
