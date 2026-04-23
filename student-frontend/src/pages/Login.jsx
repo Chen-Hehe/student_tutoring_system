@@ -22,7 +22,7 @@ const Login = () => {
         role: 2, // 1:教师，2:学生，3:家长，4:管理员
       })
       
-      if (response.code === 200) {
+      if (response.code === 200 && response.data) {
         dispatch(login({ user: response.data.user, token: response.data.token }))
         message.success('登录成功！')
         navigate('/dashboard')

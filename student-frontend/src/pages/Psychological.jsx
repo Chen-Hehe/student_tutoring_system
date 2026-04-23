@@ -27,9 +27,9 @@ function Psychological() {
 
   // 加载评估历史（绝对安全）
   const loadAssessments = async () => {
-    if (!currentUser || !currentUser.id) return
+    if (!currentUser || !currentUser.id || !currentUser.studentId) return
     try {
-      const studentId = 3001 // 直接使用正确的学生ID
+      const studentId = currentUser.studentId // 使用当前登录学生的ID
       const result = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'student_self')
       if (result?.success && Array.isArray(result.data)) {
         setAssessments(result.data)
@@ -45,9 +45,9 @@ function Psychological() {
 
   // 加载心理状态（绝对安全）
   const loadStatus = async () => {
-    if (!currentUser || !currentUser.id) return
+    if (!currentUser || !currentUser.id || !currentUser.studentId) return
     try {
-      const studentId = 3001 // 直接使用正确的学生ID
+      const studentId = currentUser.studentId // 使用当前登录学生的ID
       const result = await psychologicalAPI.getStatus(studentId)
       if (result?.success && result.data) {
         setStatus(result.data)
@@ -97,7 +97,7 @@ function Psychological() {
       const mentalScore = calculateScore(values.question4)
       const averageScore = Math.round((emotionScore + stressScore + socialScore + mentalScore) / 4)
       
-      const studentId = 3001 // 直接使用正确的学生ID
+      const studentId = currentUser.studentId // 使用当前登录学生的ID
       const assessorId = currentUser.id
       
       const assessmentData = {
