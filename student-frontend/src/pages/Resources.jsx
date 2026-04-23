@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, Input, Button, Select, Grid, Tag, message, Spin, Empty } from 'antd'
-import { SearchOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined, DesktopOutlined } from '@ant-design/icons'
+import { SearchOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined, DesktopOutlined, BookOutlined, FileOutlined } from '@ant-design/icons'
 import { resourcesAPI } from '../services/resourceApi'
 
 const { useBreakpoint } = Grid
@@ -17,18 +17,26 @@ const subjectMap = {
 
 // 资源类型映射
 const typeMap = {
-  'document': '文档',
+  'courseware': '课件',
+  'lesson_plan': '教案',
   'video': '视频',
-  'audio': '音频',
-  'presentation': '演示文稿'
+  'unknown': '未知'
 }
 
 // 资源类型图标
 const typeIcons = {
-  'document': <FileTextOutlined />,
+  'courseware': <BookOutlined />,
+  'lesson_plan': <FileOutlined />,
   'video': <VideoCameraOutlined />,
-  'audio': <AudioOutlined />,
-  'presentation': <DesktopOutlined />
+  'unknown': <FileTextOutlined />
+}
+
+// 资源类型颜色
+const typeColors = {
+  'courseware': '#4CAF50',
+  'lesson_plan': '#2196F3',
+  'video': '#FF9800',
+  'unknown': '#9E9E9E'
 }
 
 const Resources = () => {
@@ -47,13 +55,29 @@ const Resources = () => {
   const loadResources = async () => {
     setLoading(true)
     try {
-      // 构建查询参数（category 使用英文值，与教师端保持一致）
+      // 构建查询参数（category 使用中文值，与数据库保持一致）
       const params = {}
       if (subject) {
-        params.category = subject  // 直接使用英文值：math, chinese, english, etc.
+        // 从选择框值映射到中文值
+        const subjectMap = {
+          'math': '数学',
+          'chinese': '语文',
+          'english': '英语',
+          'physics': '物理',
+          'chemistry': '化学',
+          'biology': '生物'
+        }
+        params.category = subjectMap[subject] || subject
       }
       if (type) {
-        params.type = type
+        // 从选择框值映射到英文值，与数据库保持一致
+        const typeMap = {
+          'document': 'document',
+          'video': 'video',
+          'audio': 'audio',
+          'presentation': 'presentation'
+        }
+        params.type = typeMap[type] || type
       }
       
       const response = await resourcesAPI.getList(params)
@@ -150,34 +174,49 @@ const Resources = () => {
               <Button type="primary" onClick={loadResources} style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}>搜索</Button>
             }
           />
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <Select
-              placeholder="科目"
-              style={{ width: 150 }}
-              value={subject}
-              onChange={setSubject}
-              allowClear
-            >
-              <Select.Option value="math">数学</Select.Option>
-              <Select.Option value="chinese">语文</Select.Option>
-              <Select.Option value="english">英语</Select.Option>
-              <Select.Option value="physics">物理</Select.Option>
-              <Select.Option value="chemistry">化学</Select.Option>
-              <Select.Option value="biology">生物</Select.Option>
-            </Select>
-            <Select
-              placeholder="资源类型"
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'end' }}>
+            <div>
+              <div style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>科目</div>
+              <Select
+                placeholder="全部科目"
+                style={{ width: 150 }}
+                value={subject}
+                onChange={setSubject}
+                allowClear
+              >
+                <Select.Option value="math">数学</Select.Option>
+                <Select.Option value="chinese">语文</Select.Option>
+                <Select.Option value="english">英语</Select.Option>
+                <Select.Option value="physics">物理</Select.Option>
+                <Select.Option value="chemistry">化学</Select.Option>
+                <Select.Option value="biology">生物</Select.Option>
+              </Select>
+            </div>
+            <div>
+              <div style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>资源类型</div>
+              <Select
+              placeholder="全部类型"
               style={{ width: 150 }}
               value={type}
               onChange={setType}
               allowClear
             >
-              <Select.Option value="document">文档</Select.Option>
+              <Select.Option value="courseware">课件</Select.Option>
+              <Select.Option value="lesson_plan">教案</Select.Option>
               <Select.Option value="video">视频</Select.Option>
-              <Select.Option value="audio">音频</Select.Option>
-              <Select.Option value="presentation">演示文稿</Select.Option>
+              <Select.Option value="unknown">未知</Select.Option>
             </Select>
-
+            </div>
+            <Button 
+              onClick={() => {
+                setSubject('')
+                setType('')
+                setSearchText('')
+              }}
+              style={{ height: 32 }}
+            >
+              重置
+            </Button>
           </div>
         </Card>
 
@@ -204,7 +243,7 @@ const Resources = () => {
                 cover={
                   <div style={{ 
                     height: 120, 
-                    background: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
+                    background: `linear-gradient(135deg, ${typeColors[resource.type] || '#4CAF50'} 0%, ${typeColors[resource.type] ? typeColors[resource.type] + '80' : '#81C784'} 100%)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -227,9 +266,10 @@ const Resources = () => {
               >
                 <Card.Meta
                   title={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>{resource.title}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <span style={{ flex: 1 }}>{resource.title}</span>
                       <Tag style={{ backgroundColor: '#4CAF50', border: 'none', color: '#fff' }}>{resource.category || resource.subject}</Tag>
+                      <Tag style={{ backgroundColor: typeColors[resource.type] || '#4CAF50', border: 'none', color: '#fff' }}>{typeMap[resource.type] || resource.type}</Tag>
                     </div>
                   }
                   description={
