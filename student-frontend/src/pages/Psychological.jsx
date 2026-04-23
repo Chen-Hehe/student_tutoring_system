@@ -198,260 +198,335 @@ function Psychological() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1 style={{ marginBottom: 24, color: '#4CAF50' }}>❤️ 心理支持</h1>
-
-      <Card title="今天的心情如何？" style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 16 }}>
-          {moodOptions.map((option) => (
-            <Button
-              key={option.value}
-              icon={option.icon}
-              size="large"
-              style={{ 
-                fontSize: 24, 
-                height: 80, 
-                width: 100,
-                borderColor: selectedMood === option.value ? option.color : '#d9d9d9',
-                color: selectedMood === option.value ? option.color : '#666',
-              }}
-              onClick={() => handleMoodSelect(option.value)}
-            >
-              <div style={{ fontSize: 14, marginTop: 8 }}>{option.label}</div>
-            </Button>
-          ))}
+    <div style={{ background: '#f0f8f0', padding: 0 }}>
+      {/* 学生端标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#4CAF50', margin: 0, fontSize: '1.8em' }}>❤️ 心理支持</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，{currentUser?.name || '学生'}</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#4CAF50',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>{currentUser?.name?.charAt(0) || '学'}</div>
         </div>
-        <Button 
-          type="primary" 
-          icon={<CalendarOutlined />}
-          onClick={() => setIsMoodModalOpen(true)}
-          disabled={!selectedMood}
+      </div>
+
+      <div style={{ padding: 20 }}>
+        <Card 
+          title="今天的心情如何？" 
+          style={{ 
+            marginBottom: 24, 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
         >
-          记录心情
-        </Button>
-      </Card>
-
-      <Card title="心理状态概览" style={{ marginBottom: 24 }}>
-        <Result
-          icon={<HeartOutlined style={{ color: '#ff4d4f', fontSize: 48 }} />}
-          title={loading ? '加载中...' : status ? '最近评估完成' : '暂无评估'}
-          subTitle={status ? '保持积极心态，继续加油！' : '开始第一次心理测评吧'}
-          extra={
-            <Button type="primary" size="large" icon={<PlusOutlined />} onClick={handleAssessmentStart}>
-              开始新测评
-            </Button>
-          }
-        />
-        
-        {/* ✅ 绝对不会崩溃的渲染 */}
-        {status && (
-          <div style={{ marginTop: 24 }}>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span>心理健康指数</span>
-                <span>
-                  {Math.round(
-                    ((status.emotionPercentage || 0) +
-                    (status.socialPercentage || 0) +
-                    (status.stressPercentage || 0) +
-                    (status.mentalPercentage || 0)) / 4
-                  )}/100
-                </span>
-              </div>
-              <Progress 
-                percent={Math.round(
-                  ((status.emotionPercentage || 0) +
-                  (status.socialPercentage || 0) +
-                  (status.stressPercentage || 0) +
-                  (status.mentalPercentage || 0)) / 4
-                )} 
-                strokeColor={{ '0%': '#ff4d4f', '100%': '#52c41a' }} 
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-              <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ marginBottom: 8, fontWeight: 'bold' }}>情绪状态</div>
-                <div style={{ fontSize: 24, color: status.emotionLevel === 'good' ? '#52c41a' : status.emotionLevel === 'warning' ? '#faad14' : '#ff4d4f', marginBottom: 4 }}>
-                  {status.emotionPercentage || 0}%
-                </div>
-                <div style={{ color: status.emotionLevel === 'good' ? '#52c41a' : status.emotionLevel === 'warning' ? '#faad14' : '#ff4d4f' }}>
-                  {status.emotionStatus || '未知'}
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ marginBottom: 8, fontWeight: 'bold' }}>社交能力</div>
-                <div style={{ fontSize: 24, color: status.socialLevel === 'good' ? '#52c41a' : status.socialLevel === 'warning' ? '#faad14' : '#ff4d4f', marginBottom: 4 }}>
-                  {status.socialPercentage || 0}%
-                </div>
-                <div style={{ color: status.socialLevel === 'good' ? '#52c41a' : status.socialLevel === 'warning' ? '#faad14' : '#ff4d4f' }}>
-                  {status.socialStatus || '未知'}
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ marginBottom: 8, fontWeight: 'bold' }}>学习压力</div>
-                <div style={{ fontSize: 24, color: status.stressLevel === 'good' ? '#52c41a' : status.stressLevel === 'warning' ? '#faad14' : '#ff4d4f', marginBottom: 4 }}>
-                  {status.stressPercentage || 0}%
-                </div>
-                <div style={{ color: status.stressLevel === 'good' ? '#52c41a' : status.stressLevel === 'warning' ? '#faad14' : '#ff4d4f' }}>
-                  {status.stressStatus || '未知'}
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ marginBottom: 8, fontWeight: 'bold' }}>自我认知</div>
-                <div style={{ fontSize: 24, color: status.mentalLevel === 'good' ? '#52c41a' : status.mentalLevel === 'warning' ? '#faad14' : '#ff4d4f', marginBottom: 4 }}>
-                  {status.mentalPercentage || 0}%
-                </div>
-                <div style={{ color: status.mentalLevel === 'good' ? '#52c41a' : status.mentalLevel === 'warning' ? '#faad14' : '#ff4d4f' }}>
-                  {status.mentalStatus || '未知'}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </Card>
-
-      <Card title="测评历史">
-        {/* ✅ 永远不会崩溃的 List */}
-        <List
-          dataSource={assessments || []}
-          renderItem={(item) => (
-            <List.Item key={item?.id || Math.random()}>
-              <List.Item.Meta
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <span>{item?.assessmentDate ? new Date(item.assessmentDate).toLocaleDateString() : ''}</span>
-                    <Tag color={(item?.score || 0) >= 80 ? '#52c41a' : (item?.score || 0) >= 60 ? '#faad14' : '#ff4d4f'}>
-                      {item?.score || 0} 分
-                    </Tag>
-                  </div>
-                }
-                description={item?.comments || '无'}
-              />
-            </List.Item>
-          )}
-          locale={{ emptyText: '暂无测评记录' }}
-        />
-      </Card>
-
-      <Modal
-        title="心理测评"
-        open={isAssessmentModalOpen}
-        onOk={handleAssessmentSubmit}
-        onCancel={() => {
-          setIsAssessmentModalOpen(false)
-          form.resetFields()
-        }}
-        okText="提交"
-        cancelText="取消"
-        width={600}
-        destroyOnClose={true}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="question1"
-            label="1. 最近一周，你感觉情绪如何？"
-            rules={[{ required: true, message: '请选择' }]}
-          >
-            <Radio.Group>
-              <Radio value="very_good">非常好</Radio>
-              <Radio value="good">良好</Radio>
-              <Radio value="normal">一般</Radio>
-              <Radio value="bad">较差</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="question2"
-            label="2. 最近学习压力大吗？"
-            rules={[{ required: true, message: '请选择' }]}
-          >
-            <Radio.Group>
-              <Radio value="no">没有压力</Radio>
-              <Radio value="little">轻度压力</Radio>
-              <Radio value="medium">中等压力</Radio>
-              <Radio value="high">压力很大</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="question3"
-            label="3. 和同学、朋友相处得怎么样？"
-            rules={[{ required: true, message: '请选择' }]}
-          >
-            <Radio.Group>
-              <Radio value="very_good">非常好</Radio>
-              <Radio value="good">良好</Radio>
-              <Radio value="normal">一般</Radio>
-              <Radio value="bad">较差</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="question4"
-            label="4. 你对自己的认知如何？"
-            rules={[{ required: true, message: '请选择' }]}
-          >
-            <Radio.Group>
-              <Radio value="very_confident">非常自信</Radio>
-              <Radio value="confident">比较自信</Radio>
-              <Radio value="normal">一般</Radio>
-              <Radio value="unconfident">不太自信</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item
-            name="comment"
-            label="5. 你还有什么想补充的吗？"
-          >
-            <TextArea rows={3} placeholder="请输入..." />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="记录心情"
-        open={isMoodModalOpen}
-        onOk={handleMoodSubmit}
-        onCancel={() => {
-          setIsMoodModalOpen(false)
-          setSelectedMood(null)
-          setMoodDate(new Date())
-        }}
-        okText="确认"
-        cancelText="取消"
-        destroyOnClose={true}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 8 }}>选择日期：</label>
-          <DatePicker 
-            value={moodDate} 
-            onChange={(date) => setMoodDate(date)} 
-            style={{ width: '100%' }} 
-          />
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 8 }}>当前心情：</label>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 16 }}>
             {moodOptions.map((option) => (
               <Button
                 key={option.value}
                 icon={option.icon}
+                size="large"
                 style={{ 
+                  fontSize: 24, 
+                  height: 80, 
+                  width: 100,
                   borderColor: selectedMood === option.value ? option.color : '#d9d9d9',
                   color: selectedMood === option.value ? option.color : '#666',
                 }}
                 onClick={() => handleMoodSelect(option.value)}
               >
-                {option.label}
+                <div style={{ fontSize: 14, marginTop: 8 }}>{option.label}</div>
               </Button>
             ))}
           </div>
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: 8 }}>心情备注：</label>
-          <TextArea rows={3} placeholder="请输入今天的心情..." />
-        </div>
-      </Modal>
+          <Button 
+            type="primary" 
+            icon={<CalendarOutlined />}
+            onClick={() => setIsMoodModalOpen(true)}
+            disabled={!selectedMood}
+            style={{
+              backgroundColor: '#4CAF50',
+              borderColor: '#4CAF50',
+              '&:hover': {
+                backgroundColor: '#45a049',
+                borderColor: '#45a049'
+              }
+            }}
+          >
+            记录心情
+          </Button>
+        </Card>
+
+        <Card 
+          title="心理状态概览" 
+          style={{ 
+            marginBottom: 24, 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
+        >
+          <Result
+            icon={<HeartOutlined style={{ color: '#4CAF50', fontSize: 48 }} />}
+            title={loading ? '加载中...' : status ? '最近评估完成' : '暂无评估'}
+            subTitle={status ? '保持积极心态，继续加油！' : '开始第一次心理测评吧'}
+            extra={
+              <Button 
+                type="primary" 
+                size="large" 
+                icon={<PlusOutlined />} 
+                onClick={handleAssessmentStart}
+                style={{
+                  backgroundColor: '#4CAF50',
+                  borderColor: '#4CAF50',
+                  '&:hover': {
+                    backgroundColor: '#45a049',
+                    borderColor: '#45a049'
+                  }
+                }}
+              >
+                开始新测评
+              </Button>
+            }
+          />
+          
+          {/* ✅ 绝对不会崩溃的渲染 */}
+          {status && (
+            <div style={{ marginTop: 24 }}>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span>心理健康指数</span>
+                  <span>
+                    {Math.round(
+                      ((status.emotionPercentage || 0) +
+                      (status.socialPercentage || 0) +
+                      (status.stressPercentage || 0) +
+                      (status.mentalPercentage || 0)) / 4
+                    )}/100
+                  </span>
+                </div>
+                <Progress 
+                  percent={Math.round(
+                    ((status.emotionPercentage || 0) +
+                    (status.socialPercentage || 0) +
+                    (status.stressPercentage || 0) +
+                    (status.mentalPercentage || 0)) / 4
+                  )} 
+                  strokeColor={{ '0%': '#4CAF50', '100%': '#81C784' }} 
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
+                  <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#4CAF50' }}>情绪状态</div>
+                  <div style={{ fontSize: 24, color: status.emotionLevel === 'good' ? '#4CAF50' : status.emotionLevel === 'warning' ? '#8BC34A' : '#FF5722', marginBottom: 4 }}>
+                    {status.emotionPercentage || 0}%
+                  </div>
+                  <div style={{ color: status.emotionLevel === 'good' ? '#4CAF50' : status.emotionLevel === 'warning' ? '#8BC34A' : '#FF5722' }}>
+                    {status.emotionStatus || '未知'}
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
+                  <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#4CAF50' }}>社交能力</div>
+                  <div style={{ fontSize: 24, color: status.socialLevel === 'good' ? '#4CAF50' : status.socialLevel === 'warning' ? '#8BC34A' : '#FF5722', marginBottom: 4 }}>
+                    {status.socialPercentage || 0}%
+                  </div>
+                  <div style={{ color: status.socialLevel === 'good' ? '#4CAF50' : status.socialLevel === 'warning' ? '#8BC34A' : '#FF5722' }}>
+                    {status.socialStatus || '未知'}
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
+                  <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#4CAF50' }}>学习压力</div>
+                  <div style={{ fontSize: 24, color: status.stressLevel === 'good' ? '#4CAF50' : status.stressLevel === 'warning' ? '#8BC34A' : '#FF5722', marginBottom: 4 }}>
+                    {status.stressPercentage || 0}%
+                  </div>
+                  <div style={{ color: status.stressLevel === 'good' ? '#4CAF50' : status.stressLevel === 'warning' ? '#8BC34A' : '#FF5722' }}>
+                    {status.stressStatus || '未知'}
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9f9f9', padding: 16, borderRadius: 8, textAlign: 'center' }}>
+                  <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#4CAF50' }}>自我认知</div>
+                  <div style={{ fontSize: 24, color: status.mentalLevel === 'good' ? '#4CAF50' : status.mentalLevel === 'warning' ? '#8BC34A' : '#FF5722', marginBottom: 4 }}>
+                    {status.mentalPercentage || 0}%
+                  </div>
+                  <div style={{ color: status.mentalLevel === 'good' ? '#4CAF50' : status.mentalLevel === 'warning' ? '#8BC34A' : '#FF5722' }}>
+                    {status.mentalStatus || '未知'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+
+        <Card 
+          title="测评历史" 
+          style={{ 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
+        >
+          {/* ✅ 永远不会崩溃的 List */}
+          <List
+            dataSource={assessments || []}
+            renderItem={(item) => (
+              <List.Item key={item?.id || Math.random()}>
+                <List.Item.Meta
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <span>{item?.assessmentDate ? new Date(item.assessmentDate).toLocaleDateString() : ''}</span>
+                      <Tag color={(item?.score || 0) >= 80 ? '#4CAF50' : (item?.score || 0) >= 60 ? '#8BC34A' : '#FF5722'}>
+                        {item?.score || 0} 分
+                      </Tag>
+                    </div>
+                  }
+                  description={item?.comments || '无'}
+                />
+              </List.Item>
+            )}
+            locale={{ emptyText: '暂无测评记录' }}
+          />
+        </Card>
+
+        <Modal
+          title="心理测评"
+          open={isAssessmentModalOpen}
+          onOk={handleAssessmentSubmit}
+          onCancel={() => {
+            setIsAssessmentModalOpen(false)
+            form.resetFields()
+          }}
+          okText="提交"
+          cancelText="取消"
+          width={600}
+          destroyOnClose={true}
+        >
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="question1"
+              label="1. 最近一周，你感觉情绪如何？"
+              rules={[{ required: true, message: '请选择' }]}
+            >
+              <Radio.Group>
+                <Radio value="very_good">非常好</Radio>
+                <Radio value="good">良好</Radio>
+                <Radio value="normal">一般</Radio>
+                <Radio value="bad">较差</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              name="question2"
+              label="2. 最近学习压力大吗？"
+              rules={[{ required: true, message: '请选择' }]}
+            >
+              <Radio.Group>
+                <Radio value="no">没有压力</Radio>
+                <Radio value="little">轻度压力</Radio>
+                <Radio value="medium">中等压力</Radio>
+                <Radio value="high">压力很大</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              name="question3"
+              label="3. 和同学、朋友相处得怎么样？"
+              rules={[{ required: true, message: '请选择' }]}
+            >
+              <Radio.Group>
+                <Radio value="very_good">非常好</Radio>
+                <Radio value="good">良好</Radio>
+                <Radio value="normal">一般</Radio>
+                <Radio value="bad">较差</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              name="question4"
+              label="4. 你对自己的认知如何？"
+              rules={[{ required: true, message: '请选择' }]}
+            >
+              <Radio.Group>
+                <Radio value="very_confident">非常自信</Radio>
+                <Radio value="confident">比较自信</Radio>
+                <Radio value="normal">一般</Radio>
+                <Radio value="unconfident">不太自信</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item
+              name="comment"
+              label="5. 你还有什么想补充的吗？"
+            >
+              <TextArea rows={3} placeholder="请输入..." />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Modal
+          title="记录心情"
+          open={isMoodModalOpen}
+          onOk={handleMoodSubmit}
+          onCancel={() => {
+            setIsMoodModalOpen(false)
+            setSelectedMood(null)
+            setMoodDate(new Date())
+          }}
+          okText="确认"
+          cancelText="取消"
+          destroyOnClose={true}
+        >
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 8 }}>选择日期：</label>
+            <DatePicker 
+              value={moodDate} 
+              onChange={(date) => setMoodDate(date)} 
+              style={{ width: '100%' }} 
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 8 }}>当前心情：</label>
+            <div style={{ display: 'flex', gap: 16 }}>
+              {moodOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  icon={option.icon}
+                  style={{ 
+                    borderColor: selectedMood === option.value ? option.color : '#d9d9d9',
+                    color: selectedMood === option.value ? option.color : '#666',
+                  }}
+                  onClick={() => handleMoodSelect(option.value)}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: 8 }}>心情备注：</label>
+            <TextArea rows={3} placeholder="请输入今天的心情..." />
+          </div>
+        </Modal>
+      </div>
     </div>
   )
 }

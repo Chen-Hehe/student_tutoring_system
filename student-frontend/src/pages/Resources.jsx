@@ -112,115 +112,140 @@ const Resources = () => {
   })
 
   return (
-    <div>
-      <h1 style={{ marginBottom: 24, color: '#4CAF50' }}>📚 学习资源</h1>
+    <div style={{ background: '#f0f8f0', padding: 0 }}>
+      {/* 学生端标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#4CAF50', margin: 0, fontSize: '1.8em' }}>📚 学习资源</h1>
+      </div>
 
-      {/* 搜索筛选 */}
-      <Card style={{ marginBottom: 24 }}>
-        <Input
-          placeholder="搜索学习资源"
-          prefix={<SearchOutlined />}
-          size="large"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          onPressEnter={loadResources}
-          style={{ marginBottom: 16 }}
-          addonAfter={
-            <Button type="primary" onClick={loadResources}>搜索</Button>
-          }
-        />
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <Select
-            placeholder="科目"
-            style={{ width: 150 }}
-            value={subject}
-            onChange={setSubject}
-            allowClear
-          >
-            <Select.Option value="math">数学</Select.Option>
-            <Select.Option value="chinese">语文</Select.Option>
-            <Select.Option value="english">英语</Select.Option>
-            <Select.Option value="physics">物理</Select.Option>
-            <Select.Option value="chemistry">化学</Select.Option>
-            <Select.Option value="biology">生物</Select.Option>
-          </Select>
-          <Select
-            placeholder="资源类型"
-            style={{ width: 150 }}
-            value={type}
-            onChange={setType}
-            allowClear
-          >
-            <Select.Option value="document">文档</Select.Option>
-            <Select.Option value="video">视频</Select.Option>
-            <Select.Option value="audio">音频</Select.Option>
-            <Select.Option value="presentation">演示文稿</Select.Option>
-          </Select>
-
-        </div>
-      </Card>
-
-      {/* 资源列表 */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <Spin size="large" tip="加载中..." />
-        </div>
-      ) : filteredResources.length === 0 ? (
-        <Empty description="暂无学习资源" />
-      ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: screens.xs ? '1fr' : screens.sm ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-          gap: 24,
-        }}>
-          {filteredResources.map((resource) => (
-            <Card
-              key={resource.id}
-              hoverable
-              style={{ borderRadius: 12 }}
-              cover={
-                <div style={{ 
-                  height: 120, 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 48,
-                  color: 'white'
-                }}>
-                  {typeIcons[resource.type] || <FileTextOutlined />}
-                </div>
-              }
-              actions={[
-                <Button 
-                  key="download" 
-                  type="primary" 
-                  onClick={() => handleDownload(resource)}
-                >
-                  下载
-                </Button>,
-              ]}
+      <div style={{ padding: 20 }}>
+        {/* 搜索筛选 */}
+        <Card 
+          style={{ 
+            marginBottom: 16,
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
+        >
+          <Input
+            placeholder="搜索学习资源"
+            prefix={<SearchOutlined />}
+            size="large"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onPressEnter={loadResources}
+            style={{ marginBottom: 16 }}
+            addonAfter={
+              <Button type="primary" onClick={loadResources} style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}>搜索</Button>
+            }
+          />
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <Select
+              placeholder="科目"
+              style={{ width: 150 }}
+              value={subject}
+              onChange={setSubject}
+              allowClear
             >
-              <Card.Meta
-                title={
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>{resource.title}</span>
-                    <Tag color="blue">{resource.category || resource.subject}</Tag>
+              <Select.Option value="math">数学</Select.Option>
+              <Select.Option value="chinese">语文</Select.Option>
+              <Select.Option value="english">英语</Select.Option>
+              <Select.Option value="physics">物理</Select.Option>
+              <Select.Option value="chemistry">化学</Select.Option>
+              <Select.Option value="biology">生物</Select.Option>
+            </Select>
+            <Select
+              placeholder="资源类型"
+              style={{ width: 150 }}
+              value={type}
+              onChange={setType}
+              allowClear
+            >
+              <Select.Option value="document">文档</Select.Option>
+              <Select.Option value="video">视频</Select.Option>
+              <Select.Option value="audio">音频</Select.Option>
+              <Select.Option value="presentation">演示文稿</Select.Option>
+            </Select>
+
+          </div>
+        </Card>
+
+        {/* 资源列表 */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <Spin size="large" tip="加载中..." />
+          </div>
+        ) : filteredResources.length === 0 ? (
+          <Card style={{ boxShadow: '0 2px 5px rgba(0,0,0,0.1)', borderRadius: 10, padding: 20, backgroundColor: '#fff' }}>
+            <Empty description="暂无学习资源" />
+          </Card>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: screens.xs ? '1fr' : screens.sm ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+            gap: 16,
+          }}>
+            {filteredResources.map((resource) => (
+              <Card
+                key={resource.id}
+                hoverable
+                style={{ borderRadius: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
+                cover={
+                  <div style={{ 
+                    height: 120, 
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 48,
+                    color: 'white'
+                  }}>
+                    {typeIcons[resource.type] || <FileTextOutlined />}
                   </div>
                 }
-                description={
-                  <div>
-                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                      {resource.fileName || '未知文件'} · {resource.fileSize ? `${(resource.fileSize / 1024).toFixed(1)} KB` : '未知大小'}
+                actions={[
+                  <Button 
+                    key="download" 
+                    type="primary" 
+                    onClick={() => handleDownload(resource)}
+                    style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
+                  >
+                    下载
+                  </Button>,
+                ]}
+              >
+                <Card.Meta
+                  title={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>{resource.title}</span>
+                      <Tag style={{ backgroundColor: '#4CAF50', border: 'none', color: '#fff' }}>{resource.category || resource.subject}</Tag>
                     </div>
-                    <div style={{ marginBottom: 8 }}>{resource.description || '暂无描述'}</div>
-                  </div>
-                }
-              />
-            </Card>
-          ))}
-        </div>
-      )}
+                  }
+                  description={
+                    <div>
+                      <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                        {resource.fileName || '未知文件'} · {resource.fileSize ? `${(resource.fileSize / 1024).toFixed(1)} KB` : '未知大小'}
+                      </div>
+                      <div style={{ marginBottom: 8 }}>{resource.description || '暂无描述'}</div>
+                    </div>
+                  }
+                />
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

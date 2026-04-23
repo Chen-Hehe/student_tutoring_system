@@ -109,70 +109,180 @@ const Dashboard = () => {
   ]
 
   return (
-    <div>
-      <h2 style={{ marginBottom: 24 }}>👨‍🏫 教师仪表盘</h2>
-      
-      {/* 统计卡片 */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="总匹配数"
-              value={stats.totalMatches}
-              prefix={<UsergroupAddOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="待处理请求"
-              value={stats.pendingMatches}
-              prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="进行中辅导"
-              value={stats.activeMatches}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="成功率"
-              value={parseFloat(stats.successRate)}
-              suffix="%"
-              prefix={<PercentageOutlined />}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+    <div style={{ background: '#f0f8ff', padding: 0 }}>
+      {/* 教师端标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#2196F3', margin: 0, fontSize: '1.8em' }}>👨‍🏫 教师仪表盘</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，{currentUser?.name || '教师'}</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#2196F3',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>{currentUser?.name?.charAt(0) || '教'}</div>
+        </div>
+      </div>
 
-      {/* 最近匹配 */}
-      <Card 
-        title={
-          <span>
-            <FireOutlined /> 最近匹配
-          </span>
-        }
-        loading={loading}
-      >
-        <Table
-          columns={columns}
-          dataSource={recentMatches}
-          pagination={false}
-          size="small"
-        />
-      </Card>
+      <div style={{ padding: 20 }}>
+        {/* 统计卡片 */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={12} lg={6} style={{ display: 'flex' }}>
+            <Card 
+              hoverable 
+              style={{
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                borderRadius: 10,
+                padding: 20,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#fff',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Statistic
+                title={<span style={{ color: '#2196F3' }}>总匹配数</span>}
+                value={stats.totalMatches}
+                prefix={<UsergroupAddOutlined style={{ color: '#2196F3' }} />}
+                valueStyle={{ color: '#2196F3' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6} style={{ display: 'flex' }}>
+            <Card 
+              hoverable 
+              style={{
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                borderRadius: 10,
+                padding: 20,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#fff',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Statistic
+                title={<span style={{ color: '#faad14' }}>待处理请求</span>}
+                value={stats.pendingMatches}
+                prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />}
+                valueStyle={{ color: '#faad14' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6} style={{ display: 'flex' }}>
+            <Card 
+              hoverable 
+              style={{
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                borderRadius: 10,
+                padding: 20,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#fff',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Statistic
+                title={<span style={{ color: '#2196F3' }}>进行中辅导</span>}
+                value={stats.activeMatches}
+                prefix={<CheckCircleOutlined style={{ color: '#2196F3' }} />}
+                valueStyle={{ color: '#2196F3' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6} style={{ display: 'flex' }}>
+            <Card 
+              hoverable 
+              style={{
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                borderRadius: 10,
+                padding: 20,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#fff',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'
+              }}
+            >
+              <Statistic
+                title={<span style={{ color: '#2196F3' }}>成功率</span>}
+                value={parseFloat(stats.successRate)}
+                suffix="%"
+                prefix={<PercentageOutlined style={{ color: '#2196F3' }} />}
+                valueStyle={{ color: '#2196F3' }}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        {/* 最近匹配 */}
+        <Card 
+          title={
+            <span style={{ color: '#2196F3' }}>
+              <FireOutlined /> 最近匹配
+            </span>
+          }
+          loading={loading}
+          style={{
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
+        >
+          <Table
+            columns={columns}
+            dataSource={recentMatches}
+            pagination={false}
+            size="small"
+          />
+        </Card>
+      </div>
     </div>
   )
 }

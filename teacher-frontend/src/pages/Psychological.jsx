@@ -182,17 +182,17 @@ const Psychological = () => {
   }
 
   const scoreColor = (score) => {
-    if (score >= 80) return '#52c41a'
-    if (score >= 60) return '#faad14'
-    return '#ff4d4f'
+    if (score >= 80) return '#2196F3'
+    if (score >= 60) return '#64B5F6'
+    return '#FF5722'
   }
 
   const levelColor = (level) => {
     switch (level) {
-      case 'good': return '#52c41a'
-      case 'warning': return '#faad14'
-      case 'danger': return '#ff4d4f'
-      default: return '#52c41a'
+      case 'good': return '#2196F3'
+      case 'warning': return '#64B5F6'
+      case 'danger': return '#FF5722'
+      default: return '#2196F3'
     }
   }
 
@@ -245,373 +245,424 @@ const Psychological = () => {
   ]
 
   return (
-    <div>
-      <h2 style={{ marginBottom: 24 }}>💚 心理辅导</h2>
-      
-      <Card>
-        <div style={{ marginBottom: 16 }}>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => setModalVisible(true)}
-          >
-            添加心理评估
-          </Button>
+    <div style={{ background: '#f0f8ff', padding: 0 }}>
+      {/* 教师端标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#2196F3', margin: 0, fontSize: '1.8em' }}>💙 心理辅导</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，{currentUser?.name || '教师'}</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#2196F3',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>{currentUser?.name?.charAt(0) || '教'}</div>
         </div>
+      </div>
 
-        <Table
-          columns={columns}
-          dataSource={students}
-          loading={loading}
-          pagination={{
-            pageSize: 6,
-            showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条记录`
+      <div style={{ padding: 20 }}>
+        <Card 
+          style={{ 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
           }}
-        />
-      </Card>
-
-      <Modal
-        title="添加心理评估"
-        open={modalVisible}
-        onCancel={() => {
-          setModalVisible(false)
-          form.resetFields()
-        }}
-        onOk={() => form.submit()}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAddAssessment}
         >
-          <Form.Item
-            name="studentId"
-            label="选择学生"
-            rules={[{ required: true, message: '请选择学生' }]}
-          >
-            <Select placeholder="请选择学生">
-              {students.map(student => (
-                <Option key={student.id} value={student.id}>
-                  {student.name} - {student.grade}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="score"
-            label="心理状态评分"
-            rules={[{ required: true, message: '请输入评分' }]}
-          >
-            <Rate count={10} style={{ fontSize: 24 }} />
-          </Form.Item>
-
-          <Form.Item
-            name="emotionScore"
-            label="情绪稳定性"
-            rules={[{ required: true, message: '请输入评分' }]}
-          >
-            <Select placeholder="请选择">
-              <Option value={90}>优秀</Option>
-              <Option value={75}>良好</Option>
-              <Option value={60}>一般</Option>
-              <Option value={45}>需关注</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="socialScore"
-            label="社交互动"
-            rules={[{ required: true, message: '请输入评分' }]}
-          >
-            <Select placeholder="请选择">
-              <Option value={90}>优秀</Option>
-              <Option value={75}>良好</Option>
-              <Option value={60}>一般</Option>
-              <Option value={45}>需关注</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="stressScore"
-            label="学习压力"
-            rules={[{ required: true, message: '请输入评分' }]}
-          >
-            <Select placeholder="请选择">
-              <Option value={90}>优秀</Option>
-              <Option value={75}>良好</Option>
-              <Option value={60}>一般</Option>
-              <Option value={45}>需关注</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="mentalScore"
-            label="自我认知"
-            rules={[{ required: true, message: '请输入评分' }]}
-          >
-            <Select placeholder="请选择">
-              <Option value={90}>优秀</Option>
-              <Option value={75}>良好</Option>
-              <Option value={60}>一般</Option>
-              <Option value={45}>需关注</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="comments"
-            label="评估意见"
-            rules={[{ required: true, message: '请输入评估意见' }]}
-          >
-            <TextArea rows={4} placeholder="请输入详细的评估意见" />
-          </Form.Item>
-
-          <Form.Item
-            name="recommendations"
-            label="建议"
-          >
-            <TextArea rows={3} placeholder="请输入辅导建议（选填）" />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Drawer
-        title={`${selectedStudent?.name} - 心理状态详情`}
-        placement="right"
-        width={800}
-        open={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-      >
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>加载中...</div>
-        ) : (
-          <Tabs defaultActiveKey="overview">
-            <TabPane tab="心理状态概览" key="overview">
-              {studentStatus && (
-                <div>
-                  <Descriptions bordered style={{ marginBottom: 24 }}>
-                    <Descriptions.Item label="情绪状态">
-                      <span style={{ color: levelColor(studentStatus.emotionLevel) }}>
-                        {studentStatus.emotionStatus} ({studentStatus.emotionPercentage}%)
-                      </span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="社交能力">
-                      <span style={{ color: levelColor(studentStatus.socialLevel) }}>
-                        {studentStatus.socialStatus} ({studentStatus.socialPercentage}%)
-                      </span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="学习压力">
-                      <span style={{ color: levelColor(studentStatus.stressLevel) }}>
-                        {studentStatus.stressStatus} ({studentStatus.stressPercentage}%)
-                      </span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="心理健康">
-                      <span style={{ color: levelColor(studentStatus.mentalLevel) }}>
-                        {studentStatus.mentalStatus} ({studentStatus.mentalPercentage}%)
-                      </span>
-                    </Descriptions.Item>
-                  </Descriptions>
-                </div>
-              )}
-            </TabPane>
-            <TabPane tab="学生自评" key="student-assessments">
-              {studentAssessments.length > 0 ? (
-                <Table
-                  dataSource={studentAssessments}
-                  columns={[
-                    {
-                      title: '评估日期',
-                      dataIndex: 'assessmentDate',
-                      key: 'assessmentDate',
-                      render: (date) => date ? new Date(date).toLocaleDateString() : ''
-                    },
-                    {
-                      title: '评分',
-                      dataIndex: 'score',
-                      key: 'score',
-                      render: (score) => (
-                        <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
-                          {score} 分
-                        </span>
-                      )
-                    },
-                    {
-                      title: '评估意见',
-                      dataIndex: 'comments',
-                      key: 'comments',
-                      ellipsis: true
-                    },
-                    {
-                      title: '操作',
-                      key: 'action',
-                      render: (_, record) => (
-                        <Button
-                          type="link"
-                          size="small"
-                          icon={<EyeOutlined />}
-                          onClick={() => handleViewAssessmentDetail(record)}
-                        >
-                          详情
-                        </Button>
-                      )
-                    }
-                  ]}
-                  pagination={false}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                  <p>该学生未自评</p>
-                </div>
-              )}
-            </TabPane>
-            <TabPane tab="教师评估" key="teacher-assessments">
-              <div style={{ marginBottom: 16 }}>
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => setModalVisible(true)}
-                >
-                  添加评估
-                </Button>
-              </div>
-              {teacherAssessments.length > 0 ? (
-                <Table
-                  dataSource={teacherAssessments}
-                  columns={[
-                    {
-                      title: '评估日期',
-                      dataIndex: 'assessmentDate',
-                      key: 'assessmentDate',
-                      render: (date) => date ? new Date(date).toLocaleDateString() : ''
-                    },
-                    {
-                      title: '评分',
-                      dataIndex: 'score',
-                      key: 'score',
-                      render: (score) => (
-                        <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
-                          {score} 分
-                        </span>
-                      )
-                    },
-                    {
-                      title: '评估意见',
-                      dataIndex: 'comments',
-                      key: 'comments',
-                      ellipsis: true
-                    },
-                    {
-                      title: '建议',
-                      dataIndex: 'recommendations',
-                      key: 'recommendations',
-                      ellipsis: true
-                    },
-                    {
-                      title: '操作',
-                      key: 'action',
-                      render: (_, record) => (
-                        <Button
-                          type="link"
-                          size="small"
-                          icon={<EyeOutlined />}
-                          onClick={() => handleViewAssessmentDetail(record)}
-                        >
-                          详情
-                        </Button>
-                      )
-                    }
-                  ]}
-                  pagination={false}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                  <p>暂无教师评估</p>
-                </div>
-              )}
-            </TabPane>
-
-          </Tabs>
-        )}
-      </Drawer>
-
-      <Modal
-        title={`${selectedAssessment?.assessmentDate ? new Date(selectedAssessment.assessmentDate).toLocaleDateString() : ''} - 评估详情`}
-        open={detailModalVisible}
-        onCancel={() => setDetailModalVisible(false)}
-        footer={null}
-        width={600}
-      >
-        <>
-          {/* 心理状态评分 */}
-          {selectedAssessment?.score !== undefined && (
-            <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>心理状态评分：</div>
-              <div style={{ fontSize: 18, color: scoreColor(selectedAssessment.score) }}>
-                {selectedAssessment.score} 分
-              </div>
-            </div>
-          )}
-
-          {/* 评估项目 */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ marginBottom: 12, fontWeight: 'bold' }}>评估项目：</div>
-            {assessmentDetails.length > 0 ? (
-              <Table
-                dataSource={assessmentDetails}
-                columns={[
-                  {
-                    title: '评估项目',
-                    dataIndex: 'assessmentType',
-                    key: 'assessmentType'
-                  },
-                  {
-                    title: '分数',
-                    dataIndex: 'percentage',
-                    key: 'percentage',
-                    render: (percentage) => (
-                      <span style={{ color: scoreColor(percentage) }}>
-                        {percentage}%
-                      </span>
-                    )
-                  },
-                  {
-                    title: '等级',
-                    dataIndex: 'level',
-                    key: 'level',
-                    render: (level) => (
-                      <Tag color={levelColor(level)}>
-                        {levelText(level)}
-                      </Tag>
-                    )
-                  }
-                ]}
-                pagination={false}
-              />
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0', backgroundColor: '#f5f5f5', borderRadius: 8 }}>
-                暂无详细评估项目记录
-              </div>
-            )}
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={() => setModalVisible(true)}
+              style={{
+                backgroundColor: '#2196F3',
+                borderColor: '#2196F3',
+                '&:hover': {
+                  backgroundColor: '#1976D2',
+                  borderColor: '#1976D2'
+                }
+              }}
+            >
+              添加心理评估
+            </Button>
           </div>
 
-          {/* 评估意见 */}
-          {selectedAssessment?.comments && (
-            <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>评估意见：</div>
-              <div>{selectedAssessment.comments}</div>
-            </div>
-          )}
+          <Table
+            columns={columns}
+            dataSource={students}
+            loading={loading}
+            pagination={{
+              pageSize: 6,
+              showSizeChanger: true,
+              showTotal: (total) => `共 ${total} 条记录`
+            }}
+          />
+        </Card>
 
-          {/* 建议 */}
-          {selectedAssessment?.recommendations && (
-            <div style={{ padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>建议：</div>
-              <div>{selectedAssessment.recommendations}</div>
-            </div>
+        <Modal
+          title="添加心理评估"
+          open={modalVisible}
+          onCancel={() => {
+            setModalVisible(false)
+            form.resetFields()
+          }}
+          onOk={() => form.submit()}
+        >
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleAddAssessment}
+          >
+            <Form.Item
+              name="studentId"
+              label="选择学生"
+              rules={[{ required: true, message: '请选择学生' }]}
+            >
+              <Select placeholder="请选择学生">
+                {students.map(student => (
+                  <Option key={student.id} value={student.id}>
+                    {student.name} - {student.grade}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="score"
+              label="心理状态评分"
+              rules={[{ required: true, message: '请输入评分' }]}
+            >
+              <Rate count={10} style={{ fontSize: 24 }} />
+            </Form.Item>
+
+            <Form.Item
+              name="emotionScore"
+              label="情绪稳定性"
+              rules={[{ required: true, message: '请输入评分' }]}
+            >
+              <Select placeholder="请选择">
+                <Option value={90}>优秀</Option>
+                <Option value={75}>良好</Option>
+                <Option value={60}>一般</Option>
+                <Option value={45}>需关注</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="socialScore"
+              label="社交互动"
+              rules={[{ required: true, message: '请输入评分' }]}
+            >
+              <Select placeholder="请选择">
+                <Option value={90}>优秀</Option>
+                <Option value={75}>良好</Option>
+                <Option value={60}>一般</Option>
+                <Option value={45}>需关注</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="stressScore"
+              label="学习压力"
+              rules={[{ required: true, message: '请输入评分' }]}
+            >
+              <Select placeholder="请选择">
+                <Option value={90}>优秀</Option>
+                <Option value={75}>良好</Option>
+                <Option value={60}>一般</Option>
+                <Option value={45}>需关注</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="mentalScore"
+              label="自我认知"
+              rules={[{ required: true, message: '请输入评分' }]}
+            >
+              <Select placeholder="请选择">
+                <Option value={90}>优秀</Option>
+                <Option value={75}>良好</Option>
+                <Option value={60}>一般</Option>
+                <Option value={45}>需关注</Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="comments"
+              label="评估意见"
+              rules={[{ required: true, message: '请输入评估意见' }]}
+            >
+              <TextArea rows={4} placeholder="请输入详细的评估意见" />
+            </Form.Item>
+
+            <Form.Item
+              name="recommendations"
+              label="建议"
+            >
+              <TextArea rows={3} placeholder="请输入辅导建议（选填）" />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        <Drawer
+          title={`${selectedStudent?.name} - 心理状态详情`}
+          placement="right"
+          width={800}
+          open={drawerVisible}
+          onClose={() => setDrawerVisible(false)}
+        >
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>加载中...</div>
+          ) : (
+            <Tabs defaultActiveKey="overview">
+              <TabPane tab="心理状态概览" key="overview">
+                {studentStatus && (
+                  <div>
+                    <Descriptions bordered style={{ marginBottom: 24 }}>
+                      <Descriptions.Item label="情绪状态">
+                        <span style={{ color: levelColor(studentStatus.emotionLevel) }}>
+                          {studentStatus.emotionStatus} ({studentStatus.emotionPercentage}%)
+                        </span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="社交能力">
+                        <span style={{ color: levelColor(studentStatus.socialLevel) }}>
+                          {studentStatus.socialStatus} ({studentStatus.socialPercentage}%)
+                        </span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="学习压力">
+                        <span style={{ color: levelColor(studentStatus.stressLevel) }}>
+                          {studentStatus.stressStatus} ({studentStatus.stressPercentage}%)
+                        </span>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="心理健康">
+                        <span style={{ color: levelColor(studentStatus.mentalLevel) }}>
+                          {studentStatus.mentalStatus} ({studentStatus.mentalPercentage}%)
+                        </span>
+                      </Descriptions.Item>
+                    </Descriptions>
+                  </div>
+                )}
+              </TabPane>
+              <TabPane tab="学生自评" key="student-assessments">
+                {studentAssessments.length > 0 ? (
+                  <Table
+                    dataSource={studentAssessments}
+                    columns={[
+                      {
+                        title: '评估日期',
+                        dataIndex: 'assessmentDate',
+                        key: 'assessmentDate',
+                        render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                      },
+                      {
+                        title: '评分',
+                        dataIndex: 'score',
+                        key: 'score',
+                        render: (score) => (
+                          <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                            {score} 分
+                          </span>
+                        )
+                      },
+                      {
+                        title: '评估意见',
+                        dataIndex: 'comments',
+                        key: 'comments',
+                        ellipsis: true
+                      },
+                      {
+                        title: '操作',
+                        key: 'action',
+                        render: (_, record) => (
+                          <Button
+                            type="link"
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewAssessmentDetail(record)}
+                          >
+                            详情
+                          </Button>
+                        )
+                      }
+                    ]}
+                    pagination={false}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <p>该学生未自评</p>
+                  </div>
+                )}
+              </TabPane>
+              <TabPane tab="教师评估" key="teacher-assessments">
+                <div style={{ marginBottom: 16 }}>
+                  <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />}
+                    onClick={() => setModalVisible(true)}
+                    style={{
+                      backgroundColor: '#2196F3',
+                      borderColor: '#2196F3',
+                      '&:hover': {
+                        backgroundColor: '#1976D2',
+                        borderColor: '#1976D2'
+                      }
+                    }}
+                  >
+                    添加评估
+                  </Button>
+                </div>
+                {teacherAssessments.length > 0 ? (
+                  <Table
+                    dataSource={teacherAssessments}
+                    columns={[
+                      {
+                        title: '评估日期',
+                        dataIndex: 'assessmentDate',
+                        key: 'assessmentDate',
+                        render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                      },
+                      {
+                        title: '评分',
+                        dataIndex: 'score',
+                        key: 'score',
+                        render: (score) => (
+                          <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                            {score} 分
+                          </span>
+                        )
+                      },
+                      {
+                        title: '评估意见',
+                        dataIndex: 'comments',
+                        key: 'comments',
+                        ellipsis: true
+                      },
+                      {
+                        title: '建议',
+                        dataIndex: 'recommendations',
+                        key: 'recommendations',
+                        ellipsis: true
+                      },
+                      {
+                        title: '操作',
+                        key: 'action',
+                        render: (_, record) => (
+                          <Button
+                            type="link"
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewAssessmentDetail(record)}
+                          >
+                            详情
+                          </Button>
+                        )
+                      }
+                    ]}
+                    pagination={false}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <p>暂无教师评估</p>
+                  </div>
+                )}
+              </TabPane>
+
+            </Tabs>
           )}
-        </>
-      </Modal>
+        </Drawer>
+
+        <Modal
+          title={`${selectedAssessment?.assessmentDate ? new Date(selectedAssessment.assessmentDate).toLocaleDateString() : ''} - 评估详情`}
+          open={detailModalVisible}
+          onCancel={() => setDetailModalVisible(false)}
+          footer={null}
+          width={600}
+        >
+          <>
+            {/* 心理状态评分 */}
+            {selectedAssessment?.score !== undefined && (
+              <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+                <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#2196F3' }}>心理状态评分：</div>
+                <div style={{ fontSize: 18, color: scoreColor(selectedAssessment.score) }}>
+                  {selectedAssessment.score} 分
+                </div>
+              </div>
+            )}
+
+            {/* 评估项目 */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 12, fontWeight: 'bold', color: '#2196F3' }}>评估项目：</div>
+              {assessmentDetails.length > 0 ? (
+                <Table
+                  dataSource={assessmentDetails}
+                  columns={[
+                    {
+                      title: '评估项目',
+                      dataIndex: 'assessmentType',
+                      key: 'assessmentType'
+                    },
+                    {
+                      title: '分数',
+                      dataIndex: 'percentage',
+                      key: 'percentage',
+                      render: (percentage) => (
+                        <span style={{ color: scoreColor(percentage) }}>
+                          {percentage}%
+                        </span>
+                      )
+                    },
+                    {
+                      title: '等级',
+                      dataIndex: 'level',
+                      key: 'level',
+                      render: (level) => (
+                        <Tag color={levelColor(level)}>
+                          {levelText(level)}
+                        </Tag>
+                      )
+                    }
+                  ]}
+                  pagination={false}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px 0', backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                  暂无详细评估项目记录
+                </div>
+              )}
+            </div>
+
+            {/* 评估意见 */}
+            {selectedAssessment?.comments && (
+              <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+                <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#2196F3' }}>评估意见：</div>
+                <div>{selectedAssessment.comments}</div>
+              </div>
+            )}
+
+            {/* 建议 */}
+            {selectedAssessment?.recommendations && (
+              <div style={{ padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+                <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#2196F3' }}>建议：</div>
+                <div>{selectedAssessment.recommendations}</div>
+              </div>
+            )}
+          </>
+        </Modal>
+      </div>
     </div>
   )
 }

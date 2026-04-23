@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Card, Tabs, Table, Tag, Button, Space, Modal, message } from 'antd'
+import { useSelector } from 'react-redux'
 import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
 
 const Match = () => {
+  const currentUser = useSelector((state) => state.auth.user)
   const [activeTab, setActiveTab] = useState('sent')
 
   // 模拟数据 - 我发送的请求
@@ -65,7 +67,7 @@ const Match = () => {
       render: (name, record) => (
         <Space>
           <span style={{ fontWeight: 'bold' }}>{name}</span>
-          <Tag color="blue">{record.subject}</Tag>
+          <Tag style={{ backgroundColor: '#4CAF50', border: 'none', color: '#fff' }}>{record.subject}</Tag>
         </Space>
       ),
     },
@@ -82,7 +84,7 @@ const Match = () => {
         <div>
           <div><ClockCircleOutlined /> 发送：{record.sendTime}</div>
           {record.confirmTime && (
-            <div style={{ color: '#52c41a' }}>
+            <div style={{ color: '#4CAF50' }}>
               <CheckCircleOutlined /> 确认：{record.confirmTime}
             </div>
           )}
@@ -94,20 +96,24 @@ const Match = () => {
       dataIndex: 'statusText',
       key: 'status',
       render: (text, record) => {
-        let color = 'default'
+        let color = '#999'
+        let bgColor = '#f5f5f5'
         let icon = null
         if (record.status === 'pending') {
-          color = 'warning'
+          color = '#faad14'
+          bgColor = '#fffbe6'
           icon = <ClockCircleOutlined />
         } else if (record.status === 'approved' || record.status === 'active') {
-          color = 'success'
+          color = '#4CAF50'
+          bgColor = '#f6ffed'
           icon = <CheckCircleOutlined />
         } else if (record.status === 'rejected') {
-          color = 'error'
+          color = '#ff4d4f'
+          bgColor = '#fff1f0'
           icon = <CloseCircleOutlined />
         }
         return (
-          <Tag color={color}>
+          <Tag style={{ backgroundColor: bgColor, color: color, border: 'none' }}>
             {icon} {text}
           </Tag>
         )
@@ -123,6 +129,7 @@ const Match = () => {
               <Button 
                 size="small" 
                 onClick={() => handleCancelRequest(record.id)}
+                style={{ borderColor: '#4CAF50', color: '#4CAF50' }}
               >
                 取消请求
               </Button>
@@ -135,6 +142,7 @@ const Match = () => {
                 size="small" 
                 type="primary"
                 onClick={() => handleAcceptInvitation(record.id)}
+                style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
               >
                 接受
               </Button>
@@ -153,6 +161,7 @@ const Match = () => {
                 size="small" 
                 type="primary"
                 onClick={() => handleViewDetails(record.id)}
+                style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
               >
                 查看详情
               </Button>
@@ -226,16 +235,51 @@ const Match = () => {
   ]
 
   return (
-    <div>
-      <h1 style={{ marginBottom: 24, color: '#4CAF50' }}>🤝 匹配管理</h1>
+    <div style={{ background: '#f0f8f0', padding: 0 }}>
+      {/* 学生端标题栏 */}
+      <div style={{
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        marginBottom: 20,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ color: '#4CAF50', margin: 0, fontSize: '1.8em' }}>🤝 匹配管理</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>欢迎，{currentUser?.name || '学生'}</span>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: '#4CAF50',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 'bold'
+          }}>{currentUser?.name?.charAt(0) || '学'}</div>
+        </div>
+      </div>
 
-      <Card>
-        <Tabs 
-          activeKey={activeTab} 
-          onChange={setActiveTab}
-          items={tabItems}
-        />
-      </Card>
+      <div style={{ padding: 20 }}>
+        <Card 
+          style={{ 
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+            borderRadius: 10,
+            padding: 20,
+            backgroundColor: '#fff'
+          }}
+        >
+          <Tabs 
+            activeKey={activeTab} 
+            onChange={setActiveTab}
+            items={tabItems}
+          />
+        </Card>
+      </div>
     </div>
   )
 }
