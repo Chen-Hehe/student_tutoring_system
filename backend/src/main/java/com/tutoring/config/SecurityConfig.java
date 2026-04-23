@@ -41,6 +41,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // 允许访问管理员接口
                 .requestMatchers("/api/admin/**").permitAll()
+                // 允许访问匹配接口
+                .requestMatchers("/api/matches/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问教学资源接口

@@ -124,18 +124,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
     
     /**
-     * 发送消息给指定用户（由 Redis 消息监听器调用）
-     */
-    public void sendToUser(Long userId, Object message) throws IOException {
-        WebSocketSession session = ONLINE_USERS.get(userId);
-        if (session != null && session.isOpen()) {
-            String json = objectMapper.writeValueAsString(message);
-            session.sendMessage(new TextMessage(json));
-            log.debug("消息已推送给用户 {}", userId);
-        } else {
-            log.debug("用户 {} 不在线，无法推送", userId);
-        }
+ * 发送消息给指定用户（由 Redis 消息监听器调用）
+ */
+public void sendToUser(Long userId, Object message) throws IOException {
+    WebSocketSession session = ONLINE_USERS.get(userId);
+    if (session != null && session.isOpen()) {
+        // 修复双重序列化 Bug：如果 message 已经是 String，说明是 Redis 传过来的 JSON 字符串，直接使用即可
+        String json = message instanceof String ? (String) message : objectMapper.writeValueAsString(message);
+        
+        session.sendMessage(new TextMessage(json));
+        log.debug("消息已推送给用户 {}", userId);
+    } else {
+        log.debug("用户 {} 不在线，无法推送", userId);
     }
+}
     
     /**
      * 订阅用户的 Redis 频道（由 RedisListenerConfig 处理）
@@ -146,22 +148,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     
     /**
      * 从 Redis 接收消息并推送给在线用户（由 RedisListenerConfig 调用）
-     * WebSocket 仅用于接收推送，不处理发送
      */
-    public void onRedisMessage(byte[] messageBytes, String channel) {
+    public void onRedisMessage(Object messageObj, String channel) {
         try {
-            String message = new String(messageBytes);
+            // 1. 兼容各种序列化机制：不管 Spring 传过来的是 String 还是反序列化后的 Object，统一转回 JSON 字符串
+            String message = messageObj instanceof String ? 
+                             (String) messageObj : 
+                             objectMapper.writeValueAsString(messageObj);
+                             
             log.info("【Redis 收到消息】channel={}, message={}", channel, message);
             
-            // 提取频道中的用户 ID
+            // 2. 提取频道中的用户 ID
             String channelId = channel.replace(REDIS_CHANNEL_PREFIX, "");
             Long userId = Long.parseLong(channelId);
             
-            // 直接推送原始消息
+            // 3. 推送给指定用户的 WebSocket
             sendToUser(userId, message);
-            log.info("【WebSocket 推送】已推送给用户 {}", userId);
+            log.info("【WebSocket 推送】已成功推送给用户 {}", userId);
+            
         } catch (Exception e) {
-            log.error("处理 Redis 消息失败：channel={}, message={}", channel, messageBytes, e);
+            log.error("处理 Redis 消息失败：channel={}, payload={}", channel, messageObj, e);
         }
     }
 }

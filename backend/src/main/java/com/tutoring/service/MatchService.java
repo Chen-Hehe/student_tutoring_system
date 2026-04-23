@@ -514,22 +514,33 @@ public class MatchService {
      * @return 统计数据 DTO
      */
     public MatchStatisticsDTO getMatchStatistics(Long teacherId, Long studentId) {
-        Map<String, Object> result = matchRepository.getMatchStatistics(teacherId, studentId);
-        
-        MatchStatisticsDTO dto = new MatchStatisticsDTO();
-        dto.setTeacherId(teacherId);
-        dto.setStudentId(studentId);
-        
-        // 从 Map 中提取数据，处理可能的 null 值
-        dto.setTotalMatches(getLongValue(result, "totalMatches"));
-        dto.setSuccessfulMatches(getLongValue(result, "successfulMatches"));
-        dto.setPendingMatches(getLongValue(result, "pendingMatches"));
-        dto.setRejectedMatches(getLongValue(result, "rejectedMatches"));
-        
-        // 计算成功率
-        dto.calculateSuccessRate();
-        
-        return dto;
+        try {
+            log.info("获取匹配统计数据，teacherId={}, studentId={}", teacherId, studentId);
+            Map<String, Object> result = matchRepository.getMatchStatistics(teacherId, studentId);
+            log.info("查询结果：{}", result);
+            
+            MatchStatisticsDTO dto = new MatchStatisticsDTO();
+            dto.setTeacherId(teacherId);
+            dto.setStudentId(studentId);
+            
+            // 从 Map 中提取数据，处理可能的 null 值
+            dto.setTotalMatches(getLongValue(result, "totalMatches"));
+            dto.setSuccessfulMatches(getLongValue(result, "successfulMatches"));
+            dto.setPendingMatches(getLongValue(result, "pendingMatches"));
+            dto.setRejectedMatches(getLongValue(result, "rejectedMatches"));
+            
+            // 计算成功率
+            dto.calculateSuccessRate();
+            
+            log.info("统计数据：total={}, success={}, pending={}, rejected={}, rate={}", 
+                dto.getTotalMatches(), dto.getSuccessfulMatches(), 
+                dto.getPendingMatches(), dto.getRejectedMatches(), dto.getSuccessRate());
+            
+            return dto;
+        } catch (Exception e) {
+            log.error("获取匹配统计数据失败", e);
+            throw new RuntimeException("获取匹配统计数据失败：" + e.getMessage(), e);
+        }
     }
     
     /**
