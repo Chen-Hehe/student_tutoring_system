@@ -250,7 +250,7 @@ const MatchManagement = () => {
           dataSource={activeMatches}
           loading={loading}
           pagination={{
-            pageSize: 10,
+            pageSize: 6,
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 个辅导`
           }}

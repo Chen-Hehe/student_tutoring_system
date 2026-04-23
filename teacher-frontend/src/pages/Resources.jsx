@@ -321,7 +321,7 @@ const Resources = () => {
           dataSource={resources}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 6 }}
         />
       </Card>
 

@@ -148,9 +148,10 @@ const StudentManagement = () => {
           columns={columns}
           dataSource={filteredStudents}
           loading={loading}
+          rowSelection={false}
           pagination={{
             pageSize: 10,
-            showSizeChanger: true,
+            showSizeChanger: false,
             showTotal: (total) => `共 ${total} 名学生`
           }}
         />
