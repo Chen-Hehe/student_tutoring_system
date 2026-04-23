@@ -3,10 +3,10 @@ import api from './api'
 export const psychologicalAPI = {
   getStatus: async (studentId) => {
     try {
-      const data = await api.get(`/psychological/status/${studentId}`)
+      const result = await api.get(`/api/psychological/status/${studentId}`)
       return {
         success: true,
-        data: data
+        data: result.data
       }
     } catch (error) {
       return {
@@ -17,10 +17,10 @@ export const psychologicalAPI = {
   },
   getAssessmentsByStudentId: async (studentId) => {
     try {
-      const data = await api.get(`/psychological/assessments/student/${studentId}`)
+      const result = await api.get(`/api/psychological/assessments/student/${studentId}`)
       return {
         success: true,
-        data: data
+        data: result.data
       }
     } catch (error) {
       return {
@@ -31,10 +31,10 @@ export const psychologicalAPI = {
   },
   getAssessmentsByStudentIdAndType: async (studentId, assessType) => {
     try {
-      const data = await api.get(`/psychological/assessments/student/${studentId}/type/${assessType}`)
+      const result = await api.get(`/api/psychological/assessments/student/${studentId}/type/${assessType}`)
       return {
         success: true,
-        data: data
+        data: result.data
       }
     } catch (error) {
       return {
@@ -45,10 +45,10 @@ export const psychologicalAPI = {
   },
   getLatestAssessment: async (studentId) => {
     try {
-      const data = await api.get(`/psychological/assessments/latest/${studentId}`)
+      const result = await api.get(`/api/psychological/assessments/latest/${studentId}`)
       return {
         success: true,
-        data: data
+        data: result.data
       }
     } catch (error) {
       return {
@@ -59,10 +59,10 @@ export const psychologicalAPI = {
   },
   createAssessment: async (data) => {
     try {
-      const result = await api.post('/psychological/assessments', data)
+      const result = await api.post('/api/psychological/assessments', data)
       return {
         success: true,
-        data: result
+        data: result.data
       }
     } catch (error) {
       return {
@@ -73,10 +73,10 @@ export const psychologicalAPI = {
   },
   createAssessmentDetail: async (data) => {
     try {
-      const result = await api.post('/psychological/assessment-details', data)
+      const result = await api.post('/api/psychological/assessment-details', data)
       return {
         success: true,
-        data: result
+        data: result.data
       }
     } catch (error) {
       return {
@@ -87,10 +87,10 @@ export const psychologicalAPI = {
   },
   createStatus: async (data) => {
     try {
-      const result = await api.post('/psychological/status', data)
+      const result = await api.post('/api/psychological/status', data)
       return {
         success: true,
-        data: result
+        data: result.data
       }
     } catch (error) {
       return {
@@ -101,10 +101,10 @@ export const psychologicalAPI = {
   },
   getAssessmentDetails: async (assessmentId) => {
     try {
-      const data = await api.get(`/psychological/assessment-details/${assessmentId}`)
+      const result = await api.get(`/api/psychological/assessment-details/${assessmentId}`)
       return {
         success: true,
-        data: data
+        data: result.data
       }
     } catch (error) {
       return {

@@ -21,6 +21,7 @@ const Psychological = () => {
   const [teacherAssessments, setTeacherAssessments] = useState([])
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [assessmentDetails, setAssessmentDetails] = useState([])
+  const [detailModalVisible, setDetailModalVisible] = useState(false)
   const [form] = Form.useForm()
 
   useEffect(() => {
@@ -75,15 +76,21 @@ const Psychological = () => {
       const studentAssessmentsResult = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'student_self')
       if (studentAssessmentsResult.success && studentAssessmentsResult.data) {
         setStudentAssessments(studentAssessmentsResult.data)
+      } else {
+        setStudentAssessments([])
       }
       
       // 加载教师评估
       const teacherAssessmentsResult = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'teacher_professional')
       if (teacherAssessmentsResult.success && teacherAssessmentsResult.data) {
         setTeacherAssessments(teacherAssessmentsResult.data)
+      } else {
+        setTeacherAssessments([])
       }
     } catch (error) {
       console.error('加载学生心理数据失败:', error)
+      setStudentAssessments([])
+      setTeacherAssessments([])
     } finally {
       setLoading(false)
     }
@@ -114,7 +121,7 @@ const Psychological = () => {
       }
       
       const assessmentResult = await psychologicalAPI.createAssessment(assessmentData)
-      if (assessmentResult.success) {
+      if (assessmentResult.success && assessmentResult.data) {
         // 创建评估详情
         const assessmentId = assessmentResult.data.id
         const details = [
@@ -153,9 +160,12 @@ const Psychological = () => {
         if (selectedStudent) {
           loadStudentPsychologicalData(selectedStudent.id)
         }
+      } else {
+        message.error('添加失败：' + (assessmentResult.error || '未知错误'))
       }
     } catch (error) {
-      message.error('添加失败')
+      console.error('添加评估失败:', error)
+      message.error('添加失败：' + error.message)
     }
   }
 
@@ -165,9 +175,10 @@ const Psychological = () => {
     setDrawerVisible(true)
   }
 
-  const handleViewAssessmentDetail = (assessment) => {
+  const handleViewAssessmentDetail = async (assessment) => {
     setSelectedAssessment(assessment)
-    loadAssessmentDetails(assessment.id)
+    setDetailModalVisible(true)
+    await loadAssessmentDetails(assessment.id)
   }
 
   const scoreColor = (score) => {
@@ -405,48 +416,54 @@ const Psychological = () => {
               )}
             </TabPane>
             <TabPane tab="学生自评" key="student-assessments">
-              <Table
-                dataSource={studentAssessments}
-                columns={[
-                  {
-                    title: '评估日期',
-                    dataIndex: 'assessmentDate',
-                    key: 'assessmentDate',
-                    render: (date) => date ? new Date(date).toLocaleDateString() : ''
-                  },
-                  {
-                    title: '评分',
-                    dataIndex: 'score',
-                    key: 'score',
-                    render: (score) => (
-                      <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
-                        {score} 分
-                      </span>
-                    )
-                  },
-                  {
-                    title: '评估意见',
-                    dataIndex: 'comments',
-                    key: 'comments',
-                    ellipsis: true
-                  },
-                  {
-                    title: '操作',
-                    key: 'action',
-                    render: (_, record) => (
-                      <Button
-                        type="link"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewAssessmentDetail(record)}
-                      >
-                        详情
-                      </Button>
-                    )
-                  }
-                ]}
-                pagination={false}
-              />
+              {studentAssessments.length > 0 ? (
+                <Table
+                  dataSource={studentAssessments}
+                  columns={[
+                    {
+                      title: '评估日期',
+                      dataIndex: 'assessmentDate',
+                      key: 'assessmentDate',
+                      render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                    },
+                    {
+                      title: '评分',
+                      dataIndex: 'score',
+                      key: 'score',
+                      render: (score) => (
+                        <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                          {score} 分
+                        </span>
+                      )
+                    },
+                    {
+                      title: '评估意见',
+                      dataIndex: 'comments',
+                      key: 'comments',
+                      ellipsis: true
+                    },
+                    {
+                      title: '操作',
+                      key: 'action',
+                      render: (_, record) => (
+                        <Button
+                          type="link"
+                          size="small"
+                          icon={<EyeOutlined />}
+                          onClick={() => handleViewAssessmentDetail(record)}
+                        >
+                          详情
+                        </Button>
+                      )
+                    }
+                  ]}
+                  pagination={false}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <p>该学生未自评</p>
+                </div>
+              )}
             </TabPane>
             <TabPane tab="教师评估" key="teacher-assessments">
               <div style={{ marginBottom: 16 }}>
@@ -458,107 +475,143 @@ const Psychological = () => {
                   添加评估
                 </Button>
               </div>
+              {teacherAssessments.length > 0 ? (
+                <Table
+                  dataSource={teacherAssessments}
+                  columns={[
+                    {
+                      title: '评估日期',
+                      dataIndex: 'assessmentDate',
+                      key: 'assessmentDate',
+                      render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                    },
+                    {
+                      title: '评分',
+                      dataIndex: 'score',
+                      key: 'score',
+                      render: (score) => (
+                        <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                          {score} 分
+                        </span>
+                      )
+                    },
+                    {
+                      title: '评估意见',
+                      dataIndex: 'comments',
+                      key: 'comments',
+                      ellipsis: true
+                    },
+                    {
+                      title: '建议',
+                      dataIndex: 'recommendations',
+                      key: 'recommendations',
+                      ellipsis: true
+                    },
+                    {
+                      title: '操作',
+                      key: 'action',
+                      render: (_, record) => (
+                        <Button
+                          type="link"
+                          size="small"
+                          icon={<EyeOutlined />}
+                          onClick={() => handleViewAssessmentDetail(record)}
+                        >
+                          详情
+                        </Button>
+                      )
+                    }
+                  ]}
+                  pagination={false}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <p>暂无教师评估</p>
+                </div>
+              )}
+            </TabPane>
+
+          </Tabs>
+        )}
+      </Drawer>
+
+      <Modal
+        title={`${selectedAssessment?.assessmentDate ? new Date(selectedAssessment.assessmentDate).toLocaleDateString() : ''} - 评估详情`}
+        open={detailModalVisible}
+        onCancel={() => setDetailModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        <>
+          {/* 心理状态评分 */}
+          {selectedAssessment?.score !== undefined && (
+            <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>心理状态评分：</div>
+              <div style={{ fontSize: 18, color: scoreColor(selectedAssessment.score) }}>
+                {selectedAssessment.score} 分
+              </div>
+            </div>
+          )}
+
+          {/* 评估项目 */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12, fontWeight: 'bold' }}>评估项目：</div>
+            {assessmentDetails.length > 0 ? (
               <Table
-                dataSource={teacherAssessments}
+                dataSource={assessmentDetails}
                 columns={[
                   {
-                    title: '评估日期',
-                    dataIndex: 'assessmentDate',
-                    key: 'assessmentDate',
-                    render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                    title: '评估项目',
+                    dataIndex: 'assessmentType',
+                    key: 'assessmentType'
                   },
                   {
-                    title: '评分',
-                    dataIndex: 'score',
-                    key: 'score',
-                    render: (score) => (
-                      <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
-                        {score} 分
+                    title: '分数',
+                    dataIndex: 'percentage',
+                    key: 'percentage',
+                    render: (percentage) => (
+                      <span style={{ color: scoreColor(percentage) }}>
+                        {percentage}%
                       </span>
                     )
                   },
                   {
-                    title: '评估意见',
-                    dataIndex: 'comments',
-                    key: 'comments',
-                    ellipsis: true
-                  },
-                  {
-                    title: '建议',
-                    dataIndex: 'recommendations',
-                    key: 'recommendations',
-                    ellipsis: true
-                  },
-                  {
-                    title: '操作',
-                    key: 'action',
-                    render: (_, record) => (
-                      <Button
-                        type="link"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewAssessmentDetail(record)}
-                      >
-                        详情
-                      </Button>
+                    title: '等级',
+                    dataIndex: 'level',
+                    key: 'level',
+                    render: (level) => (
+                      <Tag color={levelColor(level)}>
+                        {levelText(level)}
+                      </Tag>
                     )
                   }
                 ]}
                 pagination={false}
               />
-            </TabPane>
-            {selectedAssessment && assessmentDetails.length > 0 && (
-              <TabPane tab="评估详情" key="assessment-details">
-                <Card title={`${selectedAssessment.assessmentDate ? new Date(selectedAssessment.assessmentDate).toLocaleDateString() : ''} - 评估详情`}>
-                  <Table
-                    dataSource={assessmentDetails}
-                    columns={[
-                      {
-                        title: '评估项目',
-                        dataIndex: 'assessmentType',
-                        key: 'assessmentType'
-                      },
-                      {
-                        title: '分数',
-                        dataIndex: 'percentage',
-                        key: 'percentage',
-                        render: (percentage) => (
-                          <span style={{ color: scoreColor(percentage) }}>
-                            {percentage}%
-                          </span>
-                        )
-                      },
-                      {
-                        title: '等级',
-                        dataIndex: 'level',
-                        key: 'level',
-                        render: (level) => (
-                          <Tag color={levelColor(level)}>
-                            {levelText(level)}
-                          </Tag>
-                        )
-                      }
-                    ]}
-                    pagination={false}
-                  />
-                  {selectedAssessment.comments && (
-                    <div style={{ marginTop: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-                      <div style={{ marginBottom: 8, fontWeight: 'bold' }}>评估意见：</div>
-                      <div>{selectedAssessment.comments}</div>
-                    </div>
-                  )}
-                  {selectedAssessment.recommendations && (
-                    <div style={{ marginTop: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
-                      <div style={{ marginBottom: 8, fontWeight: 'bold' }}>建议：</div>
-                      <div>{selectedAssessment.recommendations}</div>
-                    </div>
-                  )}
-                </Card>
-              </TabPane>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0', backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                暂无详细评估项目记录
+              </div>
             )}
-          </Tabs>
-        )}
-      </Drawer>
+          </div>
+
+          {/* 评估意见 */}
+          {selectedAssessment?.comments && (
+            <div style={{ marginBottom: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>评估意见：</div>
+              <div>{selectedAssessment.comments}</div>
+            </div>
+          )}
+
+          {/* 建议 */}
+          {selectedAssessment?.recommendations && (
+            <div style={{ padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>建议：</div>
+              <div>{selectedAssessment.recommendations}</div>
+            </div>
+          )}
+        </>
+      </Modal>
     </div>
   )
 }

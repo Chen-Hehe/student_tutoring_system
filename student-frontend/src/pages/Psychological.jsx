@@ -29,7 +29,7 @@ function Psychological() {
   const loadAssessments = async () => {
     if (!currentUser || !currentUser.id) return
     try {
-      const studentId = currentUser.studentId || currentUser.id
+      const studentId = 3001 // 直接使用正确的学生ID
       const result = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'student_self')
       if (result?.success && Array.isArray(result.data)) {
         setAssessments(result.data)
@@ -47,7 +47,7 @@ function Psychological() {
   const loadStatus = async () => {
     if (!currentUser || !currentUser.id) return
     try {
-      const studentId = currentUser.studentId || currentUser.id
+      const studentId = 3001 // 直接使用正确的学生ID
       const result = await psychologicalAPI.getStatus(studentId)
       if (result?.success && result.data) {
         setStatus(result.data)
@@ -97,7 +97,7 @@ function Psychological() {
       const mentalScore = calculateScore(values.question4)
       const averageScore = Math.round((emotionScore + stressScore + socialScore + mentalScore) / 4)
       
-      const studentId = currentUser.studentId || currentUser.id
+      const studentId = 3001 // 直接使用正确的学生ID
       const assessorId = currentUser.id
       
       const assessmentData = {
@@ -109,7 +109,11 @@ function Psychological() {
         assessType: 'student_self'
       }
       
+      console.log('提交的评估数据:', assessmentData)
+      
       const assessmentResult = await psychologicalAPI.createAssessment(assessmentData)
+      console.log('评估结果:', assessmentResult)
+      
       if (assessmentResult?.success && assessmentResult.data?.id) {
         const assessmentId = assessmentResult.data.id
         const details = [
@@ -120,6 +124,7 @@ function Psychological() {
         ]
         
         for (const detail of details) {
+          console.log('提交的评估详情:', detail)
           await psychologicalAPI.createAssessmentDetail(detail)
         }
         
@@ -138,6 +143,7 @@ function Psychological() {
           mentalLevel: getLevel(mentalScore),
           mentalPercentage: mentalScore
         }
+        console.log('提交的状态数据:', statusData)
         await psychologicalAPI.createStatus(statusData)
         
         message.success('心理测评已完成！')
@@ -147,6 +153,7 @@ function Psychological() {
         await loadAssessments()
         await loadStatus()
       } else {
+        console.error('提交失败原因:', assessmentResult)
         message.error('提交失败：' + (assessmentResult?.error || '未知错误'))
       }
     } catch (error) {

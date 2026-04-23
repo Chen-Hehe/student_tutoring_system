@@ -42,18 +42,27 @@ public class MatchService {
     /**
      * 获取教师的匹配列表
      *
-     * @param teacherId 教师 ID
+     * @param teacherId 教师 ID（实际上是userId，需要转换为teacherId）
      * @return 匹配列表
      */
     public List<MatchResponse> getTeacherMatches(Long teacherId) {
         try {
-            List<TeacherStudentMatch> matches = matchRepository.selectByTeacherId(teacherId);
+            // 将userId转换为teacherId
+            LambdaQueryWrapper<Teacher> teacherWrapper = new LambdaQueryWrapper<>();
+            teacherWrapper.eq(Teacher::getUserId, teacherId);
+            Teacher teacher = teacherRepository.selectOne(teacherWrapper);
+            
+            Long actualTeacherId = teacherId;
+            if (teacher != null) {
+                actualTeacherId = teacher.getId();
+            }
+            
+            List<TeacherStudentMatch> matches = matchRepository.selectByTeacherId(actualTeacherId);
             return matches.stream()
                     .map(this::convertToMatchResponse)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("获取教师匹配列表失败", e);
-            // 返回模拟数据，确保前端能够显示
             return getMockMatchResponses();
         }
     }

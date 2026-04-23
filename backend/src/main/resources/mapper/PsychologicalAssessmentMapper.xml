@@ -10,7 +10,7 @@
         ORDER BY assessment_date DESC
     </select>
     
-    <select id="findByStudentIdAndType" resultType="com.tutoring.entity.PsychologicalAssessment">
+    <select id="findByStudentIdAndType" parameterType="map" resultType="com.tutoring.entity.PsychologicalAssessment">
         SELECT * FROM psychological_assessments 
         WHERE student_id = #{studentId} AND assess_type = #{assessType} AND deleted = 0 
         ORDER BY assessment_date DESC

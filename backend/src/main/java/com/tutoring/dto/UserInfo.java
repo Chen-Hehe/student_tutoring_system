@@ -65,6 +65,16 @@ public class UserInfo {
     private String wechat;
     
     /**
+     * 学生 ID (仅学生角色)
+     */
+    private Long studentId;
+    
+    /**
+     * 教师 ID (仅教师角色)
+     */
+    private Long teacherId;
+    
+    /**
      * 创建时间
      */
     private LocalDateTime createdAt;

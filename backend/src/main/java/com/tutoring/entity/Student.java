@@ -19,6 +19,7 @@ public class Student {
     /**
      * 关联用户表
      */
+    @TableField("user_id")
     private Long userId;
     
     /**

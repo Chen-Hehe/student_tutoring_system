@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.dto.LoginRequest;
 import com.tutoring.dto.RegisterRequest;
 import com.tutoring.dto.UserInfo;
+import com.tutoring.entity.Student;
+import com.tutoring.entity.Teacher;
 import com.tutoring.entity.User;
+import com.tutoring.repository.StudentRepository;
+import com.tutoring.repository.TeacherRepository;
 import com.tutoring.repository.UserRepository;
 import com.tutoring.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,8 @@ import java.util.Map;
 public class UserService {
     
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
@@ -166,6 +172,27 @@ public class UserService {
         userInfo.setQq(user.getQq());
         userInfo.setWechat(user.getWechat());
         userInfo.setCreatedAt(user.getCreatedAt());
+        
+        // 为学生角色设置 studentId
+        if (user.getRole() == 2) {
+            LambdaQueryWrapper<Student> studentWrapper = new LambdaQueryWrapper<>();
+            studentWrapper.eq(Student::getUserId, user.getId());
+            Student student = studentRepository.selectOne(studentWrapper);
+            if (student != null) {
+                userInfo.setStudentId(student.getId());
+            }
+        }
+        
+        // 为教师角色设置 teacherId
+        if (user.getRole() == 1) {
+            LambdaQueryWrapper<Teacher> teacherWrapper = new LambdaQueryWrapper<>();
+            teacherWrapper.eq(Teacher::getUserId, user.getId());
+            Teacher teacher = teacherRepository.selectOne(teacherWrapper);
+            if (teacher != null) {
+                userInfo.setTeacherId(teacher.getId());
+            }
+        }
+        
         return userInfo;
     }
     

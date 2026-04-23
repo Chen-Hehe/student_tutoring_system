@@ -41,7 +41,7 @@ public class MatchController {
     }
     
     /**
-     * 获取教师的匹配列表（通过请求头）
+     * 获取教师的匹配列表（通过请求属性）
      *
      * @param request 请求对象
      * @return 匹配列表
@@ -49,11 +49,11 @@ public class MatchController {
     @GetMapping("/teacher")
     public Result<List<MatchResponse>> getTeacherMatches(HttpServletRequest request) {
         try {
-            String teacherIdStr = request.getHeader("X-User-Id");
-            if (teacherIdStr == null) {
+            Object teacherIdObj = request.getAttribute("X-User-Id");
+            if (teacherIdObj == null) {
                 return Result.error(400, "教师ID不能为空");
             }
-            Long teacherId = Long.parseLong(teacherIdStr);
+            Long teacherId = Long.parseLong(teacherIdObj.toString());
             List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
             return Result.success(matches);
         } catch (RuntimeException e) {
