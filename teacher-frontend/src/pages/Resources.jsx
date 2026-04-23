@@ -4,6 +4,7 @@ import { Card, Table, Button, Tag, Input, Space, Modal, message, Upload, Form, S
 import { PlusOutlined, UploadOutlined, DeleteOutlined, EyeOutlined, FileTextOutlined, VideoCameraOutlined, AudioOutlined } from '@ant-design/icons'
 
 import { resourcesAPI } from '../services/resourceApi'
+import { userAPI } from '../services/userApi'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -17,21 +18,39 @@ const Resources = () => {
   const [form] = Form.useForm()
   const [uploading, setUploading] = useState(false)
   const [fileList, setFileList] = useState([])
+  const [teachers, setTeachers] = useState({})
 
   useEffect(() => {
     if (currentUser?.id) {
       loadResources()
+      loadTeachers()
     }
   }, [currentUser?.id])
+
+  const loadTeachers = async () => {
+    try {
+      const result = await userAPI.getUsers(1)
+      const teacherMap = {}
+      (result.data || result || []).forEach(teacher => {
+        teacherMap[teacher.id] = teacher.name || teacher.username
+      })
+      setTeachers(teacherMap)
+    } catch (error) {
+      console.error('加载教师列表失败:', error)
+    }
+  }
 
   const loadResources = async () => {
     setLoading(true)
     try {
+      console.log('开始加载资源列表')
       const result = await resourcesAPI.getList()
+      console.log('资源列表加载成功:', result)
       setResources(result.data || [])
     } catch (error) {
       console.error('加载资源列表失败:', error)
-      message.error('加载资源列表失败')
+      console.error('错误详情:', error.response)
+      message.error('加载资源列表失败：' + (error.message || '未知错误'))
     } finally {
       setLoading(false)
     }
@@ -155,7 +174,7 @@ const Resources = () => {
       title: '上传者',
       dataIndex: 'uploaderId',
       key: 'uploaderId',
-      render: (id) => `教师${id}`
+      render: (id) => teachers[id] || `教师${id}`
     },
     {
       title: '大小',

@@ -13,7 +13,7 @@ export const chatAPI = {
    * @param {string} [data.fileUrl] - 文件 URL
    */
   sendMessage: (data) => {
-    return api.post('/chat/send', data)
+    return api.post('/api/chat/send', data)
   },
   
   /**
@@ -21,7 +21,7 @@ export const chatAPI = {
    * @param {number} userId - 目标用户 ID
    */
   getChatHistory: (userId) => {
-    return api.get(`/chat/history/${userId}`)
+    return api.get(`/api/chat/history/${userId}`)
   },
   
   /**
@@ -32,7 +32,7 @@ export const chatAPI = {
     if (!userId) {
       return Promise.reject(new Error('缺少用户 ID 参数'))
     }
-    return api.get('/chat/conversations', { params: { userId } })
+    return api.get('/api/chat/conversations', { params: { userId } })
   },
   
   /**
@@ -40,7 +40,7 @@ export const chatAPI = {
    * @param {number} senderId - 消息发送者 ID
    */
   markAsRead: (senderId) => {
-    return api.post(`/chat/read/${senderId}`)
+    return api.post(`/api/chat/read/${senderId}`)
   },
   
   /**
@@ -48,7 +48,7 @@ export const chatAPI = {
    * @param {number} messageId - 消息 ID
    */
   recallMessage: (messageId) => {
-    return api.post(`/chat/recall/${messageId}`)
+    return api.post(`/api/chat/recall/${messageId}`)
   }
 }
 
