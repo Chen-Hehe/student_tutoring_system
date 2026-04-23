@@ -78,6 +78,14 @@ export const parentAPI = {
   },
 
   /**
+   * 获取心理辅导员列表（使用教师数据）
+   * @returns {Promise} 辅导员列表
+   */
+  getCounselors: () => {
+    return api.get('/users/list', { params: { role: 1 } })
+  },
+
+  /**
    * 发送沟通消息
    * @param {number} studentId - 学生ID
    * @param {number} teacherId - 教师ID

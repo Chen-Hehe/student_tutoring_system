@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Card, Avatar, Button, Input, message, Spin } from 'antd'
+import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 const { TextArea } = Input
 const TeacherCommunication = () => {
+  const currentUser = useSelector((state) => state.auth.user)
   // 存储每个老师的沟通记录
   const [teacherMessages, setTeacherMessages] = useState({})
   const [selectedTeacher, setSelectedTeacher] = useState(null) // 默认未选中老师
   const [newMessage, setNewMessage] = useState('')
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(false)
-  const [studentId, setStudentId] = useState(3001) // 默认学生ID（小明）
-  const [students, setStudents] = useState([
-    { id: 3001, name: '小明（三年级）' },
-    { id: 3002, name: '小红（四年级）' }
-  ])
-  
+  const [studentId, setStudentId] = useState(null)
+  const [students, setStudents] = useState([])
+
+  useEffect(() => {
+    fetchChildren()
+  }, [])
+
   // 组件挂载时或学生ID变化时获取教师列表
   useEffect(() => {
     fetchTeachers()
@@ -26,9 +29,33 @@ const TeacherCommunication = () => {
       fetchCommunicationHistory(selectedTeacher)
     }
   }, [selectedTeacher])
-  
+
+  // 获取孩子列表
+  const fetchChildren = async () => {
+    try {
+      const response = await parentAPI.getChildren()
+      if (response && response.data && response.data.success && response.data.data) {
+        const childList = response.data.data.map(child => ({
+          id: child.id,
+          name: child.name,
+          grade: child.grade,
+          displayName: `${child.name} (${child.grade})`
+        }))
+        setStudents(childList)
+        if (childList.length > 0) {
+          setStudentId(childList[0].id)
+        }
+      }
+    } catch (error) {
+      console.error('获取孩子列表失败:', error)
+    }
+  }
+
   // 获取教师列表
   const fetchTeachers = async () => {
+    if (!studentId) {
+      return
+    }
     setLoading(true)
     try {
       console.log('Fetching teachers for studentId:', studentId)
@@ -169,7 +196,7 @@ const TeacherCommunication = () => {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，王家长</span>
+          <span>欢迎，{currentUser?.name || '家长'}</span>
           <div style={{
             width: 40,
             height: 40,
@@ -180,7 +207,7 @@ const TeacherCommunication = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>王</div>
+          }}>{currentUser?.name?.charAt(0) || '家'}</div>
         </div>
       </div>
 

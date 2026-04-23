@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Card, Form, Input, Select, Button, Table, Modal, message } from 'antd'
+import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 const { Option } = Select
 const ChildManagement = () => {
+  const currentUser = useSelector((state) => state.auth.user)
   const [form] = Form.useForm()
   const [editForm] = Form.useForm()
   const [children, setChildren] = useState([])
@@ -271,7 +273,7 @@ const ChildManagement = () => {
       }}>
         <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>孩子管理</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，王家长</span>
+          <span>欢迎，{currentUser?.name || '家长'}</span>
           <div style={{
             width: 40,
             height: 40,
@@ -282,7 +284,7 @@ const ChildManagement = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>王</div>
+          }}>{currentUser?.name?.charAt(0) || '家'}</div>
         </div>
       </div>
 

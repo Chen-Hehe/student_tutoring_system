@@ -1,51 +1,53 @@
 import { useState, useEffect } from 'react'
 import { Card, Row, Col, Progress, Avatar, Button, Modal, Input, message } from 'antd'
+import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 const { TextArea } = Input
 const PsychologicalStatus = () => {
+  const currentUser = useSelector((state) => state.auth.user)
   const [selectedChild, setSelectedChild] = useState(null)
   const [isContactModalVisible, setIsContactModalVisible] = useState(false)
   const [selectedCounselor, setSelectedCounselor] = useState(null)
-  const [counselorMessages, setCounselorMessages] = useState({
-    1: [
-      {
-        id: 1,
-        sender: '王心理师',
-        content: '您好，王家长！我是王心理师，专注于儿童心理健康。请问有什么可以帮助您的？',
-        time: '2026-03-28 09:00',
-        type: 'received'
-      }
-    ],
-    2: [
-      {
-        id: 1,
-        sender: '张心理师',
-        content: '您好，王家长！我是张心理师，专注于青少年心理健康。很高兴为您服务。',
-        time: '2026-03-28 10:00',
-        type: 'received'
-      }
-    ]
-  })
+  const [counselorMessages, setCounselorMessages] = useState({})
   const [newMessage, setNewMessage] = useState('')
   const [children, setChildren] = useState([])
   const [statusData, setStatusData] = useState({})
   const [currentStatus, setCurrentStatus] = useState(null)
   const [loading, setLoading] = useState(false)
-  
-  const counselors = [
-    {
-      id: 1,
-      name: '王心理师',
-      title: '国家二级心理咨询师 | 儿童心理专家',
-      avatar: '王'
-    },
-    {
-      id: 2,
-      name: '张心理师',
-      title: '国家二级心理咨询师 | 青少年心理专家',
-      avatar: '张'
+  const [counselors, setCounselors] = useState([])
+
+  useEffect(() => {
+    const fetchCounselors = async () => {
+      try {
+        const response = await parentAPI.getCounselors()
+        if (response && response.data && response.data.success && response.data.data) {
+          const counselorList = response.data.data.map(c => ({
+            id: c.id,
+            name: c.name,
+            title: c.subject || '心理辅导员',
+            avatar: c.name?.charAt(0) || '辅'
+          }))
+          setCounselors(counselorList)
+          const initialMessages = {}
+          counselorList.forEach(c => {
+            initialMessages[c.id] = [
+              {
+                id: 1,
+                sender: c.name,
+                content: `您好，${currentUser?.name || '家长'}！我是${c.name}，专注于儿童心理健康。请问有什么可以帮助您的？`,
+                time: new Date().toLocaleString('zh-CN'),
+                type: 'received'
+              }
+            ]
+          })
+          setCounselorMessages(initialMessages)
+        }
+      } catch (error) {
+        console.error('获取心理辅导员列表失败:', error)
+      }
     }
-  ]
+    fetchCounselors()
+  }, [currentUser])
   
   // 获取孩子列表
   useEffect(() => {
@@ -153,15 +155,15 @@ const PsychologicalStatus = () => {
   const handleSendMessage = () => {
     if (newMessage.trim() && selectedCounselor) {
       const message = {
-        id: counselorMessages[selectedCounselor.id].length + 1,
-        sender: '王家长',
+        id: counselorMessages[selectedCounselor.id]?.length + 1 || 1,
+        sender: currentUser?.name || '家长',
         content: newMessage,
         time: new Date().toLocaleString('zh-CN'),
         type: 'sent'
       }
       setCounselorMessages({
         ...counselorMessages,
-        [selectedCounselor.id]: [...counselorMessages[selectedCounselor.id], message]
+        [selectedCounselor.id]: [...(counselorMessages[selectedCounselor.id] || []), message]
       })
       setNewMessage('')
     }
@@ -188,7 +190,7 @@ const PsychologicalStatus = () => {
       }}>
         <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>心理状态</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，王家长</span>
+          <span>欢迎，{currentUser?.name || '家长'}</span>
           <div style={{
             width: 40,
             height: 40,
@@ -199,7 +201,7 @@ const PsychologicalStatus = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>王</div>
+          }}>{currentUser?.name?.charAt(0) || '家'}</div>
         </div>
       </div>
 
