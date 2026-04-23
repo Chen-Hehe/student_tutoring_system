@@ -9,6 +9,8 @@ const TeacherSelection = () => {
   const currentUser = useSelector((state) => state.auth.user)
   const [searchText, setSearchText] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
+  const [selectedExperience, setSelectedExperience] = useState('')
+  const [selectedGrade, setSelectedGrade] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [form] = Form.useForm()
@@ -125,6 +127,49 @@ const TeacherSelection = () => {
     }
   }
 
+  // 过滤教师列表
+  const filteredTeachers = teachers.filter(teacher => {
+    // 搜索文本过滤
+    const matchesSearch = searchText === '' || 
+      teacher.name.toLowerCase().includes(searchText.toLowerCase())
+    
+    // 科目过滤
+    const matchesSubject = selectedSubject === '' || 
+      teacher.subject === selectedSubject
+    
+    // 教龄过滤
+    const matchesExperience = selectedExperience === '' || {
+      '0-5': teacher.experience >= 0 && teacher.experience <= 5,
+      '5-10': teacher.experience > 5 && teacher.experience <= 10,
+      '10+': teacher.experience > 10
+    }[selectedExperience]
+    
+    // 年级过滤
+    const matchesGrade = selectedGrade === '' || 
+      teacher.grade === selectedGrade
+    
+    return matchesSearch && matchesSubject && matchesExperience && matchesGrade
+  })
+
+  // 处理搜索
+  const handleSearch = () => {
+    console.log('搜索条件:', {
+      searchText,
+      selectedSubject,
+      selectedExperience,
+      selectedGrade
+    })
+  }
+
+  // 处理重置
+  const handleReset = () => {
+    setSearchText('')
+    setSelectedSubject('')
+    setSelectedExperience('')
+    setSelectedGrade('')
+    console.log('重置搜索条件')
+  }
+
   return (
     <div style={{ background: '#f0f8f0', padding: 0 }}>
       {/* 学生端标题栏 */}
@@ -166,7 +211,7 @@ const TeacherSelection = () => {
             backgroundColor: '#fff'
           }}
         >
-          <Space wrap size="large">
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'end' }}>
             <Input
               placeholder="搜索教师姓名"
               prefix={<SearchOutlined />}
@@ -174,20 +219,68 @@ const TeacherSelection = () => {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
-            <Select
-              placeholder="选择科目"
-              style={{ width: 150 }}
-              value={selectedSubject}
-              onChange={setSelectedSubject}
-              allowClear
-            >
-              <Select.Option value="math">数学</Select.Option>
-              <Select.Option value="chinese">语文</Select.Option>
-              <Select.Option value="english">英语</Select.Option>
-              <Select.Option value="physics">物理</Select.Option>
-              <Select.Option value="chemistry">化学</Select.Option>
-            </Select>
-          </Space>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'end' }}>
+              <div>
+                <div style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>科目</div>
+                <Select
+                  placeholder="全部科目"
+                  style={{ width: 120 }}
+                  value={selectedSubject}
+                  onChange={setSelectedSubject}
+                  allowClear
+                >
+                  <Select.Option value="数学">数学</Select.Option>
+                  <Select.Option value="语文">语文</Select.Option>
+                  <Select.Option value="英语">英语</Select.Option>
+                  <Select.Option value="物理">物理</Select.Option>
+                  <Select.Option value="化学">化学</Select.Option>
+                </Select>
+              </div>
+              <div>
+                <div style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>教龄</div>
+                <Select
+                  placeholder="全部教龄"
+                  style={{ width: 120 }}
+                  value={selectedExperience}
+                  onChange={setSelectedExperience}
+                  allowClear
+                >
+                  <Select.Option value="0-5">0-5年</Select.Option>
+                  <Select.Option value="5-10">5-10年</Select.Option>
+                  <Select.Option value="10+">10年以上</Select.Option>
+                </Select>
+              </div>
+              <div>
+                <div style={{ marginBottom: 8, fontSize: 14, color: '#666' }}>年级</div>
+                <Select
+                  placeholder="全部年级"
+                  style={{ width: 120 }}
+                  value={selectedGrade}
+                  onChange={setSelectedGrade}
+                  allowClear
+                >
+                  <Select.Option value="小学">小学</Select.Option>
+                  <Select.Option value="初中">初中</Select.Option>
+                  <Select.Option value="高中">高中</Select.Option>
+                </Select>
+              </div>
+              <Space>
+                <Button 
+                  type="primary" 
+                  onClick={handleSearch}
+                  style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', height: 32 }}
+                >
+                  搜索
+                </Button>
+                <Button 
+                  onClick={handleReset}
+                  style={{ height: 32 }}
+                >
+                  重置
+                </Button>
+              </Space>
+            </div>
+          </div>
         </Card>
 
         {/* 教师列表 */}
@@ -202,7 +295,7 @@ const TeacherSelection = () => {
         >
           <Table 
             columns={columns} 
-            dataSource={teachers}
+            dataSource={filteredTeachers}
             pagination={{ pageSize: 10 }}
           />
         </Card>
