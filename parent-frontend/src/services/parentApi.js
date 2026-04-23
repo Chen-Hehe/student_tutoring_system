@@ -82,7 +82,7 @@ export const parentAPI = {
    * @returns {Promise} 辅导员列表
    */
   getCounselors: () => {
-    return api.get('/users/list', { params: { role: 1 } })
+    return api.get('/auth/users/list', { params: { role: 1 } })
   },
 
   /**
