@@ -539,7 +539,16 @@ public class MatchService {
             return dto;
         } catch (Exception e) {
             log.error("获取匹配统计数据失败", e);
-            throw new RuntimeException("获取匹配统计数据失败：" + e.getMessage(), e);
+            // 降级策略：数据库/依赖不可用时返回空统计，避免管理员看板直接 500
+            MatchStatisticsDTO fallback = new MatchStatisticsDTO();
+            fallback.setTeacherId(teacherId);
+            fallback.setStudentId(studentId);
+            fallback.setTotalMatches(0L);
+            fallback.setSuccessfulMatches(0L);
+            fallback.setPendingMatches(0L);
+            fallback.setRejectedMatches(0L);
+            fallback.calculateSuccessRate();
+            return fallback;
         }
     }
     
