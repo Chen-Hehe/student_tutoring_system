@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Card, Avatar, Button, Row, Col, Spin, Modal, Descriptions, Badge, Progress } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 
 const Dashboard = () => {
   // 导航钩子
   const navigate = useNavigate()
+  
+  // 获取当前用户信息
+  const currentUser = useSelector((state) => state.auth.user)
   
   // 状态管理
   const [children, setChildren] = useState([])
@@ -164,11 +168,18 @@ const Dashboard = () => {
           // 计算平均值和其他数据
           const averageScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0
           
+          // 计算学习进步分数（这里简化处理，实际应该从学习报告中获取）
+          let scoreImprovement = 0
+          if (scoreCount > 0) {
+            // 假设进步分数为平均分数的5%，实际应该从API获取
+            scoreImprovement = Math.round(averageScore * 0.05)
+          }
+          
           setDashboardData({
             totalChildren,
             tutoringChildren,
             averageScore,
-            scoreImprovement: 5, // 暂时硬编码，后续可以从API获取
+            scoreImprovement,
             psychologicalStatus: attentionNeeded > 0 ? '需要关注' : '良好',
             attentionNeeded
           })
@@ -198,7 +209,7 @@ const Dashboard = () => {
       }}>
         <h1 style={{ color: '#FF9800', margin: 0, fontSize: '1.8em' }}>家长仪表盘</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>欢迎，王家长</span>
+          <span>欢迎，{currentUser?.name || '家长'}</span>
           <div style={{
             width: 40,
             height: 40,
@@ -209,7 +220,7 @@ const Dashboard = () => {
             justifyContent: 'center',
             color: 'white',
             fontWeight: 'bold'
-          }}>王</div>
+          }}>{currentUser?.name?.charAt(0) || '家'}</div>
         </div>
       </div>
 
