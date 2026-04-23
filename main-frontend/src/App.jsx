@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { contentApi } from './services/api';
@@ -6,6 +6,9 @@ import { contentApi } from './services/api';
 // 主页组件
 const Home = () => {
   const [announcements, setAnnouncements] = useState([]);
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const autoPlayRef = useRef(null);
 
   // 获取公告
   useEffect(() => {
@@ -21,42 +24,158 @@ const Home = () => {
     fetchAnnouncements();
   }, []);
 
+  // 计算用于轮播的扩展数组（用于无缝循环）
+  const carouselAnnouncements = announcements.length > 0 
+    ? [announcements[announcements.length - 1], ...announcements, announcements[0]]
+    : [];
+
+  // 实际显示的索引（在扩展数组中的位置）
+  const actualDisplayIndex = displayIndex + 1;
+
+  // 自动轮播
+  useEffect(() => {
+    if (announcements.length > 1) {
+      autoPlayRef.current = setInterval(() => {
+        handleNext();
+      }, 4000);
+    }
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+      }
+    };
+  }, [announcements.length]);
+
+  // 处理无缝循环的边界情况
+  useEffect(() => {
+    if (!isTransitioning) return;
+
+    const timer = setTimeout(() => {
+      if (displayIndex >= announcements.length) {
+        setIsTransitioning(false);
+        setDisplayIndex(0);
+      } else if (displayIndex < 0) {
+        setIsTransitioning(false);
+        setDisplayIndex(announcements.length - 1);
+      }
+    }, 600); // 等待过渡动画完成
+
+    return () => clearTimeout(timer);
+  }, [displayIndex, isTransitioning, announcements.length]);
+
+  // 手动切换公告
+  const handleDotClick = (index) => {
+    setIsTransitioning(false);
+    setDisplayIndex(index);
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = setInterval(() => {
+        handleNext();
+      }, 4000);
+    }
+  };
+
+  const handlePrev = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setDisplayIndex((prev) => prev - 1);
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = setInterval(() => {
+        handleNext();
+      }, 4000);
+    }
+  };
+
+  const handleNext = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setDisplayIndex((prev) => prev + 1);
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = setInterval(() => {
+        handleNext();
+      }, 4000);
+    }
+  };
+
   return (
-    <div>
+    <div className="app">
       {/* 头部 */}
       <header className="header">
-        <h1>乡村助学平台</h1>
-        <p>连接城市教师与乡村孩子的桥梁</p>
-        <div className="header-buttons">
-          <Link to="/login"><button>登录</button></Link>
-          <Link to="/register"><button>注册</button></Link>
-          <Link to="/about"><button>关于我们</button></Link>
+        <div className="header-content">
+          <div className="header-logo">
+            <span className="logo-icon">🌱</span>
+            <h1>乡村助学平台</h1>
+          </div>
+          <p className="header-subtitle">连接城市教师与乡村孩子的桥梁</p>
+          <div className="header-buttons">
+            <Link to="/login" className="btn btn-outline">
+              <span>🔐</span> 登录
+            </Link>
+            <Link to="/register" className="btn btn-primary">
+              <span>✨</span> 注册
+            </Link>
+            <Link to="/about" className="btn btn-light">
+              <span>ℹ️</span> 关于我们
+            </Link>
+          </div>
         </div>
       </header>
 
       <div className="container">
         {/* 系统介绍 */}
-        <section className="section">
-          <h2>让每个孩子都能接受优质教育</h2>
-          <p>乡村助学平台致力于解决教育公平问题，为乡村孩子提供优质的教育资源和心理支持。通过连接城市教师和乡村学生，我们希望能够缩小城乡教育差距，让每个孩子都能拥有平等的学习机会。</p>
+        <section className="section section-intro">
+          <div className="section-header">
+            <span className="section-badge">关于我们</span>
+            <h2>让每个孩子都能接受优质教育</h2>
+          </div>
+          <div className="intro-content">
+            <div className="intro-text">
+              <p>乡村助学平台致力于解决教育公平问题，为乡村孩子提供优质的教育资源和心理支持。通过连接城市教师和乡村学生，我们希望能够缩小城乡教育差距，让每个孩子都能拥有平等的学习机会。</p>
+            </div>
+            <div className="intro-stats">
+              <div className="stat-item">
+                <span className="stat-number">1000+</span>
+                <span className="stat-label">注册教师</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">5000+</span>
+                <span className="stat-label">受益学生</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">98%</span>
+                <span className="stat-label">满意度</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* 功能特点 */}
-        <section className="section">
-          <h2>平台功能</h2>
+        <section className="section section-features">
+          <div className="section-header">
+            <span className="section-badge">核心功能</span>
+            <h2>平台功能</h2>
+          </div>
           <div className="features">
             <div className="feature-card">
-              <div className="feature-icon">📚</div>
+              <div className="feature-icon-wrapper">
+                <div className="feature-icon">📚</div>
+              </div>
               <h3>教学辅导</h3>
               <p>城市教师为乡村学生提供一对一的教学辅导，帮助他们解决学习问题，提高学习成绩。</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">❤️</div>
+              <div className="feature-icon-wrapper">
+                <div className="feature-icon">❤️</div>
+              </div>
               <h3>心理教育</h3>
               <p>为留守儿童提供及时的心理干预和支持，帮助他们健康成长，建立积极的心态。</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🤖</div>
+              <div className="feature-icon-wrapper">
+                <div className="feature-icon">🤖</div>
+              </div>
               <h3>AI智能匹配</h3>
               <p>利用AI技术为学生匹配合适的教师，为教师筛选目标学生，提高教学效率和质量。</p>
             </div>
@@ -64,44 +183,102 @@ const Home = () => {
         </section>
 
         {/* 系统角色 */}
-        <section className="section">
-          <h2>系统角色</h2>
+        <section className="section section-roles">
+          <div className="section-header">
+            <span className="section-badge">加入我们</span>
+            <h2>系统角色</h2>
+          </div>
           <div className="roles">
             <Link to="/login?role=teacher" className="role-card">
+              <div className="role-icon">👨‍🏫</div>
               <h3>教育教师</h3>
               <p>提供教学辅导和心理教育</p>
+              <div className="role-arrow">→</div>
             </Link>
             <Link to="/login?role=student" className="role-card">
+              <div className="role-icon">👧</div>
               <h3>儿童/学生</h3>
               <p>接受教育辅导和心理支持</p>
+              <div className="role-arrow">→</div>
             </Link>
             <Link to="/login?role=parent" className="role-card">
+              <div className="role-icon">👨‍👩‍👧</div>
               <h3>家长/监护人</h3>
               <p>了解孩子的学习情况和心理状态</p>
+              <div className="role-arrow">→</div>
             </Link>
             <Link to="/login?role=admin" className="role-card">
+              <div className="role-icon">👨‍💼</div>
               <h3>管理员</h3>
               <p>管理系统用户和内容</p>
+              <div className="role-arrow">→</div>
             </Link>
           </div>
         </section>
 
-        {/* 公告展示 */}
-        <section className="section">
-          <h2>最新公告</h2>
-          <div className="announcements">
-            {announcements.length > 0 ? (
-              announcements.map((announcement, index) => (
-                <div key={index} className="announcement-item">
-                  <h3>{announcement.title}</h3>
-                  <p>{announcement.content}</p>
-                  <p className="announcement-date">{announcement.publishDate}</p>
-                </div>
-              ))
-            ) : (
-              <p>暂无公告</p>
-            )}
+        {/* 公告展示 - 轮播图 */}
+        <section className="section section-announcements">
+          <div className="section-header">
+            <span className="section-badge">最新动态</span>
+            <h2>最新公告</h2>
           </div>
+          {announcements.length > 0 ? (
+            <div className="announcement-carousel">
+              {/* 上一张按钮 */}
+              {announcements.length > 1 && (
+                <button className="carousel-btn carousel-prev" onClick={handlePrev}>
+                  ‹
+                </button>
+              )}
+              
+              {/* 轮播内容 */}
+              <div className="carousel-container">
+                <div 
+                  className={`carousel-track ${!isTransitioning ? 'no-transition' : ''}`}
+                  style={{ transform: `translateX(-${actualDisplayIndex * 100}%)` }}
+                >
+                  {carouselAnnouncements.map((announcement, index) => (
+                    <div key={index} className="announcement-slide">
+                      <div className="announcement-card">
+                        <div className="announcement-icon">📢</div>
+                        <h3 className="announcement-title">{announcement.title}</h3>
+                        <p className="announcement-content">{announcement.content}</p>
+                        {announcement.publishDate && (
+                          <p className="announcement-date">
+                            {new Date(announcement.publishDate).toLocaleDateString('zh-CN')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 下一张按钮 */}
+              {announcements.length > 1 && (
+                <button className="carousel-btn carousel-next" onClick={handleNext}>
+                  ›
+                </button>
+              )}
+              
+              {/* 轮播指示器 */}
+              {announcements.length > 1 && (
+                <div className="carousel-dots">
+                  {announcements.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`carousel-dot ${index === displayIndex ? 'active' : ''}`}
+                      onClick={() => handleDotClick(index)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="no-announcements">
+              <p>暂无公告</p>
+            </div>
+          )}
         </section>
       </div>
 

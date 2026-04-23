@@ -40,7 +40,12 @@ public class ContentController {
     @GetMapping("/api/content/announcements")
     public Result<List<Announcement>> getPublicAnnouncements() {
         try {
-            List<Announcement> announcements = announcementService.listAnnouncements(null, null);
+            // 只获取已发布的最新6条公告
+            List<Announcement> announcements = announcementService.listAnnouncements(null, "published");
+            // 限制只返回前6条
+            if (announcements.size() > 6) {
+                announcements = announcements.subList(0, 6);
+            }
             return Result.success(announcements);
         } catch (Exception e) {
             return Result.error(500, "获取公告列表失败: " + e.getMessage());
