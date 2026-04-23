@@ -1,0 +1,718 @@
+1、管理员端控制台：
+GET http://localhost:8080/api/matches/statistics 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=924ea07a:1784
+xhr @ axios.js?v=924ea07a:1649
+dispatchRequest @ axios.js?v=924ea07a:2212
+Promise.then
+_request @ axios.js?v=924ea07a:2430
+request @ axios.js?v=924ea07a:2326
+Axios.<computed> @ axios.js?v=924ea07a:2466
+wrap @ axios.js?v=924ea07a:8
+（匿名） @ adminApi.js:8
+（匿名） @ Dashboard.jsx:118
+（匿名） @ Dashboard.jsx:85
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=924ea07a:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=924ea07a:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=924ea07a:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=924ea07a:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=924ea07a:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=924ea07a:19447
+performSyncWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18868
+flushSyncCallbacks @ chunk-NUMECXU6.js?v=924ea07a:9119
+commitRootImpl @ chunk-NUMECXU6.js?v=924ea07a:19432
+commitRoot @ chunk-NUMECXU6.js?v=924ea07a:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=924ea07a:18805
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18718
+workLoop @ chunk-NUMECXU6.js?v=924ea07a:197
+flushWork @ chunk-NUMECXU6.js?v=924ea07a:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:384
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:387
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+requestHostCallback @ chunk-NUMECXU6.js?v=924ea07a:418
+unstable_scheduleCallback @ chunk-NUMECXU6.js?v=924ea07a:330
+scheduleCallback$1 @ chunk-NUMECXU6.js?v=924ea07a:19826
+ensureRootIsScheduled @ chunk-NUMECXU6.js?v=924ea07a:18652
+scheduleUpdateOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18562
+updateContainer @ chunk-NUMECXU6.js?v=924ea07a:20776
+ReactDOMHydrationRoot.render.ReactDOMRoot.render @ chunk-NUMECXU6.js?v=924ea07a:21116
+（匿名） @ main.jsx:41
+Dashboard.jsx:130 获取匹配统计数据失败: AxiosError: Request failed with status code 500
+    at settle (axios.js?v=924ea07a:1319:7)
+    at XMLHttpRequest.onloadend (axios.js?v=924ea07a:1682:7)
+    at Axios.request (axios.js?v=924ea07a:2330:41)
+    at async fetchMatchStatistics (Dashboard.jsx:118:24)
+（匿名） @ Dashboard.jsx:130
+await in （匿名）
+（匿名） @ Dashboard.jsx:85
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=924ea07a:16915
+commitPassiveMountOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18156
+commitPassiveMountEffects_complete @ chunk-NUMECXU6.js?v=924ea07a:18129
+commitPassiveMountEffects_begin @ chunk-NUMECXU6.js?v=924ea07a:18119
+commitPassiveMountEffects @ chunk-NUMECXU6.js?v=924ea07a:18109
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=924ea07a:19490
+flushPassiveEffects @ chunk-NUMECXU6.js?v=924ea07a:19447
+performSyncWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18868
+flushSyncCallbacks @ chunk-NUMECXU6.js?v=924ea07a:9119
+commitRootImpl @ chunk-NUMECXU6.js?v=924ea07a:19432
+commitRoot @ chunk-NUMECXU6.js?v=924ea07a:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=924ea07a:18805
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18718
+workLoop @ chunk-NUMECXU6.js?v=924ea07a:197
+flushWork @ chunk-NUMECXU6.js?v=924ea07a:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:384
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:387
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+requestHostCallback @ chunk-NUMECXU6.js?v=924ea07a:418
+unstable_scheduleCallback @ chunk-NUMECXU6.js?v=924ea07a:330
+scheduleCallback$1 @ chunk-NUMECXU6.js?v=924ea07a:19826
+ensureRootIsScheduled @ chunk-NUMECXU6.js?v=924ea07a:18652
+scheduleUpdateOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18562
+updateContainer @ chunk-NUMECXU6.js?v=924ea07a:20776
+ReactDOMHydrationRoot.render.ReactDOMRoot.render @ chunk-NUMECXU6.js?v=924ea07a:21116
+（匿名） @ main.jsx:41
+Dashboard.jsx:146 用户列表响应: {success: true, data: {…}}
+Dashboard.jsx:150 用户列表: (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+adminApi.js:8  GET http://localhost:8080/api/matches/statistics 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=924ea07a:1784
+xhr @ axios.js?v=924ea07a:1649
+dispatchRequest @ axios.js?v=924ea07a:2212
+Promise.then
+_request @ axios.js?v=924ea07a:2430
+request @ axios.js?v=924ea07a:2326
+Axios.<computed> @ axios.js?v=924ea07a:2466
+wrap @ axios.js?v=924ea07a:8
+（匿名） @ adminApi.js:8
+（匿名） @ Dashboard.jsx:118
+（匿名） @ Dashboard.jsx:85
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=924ea07a:16915
+invokePassiveEffectMountInDEV @ chunk-NUMECXU6.js?v=924ea07a:18324
+invokeEffectsInDev @ chunk-NUMECXU6.js?v=924ea07a:19701
+commitDoubleInvokeEffectsInDEV @ chunk-NUMECXU6.js?v=924ea07a:19686
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=924ea07a:19503
+flushPassiveEffects @ chunk-NUMECXU6.js?v=924ea07a:19447
+performSyncWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18868
+flushSyncCallbacks @ chunk-NUMECXU6.js?v=924ea07a:9119
+commitRootImpl @ chunk-NUMECXU6.js?v=924ea07a:19432
+commitRoot @ chunk-NUMECXU6.js?v=924ea07a:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=924ea07a:18805
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18718
+workLoop @ chunk-NUMECXU6.js?v=924ea07a:197
+flushWork @ chunk-NUMECXU6.js?v=924ea07a:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:384
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:387
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+requestHostCallback @ chunk-NUMECXU6.js?v=924ea07a:418
+unstable_scheduleCallback @ chunk-NUMECXU6.js?v=924ea07a:330
+scheduleCallback$1 @ chunk-NUMECXU6.js?v=924ea07a:19826
+ensureRootIsScheduled @ chunk-NUMECXU6.js?v=924ea07a:18652
+scheduleUpdateOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18562
+updateContainer @ chunk-NUMECXU6.js?v=924ea07a:20776
+ReactDOMHydrationRoot.render.ReactDOMRoot.render @ chunk-NUMECXU6.js?v=924ea07a:21116
+（匿名） @ main.jsx:41
+Dashboard.jsx:130 获取匹配统计数据失败: AxiosError: Request failed with status code 500
+    at settle (axios.js?v=924ea07a:1319:7)
+    at XMLHttpRequest.onloadend (axios.js?v=924ea07a:1682:7)
+    at Axios.request (axios.js?v=924ea07a:2330:41)
+    at async fetchMatchStatistics (Dashboard.jsx:118:24)
+（匿名） @ Dashboard.jsx:130
+await in （匿名）
+（匿名） @ Dashboard.jsx:85
+commitHookEffectListMount @ chunk-NUMECXU6.js?v=924ea07a:16915
+invokePassiveEffectMountInDEV @ chunk-NUMECXU6.js?v=924ea07a:18324
+invokeEffectsInDev @ chunk-NUMECXU6.js?v=924ea07a:19701
+commitDoubleInvokeEffectsInDEV @ chunk-NUMECXU6.js?v=924ea07a:19686
+flushPassiveEffectsImpl @ chunk-NUMECXU6.js?v=924ea07a:19503
+flushPassiveEffects @ chunk-NUMECXU6.js?v=924ea07a:19447
+performSyncWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18868
+flushSyncCallbacks @ chunk-NUMECXU6.js?v=924ea07a:9119
+commitRootImpl @ chunk-NUMECXU6.js?v=924ea07a:19432
+commitRoot @ chunk-NUMECXU6.js?v=924ea07a:19277
+finishConcurrentRender @ chunk-NUMECXU6.js?v=924ea07a:18805
+performConcurrentWorkOnRoot @ chunk-NUMECXU6.js?v=924ea07a:18718
+workLoop @ chunk-NUMECXU6.js?v=924ea07a:197
+flushWork @ chunk-NUMECXU6.js?v=924ea07a:176
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:384
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+performWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:387
+postMessage
+schedulePerformWorkUntilDeadline @ chunk-NUMECXU6.js?v=924ea07a:407
+requestHostCallback @ chunk-NUMECXU6.js?v=924ea07a:418
+unstable_scheduleCallback @ chunk-NUMECXU6.js?v=924ea07a:330
+scheduleCallback$1 @ chunk-NUMECXU6.js?v=924ea07a:19826
+ensureRootIsScheduled @ chunk-NUMECXU6.js?v=924ea07a:18652
+scheduleUpdateOnFiber @ chunk-NUMECXU6.js?v=924ea07a:18562
+updateContainer @ chunk-NUMECXU6.js?v=924ea07a:20776
+ReactDOMHydrationRoot.render.ReactDOMRoot.render @ chunk-NUMECXU6.js?v=924ea07a:21116
+（匿名） @ main.jsx:41
+Dashboard.jsx:93 统计数据响应: {success: true, data: {…}}
+Dashboard.jsx:97 统计数据: {studentCount: '5', parentCount: '3', chatCount: '0', teacherCount: '3'}
+Dashboard.jsx:146 用户列表响应: {success: true, data: {…}}
+Dashboard.jsx:150 用户列表: (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+2、管理员端http://localhost:8080/api/matches/statistics网络响应：
+{"code":500,"message":"系统繁忙，请稍后重试","data":null}
+3、后端日志：
+        at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4017c5d2] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@c944e48] was not registered for synchronization because synchronization is not active
+2026-04-23T09:40:16.573+08:00 ERROR 37552 --- [student-tutoring-system] [nio-8080-exec-4] c.t.config.GlobalExceptionHandler        : 系统异常
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/matches/statistics.
+        at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.2.2.jar:6.2.2]    
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at com.tutoring.filter.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:64) ~[classes/:na]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+2026-04-23T09:40:16.585+08:00  INFO 37552 --- [student-tutoring-system] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-23T09:40:16.808+08:00  INFO 37552 --- [student-tutoring-system] [nio-8080-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@40eaca72
+2026-04-23T09:40:16.809+08:00  INFO 37552 --- [student-tutoring-system] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+JDBC Connection [HikariProxyConnection@83497718 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@800973972 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (deleted = ?)
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 0(Integer)
+==> Parameters: 1(Integer), 0(Integer)
+<==    Columns: total
+<==    Columns: total
+<==        Row: 12
+<==        Row: 3
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@c944e48]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4017c5d2]
+教师数量: 3
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6315554d] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@376b009a] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@567517599 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@49857203 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,role,name,email,phone,gender,birth_date,qq,wechat,address,avatar,created_at,updated_at,deleted FROM users WHERE deleted=0 AND (deleted = ?) ORDER BY created_at DESC LIMIT 0, 10
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 0(Integer)
+==> Parameters: 2(Integer), 0(Integer)
+<==    Columns: total
+<==    Columns: id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, avatar, created_at, updated_at, deleted
+<==        Row: 5
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6315554d]
+学生数量: 5
+<==        Row: 4001, admin, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 4, Admin, null, null, null, null, null, null, null, null, 2026-04-23 09:23:00, 2026-04-23 09:23:00, 0    
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21fa4626] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@247475421 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 3(Integer), 0(Integer)
+<==        Row: 1001, teacher_zhang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 张明华, zhang_math@example.com, 13800138001, 1, 1985-06-15 00:00:00, 123456001, zhang_math, 北京市海淀区中关村大街 1 号, null, 2026-04-20 09:49:45, 2026-04-20 13:31:03, 0
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21fa4626]
+家长数量: 3
+统计数据: {studentCount=5, parentCount=3, chatCount=0, teacherCount=3}
+<==        Row: 1002, teacher_li, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 李雅文, li_english@example.com, 13800138002, 0, 1988-03-22 00:00:00, 123456002, li_english, 上海 市浦东新区世纪大道 100 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 1003, teacher_wang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 王晓文, wang_chinese@example.com, 13800138003, 1, 1982-09-10 00:00:00, 123456003, wang_chinese, 广州市天河区天河路 200 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2001, student_ming, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 陈明, ming_student@example.com, 13900139001, 1, 2010-05-20 00:00:00, 234567001, ming_student,  北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 13:31:00, 0
+<==        Row: 2002, student_hua, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 李华, hua_student@example.com, 13900139002, 0, 2011-08-15 00:00:00, 234567002, hua_student, 上海市浦东新区世纪小区 2 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2003, student_gang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 王刚, gang_student@example.com, 13900139003, 1, 2009-12-05 00:00:00, 234567003, gang_student,  广州市天河区天河小区 3 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2004, student_fang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 刘芳, fang_student@example.com, 13900139004, 0, 2012-02-28 00:00:00, 234567004, fang_student,  深圳市南山区科技园小区 4 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2005, student_jun, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 赵军, jun_student@example.com, 13900139005, 1, 2010-11-11 00:00:00, 234567005, jun_student, 杭州市西湖区文一路小区 5 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 3001, parent_chen, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 3, 陈建国, chen_parent@example.com, 13700137001, 1, 1978-04-10 00:00:00, 345678001, chen_parent, 北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@376b009a]
+获取统计数据...
+userRepository: com.baomidou.mybatisplus.core.override.MybatisMapperProxy@547f31ce
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebf5df3] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2b1df6ef] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1081649748 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+JDBC Connection [HikariProxyConnection@635047420 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (deleted = ?)
+==> Parameters: 1(Integer), 0(Integer)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==    Columns: total
+<==        Row: 3
+<==        Row: 12
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebf5df3]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2b1df6ef]
+教师数量: 3
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@64e707c7] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@145a06f] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@545865530 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,role,name,email,phone,gender,birth_date,qq,wechat,address,avatar,created_at,updated_at,deleted FROM users WHERE deleted=0 AND (deleted = ?) ORDER BY created_at DESC LIMIT 0, 10
+JDBC Connection [HikariProxyConnection@899753329 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 0(Integer)
+==> Parameters: 2(Integer), 0(Integer)
+<==    Columns: total
+<==        Row: 5
+<==    Columns: id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, avatar, created_at, updated_at, deleted
+<==      Total: 1
+<==        Row: 4001, admin, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 4, Admin, null, null, null, null, null, null, null, null, 2026-04-23 09:23:00, 2026-04-23 09:23:00, 0    
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@145a06f]
+学生数量: 5
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4d80d827] was not registered for synchronization because synchronization is not active
+<==        Row: 1001, teacher_zhang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 张明华, zhang_math@example.com, 13800138001, 1, 1985-06-15 00:00:00, 123456001, zhang_math, 北京市海淀区中关村大街 1 号, null, 2026-04-20 09:49:45, 2026-04-20 13:31:03, 0
+JDBC Connection [HikariProxyConnection@1634361120 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+<==        Row: 1002, teacher_li, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 李雅文, li_english@example.com, 13800138002, 0, 1988-03-22 00:00:00, 123456002, li_english, 上海 市浦东新区世纪大道 100 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 3(Integer), 0(Integer)
+<==        Row: 1003, teacher_wang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 王晓文, wang_chinese@example.com, 13800138003, 1, 1982-09-10 00:00:00, 123456003, wang_chinese, 广州市天河区天河路 200 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4d80d827]
+<==        Row: 2001, student_ming, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 陈明, ming_student@example.com, 13900139001, 1, 2010-05-20 00:00:00, 234567001, ming_student,  北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 13:31:00, 0
+家长数量: 3
+统计数据: {studentCount=5, parentCount=3, chatCount=0, teacherCount=3}
+<==        Row: 2002, student_hua, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 李华, hua_student@example.com, 13900139002, 0, 2011-08-15 00:00:00, 234567002, hua_student, 上海市浦东新区世纪小区 2 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2003, student_gang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 王刚, gang_student@example.com, 13900139003, 1, 2009-12-05 00:00:00, 234567003, gang_student,  广州市天河区天河小区 3 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2004, student_fang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 刘芳, fang_student@example.com, 13900139004, 0, 2012-02-28 00:00:00, 234567004, fang_student,  深圳市南山区科技园小区 4 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2005, student_jun, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 赵军, jun_student@example.com, 13900139005, 1, 2010-11-11 00:00:00, 234567005, jun_student, 杭州市西湖区文一路小区 5 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 3001, parent_chen, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 3, 陈建国, chen_parent@example.com, 13700137001, 1, 1978-04-10 00:00:00, 345678001, chen_parent, 北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@64e707c7]
+Login request: LoginRequest(username=admin, password=Test1234!, role=4)
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6bbb796f] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1358574918 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,role,name,email,phone,gender,birth_date,qq,wechat,address,avatar,created_at,updated_at,deleted FROM users WHERE deleted=0 AND (username = ? AND deleted = ?)
+==> Parameters: admin(String), 0(Integer)
+<==    Columns: id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, avatar, created_at, updated_at, deleted
+<==        Row: 4001, admin, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 4, Admin, null, null, null, null, null, null, null, null, 2026-04-23 09:23:00, 2026-04-23 09:23:00, 0    
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6bbb796f]
+【DEBUG】密码验证 - username: admin, bcrypted: false
+【临时方案】测试账号 admin 使用Test1234!验证通过
+Login success for user: admin
+获取统计数据...
+userRepository: com.baomidou.mybatisplus.core.override.MybatisMapperProxy@547f31ce
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cf80769] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31eb11b3] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1059912190 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1648354438 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (deleted = ?)
+==> Parameters: 1(Integer), 0(Integer)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==    Columns: total
+<==        Row: 12
+<==        Row: 3
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cf80769]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31eb11b3]
+Creating a new SqlSession
+教师数量: 3
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2302eebd] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7e11f3c5] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@267216635 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@396235581 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,role,name,email,phone,gender,birth_date,qq,wechat,address,avatar,created_at,updated_at,deleted FROM users WHERE deleted=0 AND (deleted = ?) ORDER BY created_at DESC LIMIT 0, 10
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 0(Integer)
+==> Parameters: 2(Integer), 0(Integer)
+<==    Columns: total
+<==        Row: 5
+<==      Total: 1
+<==    Columns: id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, avatar, created_at, updated_at, deleted
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7e11f3c5]
+学生数量: 5
+<==        Row: 4001, admin, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 4, Admin, null, null, null, null, null, null, null, null, 2026-04-23 09:23:00, 2026-04-23 09:23:00, 0    
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6f40557c] was not registered for synchronization because synchronization is not active
+<==        Row: 1001, teacher_zhang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 张明华, zhang_math@example.com, 13800138001, 1, 1985-06-15 00:00:00, 123456001, zhang_math, 北京市海淀区中关村大街 1 号, null, 2026-04-20 09:49:45, 2026-04-20 13:31:03, 0
+JDBC Connection [HikariProxyConnection@507382922 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+<==        Row: 1002, teacher_li, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 李雅文, li_english@example.com, 13800138002, 0, 1988-03-22 00:00:00, 123456002, li_english, 上海 市浦东新区世纪大道 100 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+==> Parameters: 3(Integer), 0(Integer)
+<==        Row: 1003, teacher_wang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 王晓文, wang_chinese@example.com, 13800138003, 1, 1982-09-10 00:00:00, 123456003, wang_chinese, 广州市天河区天河路 200 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2001, student_ming, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 陈明, ming_student@example.com, 13900139001, 1, 2010-05-20 00:00:00, 234567001, ming_student,  北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 13:31:00, 0
+<==        Row: 2002, student_hua, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 李华, hua_student@example.com, 13900139002, 0, 2011-08-15 00:00:00, 234567002, hua_student, 上海市浦东新区世纪小区 2 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+<==        Row: 2003, student_gang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 王刚, gang_student@example.com, 13900139003, 1, 2009-12-05 00:00:00, 234567003, gang_student,  广州市天河区天河小区 3 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6f40557c]
+家长数量: 3
+统计数据: {studentCount=5, parentCount=3, chatCount=0, teacherCount=3}
+<==        Row: 2004, student_fang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 刘芳, fang_student@example.com, 13900139004, 0, 2012-02-28 00:00:00, 234567004, fang_student,  深圳市南山区科技园小区 4 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2005, student_jun, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 赵军, jun_student@example.com, 13900139005, 1, 2010-11-11 00:00:00, 234567005, jun_student, 杭州市西湖区文一路小区 5 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 3001, parent_chen, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 3, 陈建国, chen_parent@example.com, 13700137001, 1, 1978-04-10 00:00:00, 345678001, chen_parent, 北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+2026-04-23T09:40:42.714+08:00 ERROR 37552 --- [student-tutoring-system] [nio-8080-exec-9] c.t.config.GlobalExceptionHandler        : 系统异常
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/matches/statistics.
+        at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.2.2.jar:6.2.2]    
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at com.tutoring.filter.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:64) ~[classes/:na]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2302eebd]
+获取统计数据...
+userRepository: com.baomidou.mybatisplus.core.override.MybatisMapperProxy@547f31ce
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@59c68b7f] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1746298456 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 1(Integer), 0(Integer)
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@59c68b7f]
+教师数量: 3
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@109ac695] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4e4ed648] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@2112502410 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@880500271 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (deleted = ?)
+==> Parameters: 2(Integer), 0(Integer)
+==> Parameters: 0(Integer)
+2026-04-23T09:40:42.729+08:00 ERROR 37552 --- [student-tutoring-system] [nio-8080-exec-4] c.t.config.GlobalExceptionHandler        : 系统异常
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/matches/statistics.
+        at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.19.jar:6.0]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.2.2.jar:6.2.2]    
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at com.tutoring.filter.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:64) ~[classes/:na]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.2.2.jar:6.2.2]
+        at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar:6.1.4]
+        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.19.jar:10.1.19]
+        at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+<==    Columns: total
+<==    Columns: total
+<==        Row: 12
+<==        Row: 5
+<==      Total: 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4e4ed648]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@109ac695]
+学生数量: 5
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4be6403] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@326af5c3] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1954685813 wrapping com.mysql.cj.jdbc.ConnectionImpl@40eaca72] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1014632010 wrapping com.mysql.cj.jdbc.ConnectionImpl@1a3df9b7] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,role,name,email,phone,gender,birth_date,qq,wechat,address,avatar,created_at,updated_at,deleted FROM users WHERE deleted=0 AND (deleted = ?) ORDER BY created_at DESC LIMIT 0, 10
+==>  Preparing: SELECT COUNT( * ) AS total FROM users WHERE deleted=0 AND (role = ? AND deleted = ?)
+==> Parameters: 0(Integer)
+==> Parameters: 3(Integer), 0(Integer)
+<==    Columns: total
+<==    Columns: id, username, password, role, name, email, phone, gender, birth_date, qq, wechat, address, avatar, created_at, updated_at, deleted
+<==        Row: 3
+<==        Row: 4001, admin, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 4, Admin, null, null, null, null, null, null, null, null, 2026-04-23 09:23:00, 2026-04-23 09:23:00, 0    
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@326af5c3]
+家长数量: 3
+<==        Row: 1001, teacher_zhang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 张明华, zhang_math@example.com, 13800138001, 1, 1985-06-15 00:00:00, 123456001, zhang_math, 北京市海淀区中关村大街 1 号, null, 2026-04-20 09:49:45, 2026-04-20 13:31:03, 0
+统计数据: {studentCount=5, parentCount=3, chatCount=0, teacherCount=3}
+<==        Row: 1002, teacher_li, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 李雅文, li_english@example.com, 13800138002, 0, 1988-03-22 00:00:00, 123456002, li_english, 上海 市浦东新区世纪大道 100 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 1003, teacher_wang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 1, 王晓文, wang_chinese@example.com, 13800138003, 1, 1982-09-10 00:00:00, 123456003, wang_chinese, 广州市天河区天河路 200 号, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2001, student_ming, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 陈明, ming_student@example.com, 13900139001, 1, 2010-05-20 00:00:00, 234567001, ming_student,  北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 13:31:00, 0
+<==        Row: 2002, student_hua, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 李华, hua_student@example.com, 13900139002, 0, 2011-08-15 00:00:00, 234567002, hua_student, 上海市浦东新区世纪小区 2 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2003, student_gang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 王刚, gang_student@example.com, 13900139003, 1, 2009-12-05 00:00:00, 234567003, gang_student,  广州市天河区天河小区 3 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2004, student_fang, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 刘芳, fang_student@example.com, 13900139004, 0, 2012-02-28 00:00:00, 234567004, fang_student,  深圳市南山区科技园小区 4 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 2005, student_jun, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 2, 赵军, jun_student@example.com, 13900139005, 1, 2010-11-11 00:00:00, 234567005, jun_student, 杭州市西湖区文一路小区 5 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==        Row: 3001, parent_chen, $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy, 3, 陈建国, chen_parent@example.com, 13700137001, 1, 1978-04-10 00:00:00, 345678001, chen_parent, 北京市海淀区中关村小区 1 栋, null, 2026-04-20 09:49:45, 2026-04-20 09:49:45, 0
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4be6403]
