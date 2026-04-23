@@ -9,13 +9,10 @@ const { TextArea } = Input
 function Psychological() {
   const currentUser = useSelector((state) => state.auth.user)
   const [isAssessmentModalOpen, setIsAssessmentModalOpen] = useState(false)
-  const [isMoodModalOpen, setIsMoodModalOpen] = useState(false)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(null)
   const [assessments, setAssessments] = useState([]) // 初始值就是空数组
-  const [selectedMood, setSelectedMood] = useState(null)
-  const [moodDate, setMoodDate] = useState(new Date())
 
   // 加载数据
   useEffect(() => {
@@ -61,23 +58,7 @@ function Psychological() {
     }
   }
 
-  const moodOptions = [
-    { icon: <SmileOutlined />, label: '开心', value: 'happy', color: '#52c41a' },
-    { icon: <MehOutlined />, label: '一般', value: 'normal', color: '#faad14' },
-    { icon: <FrownOutlined />, label: '难过', value: 'sad', color: '#ff4d4f' },
-  ]
 
-  const handleMoodSelect = (mood) => {
-    setSelectedMood(mood)
-  }
-
-  const handleMoodSubmit = () => {
-    console.log('提交心情记录:', { mood: selectedMood, date: moodDate })
-    message.success('心情记录保存成功！')
-    setIsMoodModalOpen(false)
-    setSelectedMood(null)
-    setMoodDate(new Date())
-  }
 
   const handleAssessmentStart = () => {
     setIsAssessmentModalOpen(true)
@@ -228,52 +209,7 @@ function Psychological() {
       </div>
 
       <div style={{ padding: 20 }}>
-        <Card 
-          title="今天的心情如何？" 
-          style={{ 
-            marginBottom: 24, 
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            borderRadius: 10,
-            padding: 20,
-            backgroundColor: '#fff'
-          }}
-        >
-          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 16 }}>
-            {moodOptions.map((option) => (
-              <Button
-                key={option.value}
-                icon={option.icon}
-                size="large"
-                style={{ 
-                  fontSize: 24, 
-                  height: 80, 
-                  width: 100,
-                  borderColor: selectedMood === option.value ? option.color : '#d9d9d9',
-                  color: selectedMood === option.value ? option.color : '#666',
-                }}
-                onClick={() => handleMoodSelect(option.value)}
-              >
-                <div style={{ fontSize: 14, marginTop: 8 }}>{option.label}</div>
-              </Button>
-            ))}
-          </div>
-          <Button 
-            type="primary" 
-            icon={<CalendarOutlined />}
-            onClick={() => setIsMoodModalOpen(true)}
-            disabled={!selectedMood}
-            style={{
-              backgroundColor: '#4CAF50',
-              borderColor: '#4CAF50',
-              '&:hover': {
-                backgroundColor: '#45a049',
-                borderColor: '#45a049'
-              }
-            }}
-          >
-            记录心情
-          </Button>
-        </Card>
+
 
         <Card 
           title="心理状态概览" 
@@ -286,7 +222,7 @@ function Psychological() {
           }}
         >
           <Result
-            icon={<HeartOutlined style={{ color: '#4CAF50', fontSize: 48 }} />}
+            icon={<HeartOutlined style={{ color: '#ff4d4f', fontSize: 48 }} />}
             title={loading ? '加载中...' : status ? '最近评估完成' : '暂无评估'}
             subTitle={status ? '保持积极心态，继续加油！' : '开始第一次心理测评吧'}
             extra={
@@ -482,50 +418,7 @@ function Psychological() {
           </Form>
         </Modal>
 
-        <Modal
-          title="记录心情"
-          open={isMoodModalOpen}
-          onOk={handleMoodSubmit}
-          onCancel={() => {
-            setIsMoodModalOpen(false)
-            setSelectedMood(null)
-            setMoodDate(new Date())
-          }}
-          okText="确认"
-          cancelText="取消"
-          destroyOnClose={true}
-        >
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8 }}>选择日期：</label>
-            <DatePicker 
-              value={moodDate} 
-              onChange={(date) => setMoodDate(date)} 
-              style={{ width: '100%' }} 
-            />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', marginBottom: 8 }}>当前心情：</label>
-            <div style={{ display: 'flex', gap: 16 }}>
-              {moodOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  icon={option.icon}
-                  style={{ 
-                    borderColor: selectedMood === option.value ? option.color : '#d9d9d9',
-                    color: selectedMood === option.value ? option.color : '#666',
-                  }}
-                  onClick={() => handleMoodSelect(option.value)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: 8 }}>心情备注：</label>
-            <TextArea rows={3} placeholder="请输入今天的心情..." />
-          </div>
-        </Modal>
+
       </div>
     </div>
   )
