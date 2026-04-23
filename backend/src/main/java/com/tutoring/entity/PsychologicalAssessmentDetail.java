@@ -1,14 +1,11 @@
 package com.tutoring.entity;
 
+import java.util.Date;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import java.util.Date;
-
-/**
- * 心理状态评估详细数据实体类
- */
 @TableName("psychological_assessment_details")
 public class PsychologicalAssessmentDetail {
     
@@ -18,11 +15,12 @@ public class PsychologicalAssessmentDetail {
     private String assessmentType;
     private Integer percentage;
     private String level;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date updatedAt;
     private Integer deleted;
     
-    // Getter and Setter methods
     public Long getId() {
         return id;
     }

@@ -6,6 +6,7 @@ import com.tutoring.dto.AIRecommendationResponse;
 import com.tutoring.dto.MatchStatisticsDTO;
 import com.tutoring.dto.Result;
 import com.tutoring.service.MatchService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class MatchController {
     private final MatchService matchService;
     
     /**
-     * 获取教师的匹配列表
+     * 获取教师的匹配列表（通过路径参数）
      *
      * @param teacherId 教师 ID
      * @return 匹配列表
@@ -32,6 +33,27 @@ public class MatchController {
     @GetMapping("/teacher/{teacherId}")
     public Result<List<MatchResponse>> getTeacherMatches(@PathVariable Long teacherId) {
         try {
+            List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
+            return Result.success(matches);
+        } catch (RuntimeException e) {
+            return Result.error(500, e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取教师的匹配列表（通过请求头）
+     *
+     * @param request 请求对象
+     * @return 匹配列表
+     */
+    @GetMapping("/teacher")
+    public Result<List<MatchResponse>> getTeacherMatches(HttpServletRequest request) {
+        try {
+            String teacherIdStr = request.getHeader("X-User-Id");
+            if (teacherIdStr == null) {
+                return Result.error(400, "教师ID不能为空");
+            }
+            Long teacherId = Long.parseLong(teacherIdStr);
             List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
             return Result.success(matches);
         } catch (RuntimeException e) {

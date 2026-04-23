@@ -98,19 +98,5 @@ export const psychologicalAPI = {
         error: error.message
       }
     }
-  },
-  getAssessmentDetails: async (assessmentId) => {
-    try {
-      const data = await api.get(`/psychological/assessment-details/${assessmentId}`)
-      return {
-        success: true,
-        data: data
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      }
-    }
   }
 }

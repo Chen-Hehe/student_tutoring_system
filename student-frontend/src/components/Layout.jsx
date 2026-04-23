@@ -24,13 +24,13 @@ const Layout = () => {
   const [collapsed, setCollapsed] = useState(false)
 
   const menuItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    { key: '/teacher-selection', icon: <UsergroupAddOutlined />, label: '教师选择' },
-    { key: '/chat', icon: <MessageOutlined />, label: '聊天沟通' },
-    { key: '/resources', icon: <BookOutlined />, label: '学习资源' },
-    { key: '/psychological', icon: <HeartOutlined />, label: '心理支持' },
-    { key: '/ai-recommendation', icon: <RobotOutlined />, label: 'AI 推荐' },
-    { key: '/match', icon: <SwapOutlined />, label: '匹配管理' },
+    { key: 'dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
+    { key: 'teacher-selection', icon: <UsergroupAddOutlined />, label: '教师选择' },
+    { key: 'chat', icon: <MessageOutlined />, label: '聊天沟通' },
+    { key: 'resources', icon: <BookOutlined />, label: '学习资源' },
+    { key: 'psychological', icon: <HeartOutlined />, label: '心理支持' },
+    { key: 'ai-recommendation', icon: <RobotOutlined />, label: 'AI 推荐' },
+    { key: 'match', icon: <SwapOutlined />, label: '匹配管理' },
   ]
 
   const handleLogout = () => {
@@ -58,7 +58,7 @@ const Layout = () => {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[location.pathname.replace('/', '')]}
           items={menuItems}
           onClick={({ key }) => navigate(key)}
         />

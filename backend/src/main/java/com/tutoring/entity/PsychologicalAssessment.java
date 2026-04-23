@@ -1,14 +1,11 @@
 package com.tutoring.entity;
 
+import java.util.Date;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import java.util.Date;
-
-/**
- * 心理状态评估实体类
- */
 @TableName("psychological_assessments")
 public class PsychologicalAssessment {
     
@@ -16,14 +13,16 @@ public class PsychologicalAssessment {
     private Long id;
     private Long studentId;
     private Long assessorId;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date assessmentDate;
     private Integer score;
     private String comments;
     private String recommendations;
+    private String assessType;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Date createdAt;
     private Integer deleted;
     
-    // Getter and Setter methods
     public Long getId() {
         return id;
     }
@@ -78,6 +77,14 @@ public class PsychologicalAssessment {
     
     public void setRecommendations(String recommendations) {
         this.recommendations = recommendations;
+    }
+    
+    public String getAssessType() {
+        return assessType;
+    }
+    
+    public void setAssessType(String assessType) {
+        this.assessType = assessType;
     }
     
     public Date getCreatedAt() {

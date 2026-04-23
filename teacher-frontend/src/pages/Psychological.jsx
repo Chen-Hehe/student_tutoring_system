@@ -1,69 +1,173 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { Card, Table, Button, Tag, Modal, Form, Input, Select, Rate, message, Drawer, Descriptions } from 'antd'
+import { Card, Table, Button, Tag, Modal, Form, Input, Select, Rate, message, Drawer, Descriptions, Tabs } from 'antd'
 import { PlusOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons'
 import { psychologicalAPI } from '../services/psychologicalApi'
+import { matchAPI } from '../services/matchApi'
 
 const { TextArea } = Input
 const { Option } = Select
+const { TabPane } = Tabs
 
 const Psychological = () => {
   const currentUser = useSelector((state) => state.auth.user)
-  const [assessments, setAssessments] = useState([])
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [drawerVisible, setDrawerVisible] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [studentStatus, setStudentStatus] = useState(null)
+  const [studentAssessments, setStudentAssessments] = useState([])
+  const [teacherAssessments, setTeacherAssessments] = useState([])
   const [selectedAssessment, setSelectedAssessment] = useState(null)
+  const [assessmentDetails, setAssessmentDetails] = useState([])
   const [form] = Form.useForm()
 
   useEffect(() => {
     if (currentUser?.id) {
-      loadAssessments()
       loadStudents()
     }
   }, [currentUser?.id])
 
-  const loadAssessments = async () => {
+  const loadStudents = async () => {
     setLoading(true)
     try {
-      const result = await psychologicalAPI.getList()
-      setAssessments(result.data || [])
+      const result = await matchAPI.getTeacherMatches()
+      const matches = result.data || []
+      
+      // 过滤已匹配的学生并去重
+      const studentMap = new Map()
+      matches
+        .filter(m => m.status === 2) // 已匹配状态
+        .forEach(m => {
+          // 如果学生 ID 不存在于 map 中，添加它
+          if (!studentMap.has(m.studentId)) {
+            studentMap.set(m.studentId, {
+              id: m.studentId,
+              name: m.studentName,
+              grade: m.studentGrade
+            })
+          }
+        })
+      
+      // 将 map 转换为数组
+      const matchedStudents = Array.from(studentMap.values())
+      
+      setStudents(matchedStudents)
     } catch (error) {
-      console.error('加载评估列表失败:', error)
+      console.error('加载学生列表失败:', error)
+      message.error('加载学生列表失败')
     } finally {
       setLoading(false)
     }
   }
 
-  const loadStudents = async () => {
+  const loadStudentPsychologicalData = async (studentId) => {
+    setLoading(true)
     try {
-      // TODO: 获取已匹配的学生列表
-      setStudents([])
+      // 加载心理状态
+      const statusResult = await psychologicalAPI.getStatus(studentId)
+      if (statusResult.success && statusResult.data) {
+        setStudentStatus(statusResult.data)
+      }
+      
+      // 加载学生自评
+      const studentAssessmentsResult = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'student_self')
+      if (studentAssessmentsResult.success && studentAssessmentsResult.data) {
+        setStudentAssessments(studentAssessmentsResult.data)
+      }
+      
+      // 加载教师评估
+      const teacherAssessmentsResult = await psychologicalAPI.getAssessmentsByStudentIdAndType(studentId, 'teacher_professional')
+      if (teacherAssessmentsResult.success && teacherAssessmentsResult.data) {
+        setTeacherAssessments(teacherAssessmentsResult.data)
+      }
     } catch (error) {
-      console.error('加载学生列表失败:', error)
+      console.error('加载学生心理数据失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadAssessmentDetails = async (assessmentId) => {
+    try {
+      const result = await psychologicalAPI.getAssessmentDetails(assessmentId)
+      if (result.success && result.data) {
+        setAssessmentDetails(result.data)
+      }
+    } catch (error) {
+      console.error('加载评估详情失败:', error)
     }
   }
 
   const handleAddAssessment = async (values) => {
     try {
-      await psychologicalAPI.create({
-        ...values,
+      // 创建教师评估记录
+      const assessmentData = {
+        studentId: values.studentId,
         assessorId: currentUser.id,
-        assessmentDate: new Date().toISOString()
-      })
-      message.success('评估添加成功')
-      setModalVisible(false)
-      form.resetFields()
-      loadAssessments()
+        assessmentDate: new Date(),
+        score: values.score * 10,
+        comments: values.comments,
+        recommendations: values.recommendations,
+        assessType: 'teacher_professional'
+      }
+      
+      const assessmentResult = await psychologicalAPI.createAssessment(assessmentData)
+      if (assessmentResult.success) {
+        // 创建评估详情
+        const assessmentId = assessmentResult.data.id
+        const details = [
+          { assessmentId, assessmentType: '情绪稳定性', percentage: values.emotionScore, level: getLevel(values.emotionScore) },
+          { assessmentId, assessmentType: '学习压力', percentage: values.stressScore, level: getLevel(values.stressScore) },
+          { assessmentId, assessmentType: '社交互动', percentage: values.socialScore, level: getLevel(values.socialScore) },
+          { assessmentId, assessmentType: '自我认知', percentage: values.mentalScore, level: getLevel(values.mentalScore) }
+        ]
+        
+        for (const detail of details) {
+          await psychologicalAPI.createAssessmentDetail(detail)
+        }
+        
+        // 更新心理状态
+        const statusData = {
+          studentId: values.studentId,
+          emotionStatus: getStatusText(values.emotionScore),
+          emotionLevel: getLevel(values.emotionScore),
+          emotionPercentage: values.emotionScore,
+          socialStatus: getStatusText(values.socialScore),
+          socialLevel: getLevel(values.socialScore),
+          socialPercentage: values.socialScore,
+          stressStatus: getStatusText(values.stressScore),
+          stressLevel: getLevel(values.stressScore),
+          stressPercentage: values.stressScore,
+          mentalStatus: getStatusText(values.mentalScore),
+          mentalLevel: getLevel(values.mentalScore),
+          mentalPercentage: values.mentalScore
+        }
+        await psychologicalAPI.createStatus(statusData)
+        
+        message.success('评估添加成功')
+        setModalVisible(false)
+        form.resetFields()
+        // 重新加载数据
+        if (selectedStudent) {
+          loadStudentPsychologicalData(selectedStudent.id)
+        }
+      }
     } catch (error) {
       message.error('添加失败')
     }
   }
 
-  const handleViewDetail = (assessment) => {
-    setSelectedAssessment(assessment)
+  const handleViewDetail = (student) => {
+    setSelectedStudent(student)
+    loadStudentPsychologicalData(student.id)
     setDrawerVisible(true)
+  }
+
+  const handleViewAssessmentDetail = (assessment) => {
+    setSelectedAssessment(assessment)
+    loadAssessmentDetails(assessment.id)
   }
 
   const scoreColor = (score) => {
@@ -72,32 +176,46 @@ const Psychological = () => {
     return '#ff4d4f'
   }
 
+  const levelColor = (level) => {
+    switch (level) {
+      case 'good': return '#52c41a'
+      case 'warning': return '#faad14'
+      case 'danger': return '#ff4d4f'
+      default: return '#52c41a'
+    }
+  }
+
+  const levelText = (level) => {
+    switch (level) {
+      case 'good': return '良好'
+      case 'warning': return '注意'
+      case 'danger': return '需关注'
+      default: return '良好'
+    }
+  }
+
+  const getLevel = (score) => {
+    if (score >= 80) return 'good'
+    if (score >= 60) return 'warning'
+    return 'danger'
+  }
+
+  const getStatusText = (score) => {
+    if (score >= 80) return '优秀'
+    if (score >= 60) return '良好'
+    return '需关注'
+  }
+
   const columns = [
     {
       title: '学生姓名',
-      dataIndex: 'studentName',
-      key: 'studentName'
+      dataIndex: 'name',
+      key: 'name'
     },
     {
-      title: '评估日期',
-      dataIndex: 'assessmentDate',
-      key: 'assessmentDate',
-      render: (date) => new Date(date).toLocaleDateString()
-    },
-    {
-      title: '评估分数',
-      dataIndex: 'score',
-      key: 'score',
-      render: (score) => (
-        <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
-          {score} 分
-        </span>
-      )
-    },
-    {
-      title: '评估者',
-      dataIndex: 'assessorName',
-      key: 'assessorName'
+      title: '年级',
+      dataIndex: 'grade',
+      key: 'grade'
     },
     {
       title: '操作',
@@ -109,7 +227,7 @@ const Psychological = () => {
           icon={<EyeOutlined />}
           onClick={() => handleViewDetail(record)}
         >
-          详情
+          查看详情
         </Button>
       )
     }
@@ -132,17 +250,16 @@ const Psychological = () => {
 
         <Table
           columns={columns}
-          dataSource={assessments}
+          dataSource={students}
           loading={loading}
           pagination={{
             pageSize: 6,
             showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条评估记录`
+            showTotal: (total) => `共 ${total} 条记录`
           }}
         />
       </Card>
 
-      {/* 添加评估弹窗 */}
       <Modal
         title="添加心理评估"
         open={modalVisible}
@@ -180,6 +297,58 @@ const Psychological = () => {
           </Form.Item>
 
           <Form.Item
+            name="emotionScore"
+            label="情绪稳定性"
+            rules={[{ required: true, message: '请输入评分' }]}
+          >
+            <Select placeholder="请选择">
+              <Option value={90}>优秀</Option>
+              <Option value={75}>良好</Option>
+              <Option value={60}>一般</Option>
+              <Option value={45}>需关注</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="socialScore"
+            label="社交互动"
+            rules={[{ required: true, message: '请输入评分' }]}
+          >
+            <Select placeholder="请选择">
+              <Option value={90}>优秀</Option>
+              <Option value={75}>良好</Option>
+              <Option value={60}>一般</Option>
+              <Option value={45}>需关注</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="stressScore"
+            label="学习压力"
+            rules={[{ required: true, message: '请输入评分' }]}
+          >
+            <Select placeholder="请选择">
+              <Option value={90}>优秀</Option>
+              <Option value={75}>良好</Option>
+              <Option value={60}>一般</Option>
+              <Option value={45}>需关注</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="mentalScore"
+            label="自我认知"
+            rules={[{ required: true, message: '请输入评分' }]}
+          >
+            <Select placeholder="请选择">
+              <Option value={90}>优秀</Option>
+              <Option value={75}>良好</Option>
+              <Option value={60}>一般</Option>
+              <Option value={45}>需关注</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
             name="comments"
             label="评估意见"
             rules={[{ required: true, message: '请输入评估意见' }]}
@@ -196,37 +365,198 @@ const Psychological = () => {
         </Form>
       </Modal>
 
-      {/* 详情抽屉 */}
       <Drawer
-        title="心理评估详情"
+        title={`${selectedStudent?.name} - 心理状态详情`}
         placement="right"
-        width={600}
+        width={800}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
       >
-        {selectedAssessment && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="学生姓名">
-              {selectedAssessment.studentName}
-            </Descriptions.Item>
-            <Descriptions.Item label="评估日期">
-              {new Date(selectedAssessment.assessmentDate).toLocaleDateString()}
-            </Descriptions.Item>
-            <Descriptions.Item label="评估分数">
-              <span style={{ color: scoreColor(selectedAssessment.score), fontWeight: 'bold' }}>
-                {selectedAssessment.score} 分
-              </span>
-            </Descriptions.Item>
-            <Descriptions.Item label="评估者">
-              {selectedAssessment.assessorName}
-            </Descriptions.Item>
-            <Descriptions.Item label="评估意见" span={2}>
-              {selectedAssessment.comments}
-            </Descriptions.Item>
-            <Descriptions.Item label="建议" span={2}>
-              {selectedAssessment.recommendations || '无'}
-            </Descriptions.Item>
-          </Descriptions>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>加载中...</div>
+        ) : (
+          <Tabs defaultActiveKey="overview">
+            <TabPane tab="心理状态概览" key="overview">
+              {studentStatus && (
+                <div>
+                  <Descriptions bordered style={{ marginBottom: 24 }}>
+                    <Descriptions.Item label="情绪状态">
+                      <span style={{ color: levelColor(studentStatus.emotionLevel) }}>
+                        {studentStatus.emotionStatus} ({studentStatus.emotionPercentage}%)
+                      </span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="社交能力">
+                      <span style={{ color: levelColor(studentStatus.socialLevel) }}>
+                        {studentStatus.socialStatus} ({studentStatus.socialPercentage}%)
+                      </span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="学习压力">
+                      <span style={{ color: levelColor(studentStatus.stressLevel) }}>
+                        {studentStatus.stressStatus} ({studentStatus.stressPercentage}%)
+                      </span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="心理健康">
+                      <span style={{ color: levelColor(studentStatus.mentalLevel) }}>
+                        {studentStatus.mentalStatus} ({studentStatus.mentalPercentage}%)
+                      </span>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </div>
+              )}
+            </TabPane>
+            <TabPane tab="学生自评" key="student-assessments">
+              <Table
+                dataSource={studentAssessments}
+                columns={[
+                  {
+                    title: '评估日期',
+                    dataIndex: 'assessmentDate',
+                    key: 'assessmentDate',
+                    render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                  },
+                  {
+                    title: '评分',
+                    dataIndex: 'score',
+                    key: 'score',
+                    render: (score) => (
+                      <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                        {score} 分
+                      </span>
+                    )
+                  },
+                  {
+                    title: '评估意见',
+                    dataIndex: 'comments',
+                    key: 'comments',
+                    ellipsis: true
+                  },
+                  {
+                    title: '操作',
+                    key: 'action',
+                    render: (_, record) => (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => handleViewAssessmentDetail(record)}
+                      >
+                        详情
+                      </Button>
+                    )
+                  }
+                ]}
+                pagination={false}
+              />
+            </TabPane>
+            <TabPane tab="教师评估" key="teacher-assessments">
+              <div style={{ marginBottom: 16 }}>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />}
+                  onClick={() => setModalVisible(true)}
+                >
+                  添加评估
+                </Button>
+              </div>
+              <Table
+                dataSource={teacherAssessments}
+                columns={[
+                  {
+                    title: '评估日期',
+                    dataIndex: 'assessmentDate',
+                    key: 'assessmentDate',
+                    render: (date) => date ? new Date(date).toLocaleDateString() : ''
+                  },
+                  {
+                    title: '评分',
+                    dataIndex: 'score',
+                    key: 'score',
+                    render: (score) => (
+                      <span style={{ color: scoreColor(score), fontWeight: 'bold' }}>
+                        {score} 分
+                      </span>
+                    )
+                  },
+                  {
+                    title: '评估意见',
+                    dataIndex: 'comments',
+                    key: 'comments',
+                    ellipsis: true
+                  },
+                  {
+                    title: '建议',
+                    dataIndex: 'recommendations',
+                    key: 'recommendations',
+                    ellipsis: true
+                  },
+                  {
+                    title: '操作',
+                    key: 'action',
+                    render: (_, record) => (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => handleViewAssessmentDetail(record)}
+                      >
+                        详情
+                      </Button>
+                    )
+                  }
+                ]}
+                pagination={false}
+              />
+            </TabPane>
+            {selectedAssessment && assessmentDetails.length > 0 && (
+              <TabPane tab="评估详情" key="assessment-details">
+                <Card title={`${selectedAssessment.assessmentDate ? new Date(selectedAssessment.assessmentDate).toLocaleDateString() : ''} - 评估详情`}>
+                  <Table
+                    dataSource={assessmentDetails}
+                    columns={[
+                      {
+                        title: '评估项目',
+                        dataIndex: 'assessmentType',
+                        key: 'assessmentType'
+                      },
+                      {
+                        title: '分数',
+                        dataIndex: 'percentage',
+                        key: 'percentage',
+                        render: (percentage) => (
+                          <span style={{ color: scoreColor(percentage) }}>
+                            {percentage}%
+                          </span>
+                        )
+                      },
+                      {
+                        title: '等级',
+                        dataIndex: 'level',
+                        key: 'level',
+                        render: (level) => (
+                          <Tag color={levelColor(level)}>
+                            {levelText(level)}
+                          </Tag>
+                        )
+                      }
+                    ]}
+                    pagination={false}
+                  />
+                  {selectedAssessment.comments && (
+                    <div style={{ marginTop: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 'bold' }}>评估意见：</div>
+                      <div>{selectedAssessment.comments}</div>
+                    </div>
+                  )}
+                  {selectedAssessment.recommendations && (
+                    <div style={{ marginTop: 16, padding: 16, backgroundColor: '#f9f9f9', borderRadius: 8 }}>
+                      <div style={{ marginBottom: 8, fontWeight: 'bold' }}>建议：</div>
+                      <div>{selectedAssessment.recommendations}</div>
+                    </div>
+                  )}
+                </Card>
+              </TabPane>
+            )}
+          </Tabs>
         )}
       </Drawer>
     </div>

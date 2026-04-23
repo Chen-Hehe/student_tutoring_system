@@ -452,13 +452,13 @@ public class ParentController {
             String grade = student.getGrade();
             
             // 获取心理状态评估
-            PsychologicalAssessment assessment = psychologicalAssessmentService.getLatestByStudentId(studentId);
+            PsychologicalAssessment assessment = psychologicalAssessmentService.getLatestAssessmentByStudentId(studentId);
             if (assessment == null) {
                 return Result.error(404, "暂无心理状态评估数据");
             }
             
             // 获取详细评估数据
-            List<PsychologicalAssessmentDetail> details = psychologicalAssessmentService.getDetailsByAssessmentId(assessment.getId());
+            List<PsychologicalAssessmentDetail> details = psychologicalAssessmentService.getAssessmentDetails(assessment.getId());
             
             // 构建DTO对象
             PsychologicalStatusDTO dto = new PsychologicalStatusDTO();
