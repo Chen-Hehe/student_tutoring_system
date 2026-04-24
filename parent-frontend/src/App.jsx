@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import ChildManagement from './pages/ChildManagement'
-import TeacherCommunication from './pages/TeacherCommunication'
+import Chat from './pages/Chat'
+import ParentChat from './pages/ParentChat'
 import LearningReport from './pages/LearningReport'
 import PsychologicalStatus from './pages/PsychologicalStatus'
 import MatchConfirmation from './pages/MatchConfirmation'
@@ -46,7 +47,8 @@ function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="children" element={<ChildManagement />} />
-        <Route path="teacher-chat" element={<TeacherCommunication />} />
+        <Route path="teacher-chat" element={<ParentChat />} />
+        <Route path="chat" element={<ParentChat />} />
         <Route path="learning-report" element={<LearningReport />} />
         <Route path="psychological" element={<PsychologicalStatus />} />
         <Route path="match-confirm" element={<MatchConfirmation />} />

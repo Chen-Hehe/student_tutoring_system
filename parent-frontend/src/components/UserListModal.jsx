@@ -37,11 +37,27 @@ const UserListModal = ({ visible, onCancel, onSelect, currentUserId, currentRole
     try {
       const targetRole = getTargetRole()
       const result = await userAPI.getUsers(targetRole)
+      console.log('【DEBUG】获取用户列表返回:', result)
+      
+      // 处理不同的返回格式
+      let usersArray = []
+      if (Array.isArray(result)) {
+        usersArray = result
+      } else if (Array.isArray(result?.data)) {
+        usersArray = result.data
+      } else if (result?.data?.data && Array.isArray(result.data.data)) {
+        usersArray = result.data.data
+      } else if (result?.success && Array.isArray(result.data)) {
+        usersArray = result.data
+      }
+      
       // 过滤掉当前用户自己
-      const filteredUsers = (result.data || []).filter(user => user.id !== currentUserId)
+      const filteredUsers = usersArray.filter(user => user && user.id !== currentUserId)
+      console.log('【DEBUG】过滤后的用户列表:', filteredUsers)
       setUsers(filteredUsers)
     } catch (error) {
       console.error('加载用户列表失败:', error)
+      setUsers([]) // 确保设置为空数组
     } finally {
       setLoading(false)
     }

@@ -15,39 +15,54 @@ dayjs.locale('zh-cn')
 const { TextArea } = Input
 
 /**
- * 聊天页面组件
+ * 聊天页面组件（复用教师端 UI）
  */
 const Chat = () => {
   // 获取当前用户信息
   const currentUser = useSelector((state) => state.auth.user)
   
   // 状态管理
-  const [conversations, setConversations] = useState([])
+  const [conversations, setConversations] = useState(() => [])
   const [selectedConversation, setSelectedConversation] = useState(() => {
     // 从 localStorage 恢复选中的对话
-    const saved = localStorage.getItem('selectedConversation')
-    return saved ? JSON.parse(saved) : null
+    try {
+      const saved = localStorage.getItem('selectedConversation')
+      return saved ? JSON.parse(saved) : null
+    } catch (e) {
+      console.error('解析 localStorage 失败:', e)
+      return null
+    }
   })
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(() => [])
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
   const [pendingMessage, setPendingMessage] = useState('')
+  const [recallMenuVisible, setRecallMenuVisible] = useState(null) // 显示撤回菜单的消息 ID
   
   // 引用
   const messagesEndRef = useRef(null)
   const uploadRef = useRef(null)
+  const selectedConversationRef = useRef(selectedConversation)
   
-  // 滚动到底部
+  // 滚动到底部 - 优化版：确保在消息加载完成且 DOM 渲染后滚动
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesEndRef.current && messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
   }
   
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    selectedConversationRef.current = selectedConversation
+  }, [selectedConversation])
   
   // 加载对话列表
   const loadConversations = async () => {
@@ -57,9 +72,13 @@ const Chat = () => {
     }
     try {
       const result = await chatAPI.getConversations(currentUser.id)
-      setConversations(result.data || [])
+      console.log('【DEBUG】获取对话列表返回:', result)
+      // 确保是数组格式
+      const conversationsData = result?.data || []
+      setConversations(Array.isArray(conversationsData) ? conversationsData : [])
     } catch (error) {
       console.error('加载对话列表失败:', error)
+      setConversations([]) // 确保始终是数组
     }
   }
   
@@ -68,12 +87,17 @@ const Chat = () => {
     setLoading(true)
     try {
       const result = await chatAPI.getChatHistory(userId)
-      setMessages(result.data || [])
+      console.log('【DEBUG】加载聊天记录返回:', result)
+      // 确保是数组并过滤掉通知消息
+      const messagesData = result?.data || []
+      const validMessages = (Array.isArray(messagesData) ? messagesData : [])
+        .filter(msg => msg && msg.type !== 0 && msg.type !== '0') // 过滤掉已读通知
+      setMessages(validMessages)
       // 标记为已读
       await chatAPI.markAsRead(userId)
     } catch (error) {
       console.error('加载聊天记录失败:', error)
-      antdMessage.error('加载聊天记录失败')
+      setMessages([]) // 确保设置为空数组
     } finally {
       setLoading(false)
     }
@@ -84,7 +108,11 @@ const Chat = () => {
     setSelectedConversation(conversation)
     // 持久化选中的对话到 localStorage
     localStorage.setItem('selectedConversation', JSON.stringify(conversation))
-    loadChatHistory(conversation.userId)
+    // 切换对话时自动标记为已读
+    if (conversation.userId) {
+      chatAPI.markAsRead(conversation.userId)
+      loadChatHistory(conversation.userId)
+    }
   }
   
   // 开始新聊天
@@ -119,42 +147,79 @@ const Chat = () => {
       return
     }
     
-    if (!wsService.isConnected()) {
-      antdMessage.warning('连接已断开，请刷新页面')
-      return
-    }
-    
     setSending(true)
-    const messageData = {
+    
+    // 生成临时 ID，用于乐观更新
+    const tempMessageId = 'temp_' + Date.now()
+    const tempTimestamp = new Date().toISOString()
+    
+    // 乐观更新 UI - 先显示消息（发送中状态）
+    const tempMessage = {
+      messageId: tempMessageId,
+      senderId: currentUser.id,
       receiverId: selectedConversation.userId,
       message: inputValue.trim(),
-      type: 1, // 文字消息
-      timestamp: new Date().toISOString()
+      type: 1,
+      timestamp: tempTimestamp,
+      isRead: false,
+      senderName: currentUser.name,
+      senderAvatar: currentUser.avatar,
+      sending: true
+    }
+    setMessages(prev => {
+      if (!Array.isArray(prev)) return [tempMessage]
+      const newArray = [...prev, tempMessage]
+      console.log('【DEBUG】乐观更新后的消息列表:', newArray.length, '条消息')
+      return newArray
+    })
+    setInputValue('')
+    
+    const messageData = {
+      senderId: currentUser.id,
+      receiverId: selectedConversation.userId,
+      message: inputValue.trim(),
+      type: 1 // 确保是数字 1（文字消息）
     }
     
+    console.log('【DEBUG】发送消息 - senderId:', currentUser.id, 'receiverId:', selectedConversation.userId, 'currentUser:', currentUser)
+    
     try {
-      // 通过 WebSocket 发送
-      wsService.send(messageData)
+      // 通过 HTTP API 发送
+      const result = await chatAPI.sendMessage(messageData)
+      console.log('【DEBUG】发送消息成功，后端返回:', result)
       
-      // 乐观更新 UI
-      const newMessage = {
-        messageId: Date.now(),
-        senderId: currentUser.id,
-        receiverId: selectedConversation.userId,
-        message: inputValue.trim(),
-        type: 1,
-        timestamp: new Date().toISOString(),
-        isRead: false,
-        senderName: currentUser.name,
-        senderAvatar: currentUser.avatar
+      // 用后端返回的真实消息替换临时消息
+      const realMessage = {
+        ...result.data,
+        timestamp: result.data.timestamp || tempTimestamp
       }
-      setMessages(prev => [...prev, newMessage])
-      setInputValue('')
       
-      // 刷新对话列表
+      // 替换临时消息为真实消息
+      setMessages(prev => {
+        if (!Array.isArray(prev)) return [realMessage]
+        const newArray = prev.map(msg => {
+          const isTemp = String(msg.messageId) === String(tempMessageId)
+          if (isTemp) {
+            console.log('【DEBUG】替换临时消息为真实消息:', msg.messageId, '->', realMessage.messageId)
+          }
+          return isTemp ? realMessage : msg
+        })
+        console.log('【DEBUG】替换后的消息列表:', newArray.length, '条消息')
+        return newArray
+      })
+      
+      // 刷新对话列表（不重新加载聊天记录，避免覆盖乐观更新）
       loadConversations()
+      
     } catch (error) {
       console.error('发送消息失败:', error)
+      // 标记为发送失败
+      setMessages(prev => {
+        if (!Array.isArray(prev)) return []
+        return prev.map(msg => 
+          msg.messageId === tempMessageId ? { ...msg, sending: false, sendFailed: true } : msg
+        )
+      })
       antdMessage.error('发送失败，请重试')
     } finally {
       setSending(false)
@@ -175,8 +240,7 @@ const Chat = () => {
       return false
     }
     
-    // TODO: 实现图片上传到 OSS
-    // 这里只是示例，实际应该上传到服务器
+    // TODO: 实现图片上传到服务器
     antdMessage.info('图片上传功能待实现')
     return false
   }
@@ -194,6 +258,52 @@ const Chat = () => {
     }
   }
   
+  // 撤回消息
+  const recallMessage = async (messageId) => {
+    try {
+      await chatAPI.recallMessage(messageId)
+      setMessages(prev => prev.map(msg => 
+        msg.messageId === messageId
+          ? { ...msg, isRecalled: true, recalledAt: dayjs().format('YYYY-MM-DD HH:mm:ss'), recalledBy: currentUser.id }
+          : msg
+      ))
+      setRecallMenuVisible(null)
+      antdMessage.success('消息已撤回')
+      loadConversations()
+    } catch (error) {
+      console.error('撤回消息失败:', error)
+      antdMessage.error('撤回失败：' + (error.response?.data?.message || error.message))
+    }
+  }
+  
+  // 检查是否可以撤回（2 分钟内）
+  const canRecall = (msg) => {
+    if (!msg.timestamp || msg.isRecalled) return false
+    const now = dayjs()
+    const sentTime = dayjs(msg.timestamp)
+    const diffMinutes = now.diff(sentTime, 'minute')
+    return diffMinutes <= 2
+  }
+  
+  // 点击其他地方关闭撤回菜单
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (recallMenuVisible !== null) {
+        setRecallMenuVisible(null)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [recallMenuVisible])
+  
+  // 当选中对话变化时，自动标记为已读
+  useEffect(() => {
+    if (selectedConversation?.userId) {
+      console.log('切换对话，标记为已读:', selectedConversation.userId)
+      chatAPI.markAsRead(selectedConversation.userId)
+    }
+  }, [selectedConversation?.userId])
+
   // 初始化 WebSocket 连接和加载数据
   useEffect(() => {
     if (currentUser?.id) {
@@ -202,25 +312,83 @@ const Chat = () => {
       
       // 监听消息
       const unsubscribeMessage = wsService.onMessage((data) => {
-        if (data.type === 'ping') {
-          // 心跳响应，忽略
+        console.log('收到 WebSocket 消息:', data)
+        
+        if (data.type === 'pong' || data.type === 'ping') {
           return
         }
         
-        // 收到新消息
-        if (data.senderId && data.receiverId) {
-          setMessages(prev => [...prev, data])
-          
-          // 如果是对话中的消息，刷新对话列表
-          if (selectedConversation && 
-              (data.senderId === selectedConversation.userId || 
-               data.receiverId === selectedConversation.userId)) {
-            loadConversations()
-          }
-          
-          // 如果当前选中的是对话方，标记为已读
-          if (data.receiverId === currentUser.id && data.senderId === selectedConversation?.userId) {
+        if (data.type === 'error') {
+          antdMessage.error(data.message || '消息发送失败')
+          return
+        }
+        
+        // 处理撤回通知
+        if (data.type === 100 || data.isRecalled) {
+          console.log('收到撤回通知:', data)
+          setMessages(prev => {
+            if (!Array.isArray(prev)) return []
+            return prev.map(msg => 
+              msg.messageId === data.messageId
+                ? { ...msg, isRecalled: true, recalledAt: data.recalledAt, recalledBy: data.recalledBy }
+                : msg
+            )
+          })
+          antdMessage.success('对方撤回了一条消息')
+          loadConversations()
+          return
+        }
+        
+        // 处理已读状态更新
+        if (data.type === 0 && data.readerId) {
+          console.log('【DEBUG】收到已读状态更新，readerId:', data.readerId, 'currentUser.id:', currentUser.id)
+          setMessages(prev => {
+            if (!Array.isArray(prev)) return []
+            const updated = prev.map(msg => {
+              const match = String(msg.senderId) === String(currentUser.id) && !msg.isRead
+              if (match) {
+                console.log('【DEBUG】标记消息为已读:', msg.messageId)
+              }
+              return match ? { ...msg, isRead: true } : msg
+            })
+            return updated
+          })
+          loadConversations()
+          return
+        }
+
+        // 忽略自己发送的消息
+        if (String(data.senderId) === String(currentUser.id)) {
+          return
+        }
+        
+        // 收到新消息（过滤掉通知类型）
+        if (data.senderId && data.receiverId && data.message && data.type !== 0 && data.type !== '0') {
+          console.log('处理收到的消息:', data)
+
+          const activeConversation = selectedConversationRef.current
+
+          if (activeConversation && String(data.senderId) === String(activeConversation.userId)) {
+            setMessages(prev => {
+              if (!Array.isArray(prev)) return []
+              const exists = prev.some(msg => msg.messageId === data.messageId)
+
+              if (exists) {
+                console.log('消息已存在，跳过添加')
+                return prev
+              }
+
+              console.log('添加新消息到状态')
+              return [...prev, {
+                ...data,
+                timestamp: data.timestamp ? dayjs(data.timestamp).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss')
+              }]
+            })
+
             chatAPI.markAsRead(data.senderId)
+            loadConversations()
+          } else {
+            loadConversations()
           }
         }
       })
@@ -239,19 +407,18 @@ const Chat = () => {
       loadConversations()
       
       // 如果有恢复的选中对话，加载聊天记录
-      if (selectedConversation?.userId) {
-        console.log('恢复选中的对话，加载聊天记录:', selectedConversation.userId)
-        loadChatHistory(selectedConversation.userId)
+      if (selectedConversationRef.current?.userId) {
+        console.log('恢复选中的对话，加载聊天记录:', selectedConversationRef.current.userId)
+        loadChatHistory(selectedConversationRef.current.userId)
       }
       
       // 清理
       return () => {
         unsubscribeMessage()
         unsubscribeConnection()
-        wsService.disconnect()
       }
     }
-  }, [currentUser?.id, selectedConversation?.userId])
+  }, [currentUser?.id])
   
   // 获取消息类型图标
   const getMessageTypeIcon = (type) => {
@@ -264,8 +431,11 @@ const Chat = () => {
   
   // 渲染消息气泡
   const renderMessage = (msg, index) => {
-    const isSelf = msg.senderId === currentUser?.id
+    const isSelf = String(msg.senderId) === String(currentUser?.id)
+    const isRead = msg.isRead === true
+    const isRecalled = msg.isRecalled === true
     const time = dayjs(msg.timestamp).format('HH:mm')
+    const showRecallBtn = isSelf && canRecall(msg) && recallMenuVisible === msg.messageId
     
     return (
       <div
@@ -274,7 +444,8 @@ const Chat = () => {
           display: 'flex',
           justifyContent: isSelf ? 'flex-end' : 'flex-start',
           marginBottom: 16,
-          alignItems: 'flex-start'
+          alignItems: 'flex-start',
+          position: 'relative'
         }}
       >
         {!isSelf && (
@@ -287,21 +458,31 @@ const Chat = () => {
         )}
         
         <div
+          onContextMenu={(e) => {
+            e.preventDefault()
+            if (isSelf && canRecall(msg)) {
+              setRecallMenuVisible(msg.messageId)
+            }
+          }}
           style={{
             maxWidth: '60%',
             padding: '12px 16px',
             borderRadius: 16,
-            backgroundColor: isSelf ? '#1890ff' : '#f0f0f0',
-            color: isSelf ? '#fff' : '#000',
-            wordBreak: 'break-word'
+            backgroundColor: isRecalled ? '#f5f5f5' : (isSelf ? '#1890ff' : '#f0f0f0'),
+            color: isRecalled ? '#999' : (isSelf ? '#fff' : '#000'),
+            wordBreak: 'break-word',
+            position: 'relative',
+            fontStyle: isRecalled ? 'italic' : 'normal'
           }}
         >
-          {msg.type === 1 ? (
+          {isRecalled ? (
+            <div>↩️ 消息已撤回</div>
+          ) : (msg.type === 1 || msg.type === '1' ? (
             <div style={{ whiteSpace: 'pre-wrap' }}>{msg.message}</div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {getMessageTypeIcon(msg.type)}
-              <span>{msg.type === 2 ? '[图片]' : '[语音]'}</span>
+              <span>{msg.type === 2 || msg.type === '2' ? '[图片]' : '[语音]'}</span>
               {msg.fileUrl && (
                 <a 
                   href={msg.fileUrl} 
@@ -313,22 +494,54 @@ const Chat = () => {
                 </a>
               )}
             </div>
-          )}
+          ))}
           <div
             style={{
               fontSize: 12,
               marginTop: 4,
               opacity: 0.7,
-              textAlign: 'right'
+              textAlign: 'right',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 4
             }}
           >
             {time}
-            {isSelf && msg.isRead !== undefined && (
+            {!isRecalled && isSelf && (
               <span style={{ marginLeft: 4 }}>
-                {msg.isRead ? '已读' : '未读'}
+                {isRead ? (
+                  <span style={{ color: '#fff' }} title="已读">✓</span>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.6)' }} title="未读">⏳</span>
+                )}
               </span>
             )}
           </div>
+          
+          {/* 撤回按钮 */}
+          {showRecallBtn && (
+            <div style={{
+              position: 'absolute',
+              top: -35,
+              right: 0,
+              backgroundColor: '#fff',
+              borderRadius: 4,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              padding: '4px 8px',
+              fontSize: 12,
+              zIndex: 1000
+            }}>
+              <Button 
+                size="small" 
+                danger 
+                onClick={() => recallMessage(msg.messageId)}
+                style={{ fontSize: 12 }}
+              >
+                撤回
+              </Button>
+            </div>
+          )}
         </div>
         
         {isSelf && (
@@ -381,7 +594,7 @@ const Chat = () => {
         </div>
         
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {conversations.length === 0 ? (
+          {!conversations || conversations.length === 0 ? (
             <Empty description="暂无对话" style={{ padding: 40 }} />
           ) : (
             <List
@@ -477,10 +690,12 @@ const Chat = () => {
                 <div style={{ textAlign: 'center', padding: 40 }}>
                   <Spin />
                 </div>
-              ) : messages.length === 0 ? (
+              ) : !messages || messages.length === 0 ? (
                 <Empty description="暂无聊天记录" />
               ) : (
-                messages.map((msg, index) => renderMessage(msg, index))
+                (Array.isArray(messages) ? messages : [])
+                  .filter(msg => msg && msg.senderId !== undefined && msg.type !== undefined && msg.type !== 0) // 过滤掉通知消息（type=0 是已读通知）
+                  .map((msg, index) => renderMessage(msg, index))
               )}
               <div ref={messagesEndRef} />
             </div>

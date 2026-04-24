@@ -16,11 +16,11 @@ const UserListModal = ({ visible, onCancel, onSelect, currentUserId, currentRole
   // 根据当前用户角色确定可聊天的对象角色
   const getTargetRole = () => {
     // 学生 (2) -> 看老师 (1)
-    // 老师 (1) -> 看学生 (2)
+    // 老师 (1) -> 看学生 (2) 和家长 (3)
     // 家长 (3) -> 看老师 (1)
     // 管理员 (4) -> 看所有人
     if (currentRole === 2) return 1
-    if (currentRole === 1) return 2
+    if (currentRole === 1) return null // 老师可以看到学生和家长（不过滤）
     if (currentRole === 3) return 1
     return null // 管理员看所有人
   }
@@ -37,11 +37,27 @@ const UserListModal = ({ visible, onCancel, onSelect, currentUserId, currentRole
     try {
       const targetRole = getTargetRole()
       const result = await userAPI.getUsers(targetRole)
+      console.log('【DEBUG】教师端获取用户列表返回:', result)
+      
+      // 处理不同的返回格式
+      let usersArray = []
+      if (Array.isArray(result)) {
+        usersArray = result
+      } else if (Array.isArray(result?.data)) {
+        usersArray = result.data
+      } else if (result?.data?.data && Array.isArray(result.data.data)) {
+        usersArray = result.data.data
+      } else if (result?.success && Array.isArray(result.data)) {
+        usersArray = result.data
+      }
+      
       // 过滤掉当前用户自己
-      const filteredUsers = (result.data || []).filter(user => user.id !== currentUserId)
+      const filteredUsers = usersArray.filter(user => user && user.id !== currentUserId)
+      console.log('【DEBUG】过滤后的用户列表:', filteredUsers)
       setUsers(filteredUsers)
     } catch (error) {
       console.error('加载用户列表失败:', error)
+      setUsers([]) // 确保设置为空数组
     } finally {
       setLoading(false)
     }
