@@ -1,63 +1,44 @@
-import { useState } from 'react'
-import { Card, Tabs, Table, Tag, Button, Space, Modal, message } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, Tabs, Table, Tag, Button, Space, Modal, message, Spin } from 'antd'
 import { useSelector } from 'react-redux'
 import { ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
+import { getStudentMatches, acceptMatch, rejectMatch, cancelMatchRequest } from '../services/match'
 
 const Match = () => {
   const currentUser = useSelector((state) => state.auth.user)
   const [activeTab, setActiveTab] = useState('sent')
+  const [loading, setLoading] = useState(false)
+  const [sentRequests, setSentRequests] = useState([])
+  const [receivedInvitations, setReceivedInvitations] = useState([])
+  const [matched, setMatched] = useState([])
 
-  // 模拟数据 - 我发送的请求
-  const sentRequests = [
-    {
-      key: '1',
-      id: 1,
-      teacherName: '李老师',
-      subject: '数学',
-      content: '我希望在数学方面得到辅导，特别是分数的加减法',
-      sendTime: '2026-03-30 09:30',
-      status: 'pending',
-      statusText: '待家长确认',
-    },
-    {
-      key: '2',
-      id: 2,
-      teacherName: '王老师',
-      subject: '语文',
-      content: '我希望在语文作文方面得到辅导',
-      sendTime: '2026-03-28 14:20',
-      confirmTime: '2026-03-29 10:15',
-      status: 'approved',
-      statusText: '已匹配',
-    },
-  ]
+  // 加载匹配数据
+  useEffect(() => {
+    loadMatches()
+  }, [currentUser?.id])
 
-  // 模拟数据 - 我收到的邀请
-  const receivedInvitations = [
-    {
-      key: '3',
-      id: 3,
-      teacherName: '张老师',
-      subject: '英语',
-      content: '我看到您在英语方面有学习需求，我很乐意帮助您',
-      sendTime: '2026-03-31 10:00',
-      status: 'pending',
-      statusText: '待确认',
-    },
-  ]
-
-  // 模拟数据 - 已匹配
-  const matched = [
-    {
-      key: '2',
-      id: 2,
-      teacherName: '王老师',
-      subject: '语文',
-      matchTime: '2026-03-29 10:15',
-      status: 'active',
-      statusText: '进行中',
-    },
-  ]
+  const loadMatches = async () => {
+    if (!currentUser?.id) return
+    
+    setLoading(true)
+    try {
+      const res = await getStudentMatches(currentUser.id)
+      const data = res.data || []
+      
+      // 按状态分类
+      const sent = data.filter(item => item.requesterType === 'student')
+      const received = data.filter(item => item.requesterType === 'teacher')
+      const matchedList = data.filter(item => item.status === 2)
+      
+      setSentRequests(sent)
+      setReceivedInvitations(received)
+      setMatched(matchedList)
+    } catch (error) {
+      message.error('加载匹配数据失败：' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const columns = [
     {
@@ -176,26 +157,53 @@ const Match = () => {
     Modal.confirm({
       title: '确认取消',
       content: '确定要取消这个辅导请求吗？',
-      onOk: () => {
-        message.success('辅导请求已取消')
-        // TODO: 调用 API 取消请求
+      onOk: async () => {
+        try {
+          await cancelMatchRequest(requestId)
+          message.success('辅导请求已取消')
+          loadMatches()
+        } catch (error) {
+          message.error('取消失败：' + error.message)
+        }
       },
     })
   }
 
   const handleAcceptInvitation = (invitationId) => {
-    message.success('已接受邀请，等待家长确认！')
-    // TODO: 调用 API 接受邀请
+    Modal.confirm({
+      title: '确认接受',
+      content: '接受后将等待家长确认，确认接受吗？',
+      onOk: async () => {
+        try {
+          await acceptMatch(invitationId, currentUser.id, 'student')
+          message.success('已接受邀请，等待家长确认！')
+          loadMatches()
+        } catch (error) {
+          message.error('接受失败：' + error.message)
+        }
+      },
+    })
   }
 
   const handleRejectInvitation = (invitationId) => {
-    message.info('已拒绝邀请')
-    // TODO: 调用 API 拒绝邀请
+    Modal.confirm({
+      title: '确认拒绝',
+      content: '确定要拒绝这个邀请吗？',
+      onOk: async () => {
+        try {
+          await rejectMatch(invitationId, currentUser.id, 'student')
+          message.info('已拒绝邀请')
+          loadMatches()
+        } catch (error) {
+          message.error('拒绝失败：' + error.message)
+        }
+      },
+    })
   }
 
   const handleViewDetails = (matchId) => {
-    message.info('查看匹配详情')
-    // TODO: 调用 API 获取详情或打开详情页面
+    message.info('查看匹配详情：' + matchId)
+    // TODO: 打开详情页面或弹窗
   }
 
   const tabItems = [
@@ -265,20 +273,24 @@ const Match = () => {
       </div>
 
       <div style={{ padding: 20 }}>
-        <Card 
-          style={{ 
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            borderRadius: 10,
-            padding: 20,
-            backgroundColor: '#fff'
-          }}
-        >
-          <Tabs 
-            activeKey={activeTab} 
-            onChange={setActiveTab}
-            items={tabItems}
-          />
-        </Card>
+        {loading && <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" tip="加载匹配数据..." /></div>}
+        
+        {!loading && (
+          <Card 
+            style={{ 
+              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+              borderRadius: 10,
+              padding: 20,
+              backgroundColor: '#fff'
+            }}
+          >
+            <Tabs 
+              activeKey={activeTab} 
+              onChange={setActiveTab}
+              items={tabItems}
+            />
+          </Card>
+        )}
       </div>
     </div>
   )

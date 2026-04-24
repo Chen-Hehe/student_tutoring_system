@@ -1,49 +1,83 @@
-import { Card, List, Tag, Button, Rate, message } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, List, Tag, Button, Rate, message, Spin, Empty } from 'antd'
 import { useSelector } from 'react-redux'
 import { RobotOutlined, StarOutlined } from '@ant-design/icons'
+import { getTeacherRecommendations, acceptAIRecommendation } from '../services/match'
 
 const AIRecommendation = () => {
   const currentUser = useSelector((state) => state.auth.user)
+  const [loading, setLoading] = useState(false)
+  const [recommendations, setRecommendations] = useState([])
   
-  // 模拟 AI 推荐数据
-  const recommendations = [
-    {
-      key: '1',
-      type: 'teacher',
-      title: '推荐教师：陈老师（数学）',
-      description: '根据您的学习情况和偏好，陈老师的教学风格非常适合您。',
-      reason: '匹配理由：擅长小学分数教学，评分 4.9，有 15 年教学经验',
-      tags: ['高匹配度', '经验丰富'],
-      rating: 4.9,
-    },
-    {
-      key: '2',
-      type: 'resource',
-      title: '推荐资源：分数运算专项练习',
-      description: '针对您最近的薄弱环节，这套练习题会很有帮助。',
-      reason: '匹配理由：基于您的错题分析，重点强化分数加减法',
-      tags: ['个性化', '薄弱点强化'],
-      rating: 4.7,
-    },
-    {
-      key: '3',
-      type: 'course',
-      title: '推荐课程：小学数学思维训练',
-      description: '提升数学思维能力，为后续学习打下基础。',
-      reason: '匹配理由：适合您当前年级，提升逻辑思维能力',
-      tags: ['思维训练', '能力提升'],
-      rating: 4.8,
-    },
-  ]
+  // 加载 AI 推荐数据
+  useEffect(() => {
+    loadRecommendations()
+  }, [])
+  
+  const loadRecommendations = async () => {
+    if (!currentUser?.id) return
+    
+    setLoading(true)
+    try {
+      // TODO: 实际应该调用学生端的推荐 API
+      // const res = await getTeacherRecommendations(currentUser.id)
+      // setRecommendations(res.data || [])
+      
+      // 临时使用模拟数据
+      setRecommendations([
+        {
+          key: '1',
+          type: 'teacher',
+          teacherId: 2001,
+          title: '推荐教师：张老师（数学）',
+          description: '根据您的学习情况和偏好，张老师的教学风格非常适合您。',
+          reason: '匹配理由：擅长初中数学教学，评分 4.9，有 15 年教学经验',
+          tags: ['高匹配度', '经验丰富'],
+          rating: 4.9,
+          matchScore: 92,
+        },
+        {
+          key: '2',
+          type: 'teacher',
+          teacherId: 2002,
+          title: '推荐教师：李老师（英语）',
+          description: '李老师的英语教学经验丰富，适合您的学习需求。',
+          reason: '匹配理由：擅长英语口语教学，评分 4.8，有 10 年教学经验',
+          tags: ['口语强化', '耐心细致'],
+          rating: 4.8,
+          matchScore: 88,
+        },
+      ])
+    } catch (error) {
+      message.error('加载推荐失败：' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const handleAccept = (recommendation) => {
-    message.success(`已接受推荐：${recommendation.title}`)
-    // TODO: 调用 API 接受推荐
+  const handleAccept = async (recommendation) => {
+    if (!currentUser?.id) {
+      message.error('请先登录')
+      return
+    }
+    
+    try {
+      await acceptAIRecommendation(
+        recommendation.teacherId,
+        currentUser.id,
+        '老师您好，我对您的辅导感兴趣，希望能得到您的帮助！'
+      )
+      message.success('已发送匹配请求，等待老师确认！')
+      // 重新加载推荐列表
+      loadRecommendations()
+    } catch (error) {
+      message.error('发送请求失败：' + error.message)
+    }
   }
 
   const handleDismiss = (recommendation) => {
     message.info(`已忽略推荐：${recommendation.title}`)
-    // TODO: 调用 API 忽略推荐
+    // TODO: 调用 API 忽略推荐（记录用户偏好）
   }
 
   const getTypeIcon = (type) => {
@@ -92,24 +126,32 @@ const AIRecommendation = () => {
       </div>
 
       <div style={{ padding: 20 }}>
-        <Card 
-          extra={<Tag style={{ backgroundColor: '#4CAF50', border: 'none', color: '#fff' }}>基于您的学习数据智能生成</Tag>}
-          style={{ 
-            marginBottom: 16,
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-            borderRadius: 10,
-            padding: 20,
-            backgroundColor: '#fff'
-          }}
-        >
-          <p style={{ fontSize: 16, color: '#666' }}>
-            根据您的学习进度、错题记录和偏好，AI 为您个性化推荐以下内容：
-          </p>
-        </Card>
+        {loading && <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" tip="加载推荐中..." /></div>}
+        
+        {!loading && recommendations.length === 0 && (
+          <Empty description="暂无推荐" />
+        )}
+        
+        {!loading && recommendations.length > 0 && (
+          <>
+            <Card 
+              extra={<Tag style={{ backgroundColor: '#4CAF50', border: 'none', color: '#fff' }}>基于 AI 智能匹配</Tag>}
+              style={{ 
+                marginBottom: 16,
+                boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                borderRadius: 10,
+                padding: 20,
+                backgroundColor: '#fff'
+              }}
+            >
+              <p style={{ fontSize: 16, color: '#666' }}>
+                根据您的学习情况和需求，AI 为您匹配了以下老师：
+              </p>
+            </Card>
 
-        <List
-          dataSource={recommendations}
-          renderItem={(item) => (
+            <List
+              dataSource={recommendations}
+              renderItem={(item) => (
             <Card 
               hoverable 
               style={{ 
@@ -125,7 +167,7 @@ const AIRecommendation = () => {
                   onClick={() => handleAccept(item)}
                   style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
                 >
-                  接受推荐
+                  发送请求
                 </Button>,
                 <Button 
                   key="dismiss" 
@@ -182,7 +224,10 @@ const AIRecommendation = () => {
               />
             </Card>
           )}
-        />
+            />
+          </>
+        )}
+      </div>
       </div>
     </div>
   )
