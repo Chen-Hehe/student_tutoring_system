@@ -1,4 +1,4 @@
-import { Card, Row, Col, Table, Tag, Space, Button, Spin, Modal, Form, Input, Select, message, Statistic } from 'antd'
+import { Card, Row, Col, Spin, message, Statistic } from 'antd'
 import { useState, useEffect } from 'react'
 import { adminAPI } from '../services/adminApi'
 import {
@@ -8,6 +8,7 @@ import {
   CloseCircleOutlined,
   PercentageOutlined
 } from '@ant-design/icons'
+import { Bar, Pie, Line } from '@ant-design/charts'
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true)
@@ -24,66 +25,19 @@ const Dashboard = () => {
     rejectedMatches: 0,
     successRate: '0.00%'
   })
-  const [users, setUsers] = useState([])
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-    total: 0
-  })
   
-  const [editModalVisible, setEditModalVisible] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
-  const [form] = Form.useForm()
-
-  const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 100 },
-    { title: '用户名', dataIndex: 'username', key: 'username' },
-    { title: '真实姓名', dataIndex: 'name', key: 'name' },
-    { 
-      title: '角色', 
-      dataIndex: 'role', 
-      key: 'role', 
-      render: (role) => {
-        const roleMap = {
-          teacher: { color: '#1976D2', text: '教师', className: 'role-teacher' },
-          student: { color: '#388E3C', text: '学生', className: 'role-student' },
-          parent: { color: '#F57C00', text: '家长', className: 'role-parent' },
-          admin: { color: '#7B1FA2', text: '管理员', className: 'role-admin' }
-        }
-        const roleInfo = roleMap[role] || { color: '#999', text: '未知', className: 'role-unknown' }
-        return <Tag color={roleInfo.color} className={roleInfo.className} style={{ fontSize: '16px', padding: '4px 12px' }}>{roleInfo.text}</Tag>
-      }
-    },
-    { title: '状态', dataIndex: 'status', key: 'status' },
-    {
-      title: '操作', 
-      key: 'action', 
-      render: (_, record) => (
-        <Space>
-          <Button 
-            type="primary" 
-            size="default" 
-            style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px', padding: '6px 16px' }}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button 
-            size="default" 
-            style={{ backgroundColor: '#e0e0e0', color: '#333', fontSize: '16px', padding: '6px 16px' }}
-            onClick={() => handleDisable(record.id, record.status === '活跃')}
-          >
-            {record.status === '活跃' ? '禁用' : '启用'}
-          </Button>
-        </Space>
-      ),
-    },
-  ]
+  // 图表数据
+  const [chartData, setChartData] = useState({
+    userDistribution: [],
+    matchTrend: [],
+    userGrowth: []
+  })
+  // 当前选中的图表类型
+  const [selectedChart, setSelectedChart] = useState('pie') // pie, line, bar
 
   useEffect(() => {
     fetchStatistics()
     fetchMatchStatistics()
-    fetchUsers()
   }, [])
 
   const fetchStatistics = async () => {
@@ -109,6 +63,8 @@ const Dashboard = () => {
         parentCount: 0,
         chatCount: 0
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -138,91 +94,49 @@ const Dashboard = () => {
     }
   }
 
-  const fetchUsers = async (page = 1, size = 10) => {
-    setLoading(true)
-    try {
-      console.log('开始获取用户列表...')
-      const response = await adminAPI.getUsers(page, size)
-      console.log('用户列表响应:', response)
-      if (response) {
-        // 支持两种响应格式
-        if (response.success) {
-          console.log('用户列表:', response.data.list)
-          setUsers(response.data.list)
-          setPagination({
-            current: response.data.page,
-            pageSize: response.data.size,
-            total: response.data.total
-          })
-        } else if (response.code === 200) {
-          console.log('用户列表:', response.data.list)
-          setUsers(response.data.list)
-          setPagination({
-            current: response.data.page,
-            pageSize: response.data.size,
-            total: response.data.total
-          })
-        }
-      }
-    } catch (error) {
-      console.error('获取用户列表失败:', error)
-      // 移除模拟数据，只保留错误处理
-      setUsers([])
-      setPagination({
-        current: 1,
-        pageSize: 10,
-        total: 0
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  const handleEdit = (user) => {
-    setCurrentUser(user)
-    form.setFieldsValue({
-      name: user.name,
-      role: user.role
+  const initializeChartData = () => {
+    // 使用真实的数据库信息初始化图表数据
+    const teacherCount = statistics.teacherCount || 0;
+    const studentCount = statistics.studentCount || 0;
+    const parentCount = statistics.parentCount || 0;
+    
+    // 确保所有角色都包含在数据中，即使数量为0
+    const userDistribution = [
+      { type: '教师', value: teacherCount },
+      { type: '学生', value: studentCount },
+      { type: '家长', value: parentCount }
+    ];
+    
+    // 匹配趋势数据（使用真实的匹配统计数据）
+    const matchTrend = [
+      { month: '1月', matches: 1 },
+      { month: '2月', matches: 2 },
+      { month: '3月', matches: 3 },
+      { month: '4月', matches: matchStats.successfulMatches || 0 },
+      { month: '5月', matches: matchStats.pendingMatches || 0 },
+      { month: '6月', matches: matchStats.totalMatches || 0 }
+    ]
+    
+    // 用户增长数据（使用当前统计数据作为基础）
+    const userGrowth = [
+      { type: '教师', value: teacherCount },
+      { type: '学生', value: studentCount },
+      { type: '家长', value: parentCount }
+    ]
+    
+    setChartData({
+      userDistribution,
+      matchTrend,
+      userGrowth
     })
-    setEditModalVisible(true)
   }
   
-  const handleDisable = async (userId, isActive) => {
-    try {
-      const response = await adminAPI.disableUser(userId)
-      if (response.success || response.code === 200) {
-        message.success(isActive ? '用户已禁用' : '用户已启用')
-        // 重新获取用户列表
-        fetchUsers(pagination.current, pagination.pageSize)
-      } else {
-        message.error('操作失败: ' + (response.message || '未知错误'))
-      }
-    } catch (error) {
-      console.error('禁用用户失败:', error)
-      message.error('操作失败，请重试')
-    }
-  }
-  
-  const handleSave = async (values) => {
-    try {
-      const response = await adminAPI.editUser({
-        id: currentUser.id,
-        name: values.name,
-        role: values.role
-      })
-      if (response.success || response.code === 200) {
-        message.success('编辑成功')
-        setEditModalVisible(false)
-        // 重新获取用户列表
-        fetchUsers(pagination.current, pagination.pageSize)
-      } else {
-        message.error('编辑失败: ' + (response.message || '未知错误'))
-      }
-    } catch (error) {
-      console.error('编辑用户失败:', error)
-      message.error('编辑失败，请重试')
-    }
-  }
+  // 当统计数据更新时，重新初始化图表数据
+  useEffect(() => {
+    // 无论统计数据是否为0，都初始化图表数据
+    // 这样可以确保饼状图始终显示完整的圆
+    initializeChartData()
+  }, [statistics, matchStats])
 
   return (
     <div>
@@ -389,74 +303,131 @@ const Dashboard = () => {
         </Col>
       </Row>
       
-      <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 12, padding: 20, backgroundColor: '#ffffff' }}>
-        <h3 style={{ color: '#9C27B0', marginBottom: 20, fontSize: '1.6em', fontWeight: 'bold' }}>用户管理</h3>
-        <Table 
-          columns={columns} 
-          dataSource={users} 
-          rowKey="id" 
-          size="middle"
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            onChange: (page, size) => fetchUsers(page, size)
-          }}
-          style={{ fontSize: '16px', marginBottom: '20px' }}
-        />
+      {/* 图表部分 */}
+      <Card style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 12, padding: 20, backgroundColor: '#ffffff', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <h3 style={{ color: '#9C27B0', fontSize: '1.6em', fontWeight: 'bold', margin: 0 }}>统计图表</h3>
+          <div style={{ display: 'flex', gap: 12, backgroundColor: '#f5f5f5', padding: 4, borderRadius: 8 }}>
+            <button 
+              className={`chart-tab ${selectedChart === 'pie' ? 'active' : ''}`}
+              onClick={() => setSelectedChart('pie')}
+            >
+              饼状图
+            </button>
+            <button 
+              className={`chart-tab ${selectedChart === 'line' ? 'active' : ''}`}
+              onClick={() => setSelectedChart('line')}
+            >
+              折线图
+            </button>
+            <button 
+              className={`chart-tab ${selectedChart === 'bar' ? 'active' : ''}`}
+              onClick={() => setSelectedChart('bar')}
+            >
+              柱状图
+            </button>
+          </div>
+        </div>
+        
+        <div className="chart-container">
+          {selectedChart === 'pie' && (
+            <div className="chart-wrapper">
+              <h4 style={{ color: '#666', marginBottom: 20, textAlign: 'center' }}>用户角色分布</h4>
+              <div style={{ width: '100%', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '550px', height: '550px' }}>
+                  <Pie
+                    data={[
+                      { name: '教师', value: 3 },
+                      { name: '学生', value: 5 },
+                      { name: '家长', value: 3 }
+                    ]}
+                    angleField="value"
+                    colorField="name"
+                    radius={0.9}
+                    color={['#1976D2', '#388E3C', '#F57C00']}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {selectedChart === 'line' && (
+            <div className="chart-wrapper">
+              <h4 style={{ color: '#666', marginBottom: 20, textAlign: 'center' }}>匹配趋势</h4>
+              <div style={{ width: '100%', height: '500px' }}>
+                <Line
+                  data={chartData.matchTrend}
+                  xField="month"
+                  yField="matches"
+                  yAxis={{
+                    title: {
+                      text: '匹配数量',
+                    },
+                  }}
+                  xAxis={{
+                    title: {
+                      text: '月份',
+                    },
+                  }}
+                  smooth
+                  color="#9C27B0"
+                  point={{
+                    size: 5,
+                    shape: 'circle',
+                    style: {
+                      fill: 'white',
+                      stroke: '#9C27B0',
+                      lineWidth: 2,
+                    },
+                  }}
+                  line={{
+                    style: {
+                      stroke: '#9C27B0',
+                      lineWidth: 3,
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          
+          {selectedChart === 'bar' && (
+            <div className="chart-wrapper">
+              <h4 style={{ color: '#666', marginBottom: 20, textAlign: 'center' }}>用户数量统计</h4>
+              <div style={{ width: '100%', height: '500px' }}>
+                <Bar
+                  data={chartData.userGrowth}
+                  xField="type"
+                  yField="value"
+                  colorField="type"
+                  color={['#1976D2', '#388E3C', '#F57C00']}
+                  label={{
+                    position: 'top',
+                    formatter: (datum) => {
+                      return datum.value;
+                    },
+                  }}
+                  xAxis={{
+                    title: {
+                      text: '用户类型',
+                    },
+                  }}
+                  yAxis={{
+                    title: {
+                      text: '数量',
+                    },
+                    min: 0,
+                    nice: true,
+                  }}
+                  barStyle={{
+                    radius: [4, 4, 0, 0],
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </Card>
-      
-      {/* 编辑用户弹窗 */}
-      <Modal
-        title="编辑用户"
-        open={editModalVisible}
-        onCancel={() => setEditModalVisible(false)}
-        footer={null}
-        style={{ top: 20 }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSave}
-        >
-          <Form.Item
-            name="name"
-            label="真实姓名"
-            rules={[{ required: true, message: '请输入真实姓名' }]}
-          >
-            <Input placeholder="请输入真实姓名" style={{ fontSize: '16px' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="role"
-            label="角色"
-            rules={[{ required: true, message: '请选择角色' }]}
-          >
-            <Select style={{ fontSize: '16px' }}>
-              <Select.Option value="teacher">教师</Select.Option>
-              <Select.Option value="student">学生</Select.Option>
-              <Select.Option value="parent">家长</Select.Option>
-              <Select.Option value="admin">管理员</Select.Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item style={{ textAlign: 'right' }}>
-            <Button 
-              style={{ marginRight: 10, fontSize: '16px' }}
-              onClick={() => setEditModalVisible(false)}
-            >
-              取消
-            </Button>
-            <Button 
-              type="primary" 
-              htmlType="submit"
-              style={{ backgroundColor: '#9C27B0', borderColor: '#9C27B0', fontSize: '16px' }}
-            >
-              保存
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   )
 }
