@@ -529,12 +529,26 @@ code {
   border-radius: 50%;
   font-size: 1.75rem;
   cursor: pointer;
-  z-index: 10;
+  z-index: 100;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 6px 20px rgba(76, 175, 80, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+  outline: none;
+}
+
+.carousel-btn:focus {
+  outline: 3px solid rgba(76, 175, 80, 0.5);
+}
+
+.carousel-container {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .carousel-btn:hover {

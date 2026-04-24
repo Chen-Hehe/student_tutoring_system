@@ -57,6 +57,9 @@ const Home = () => {
       } else if (displayIndex < 0) {
         setIsTransitioning(false);
         setDisplayIndex(announcements.length - 1);
+      } else {
+        // 正常过渡完成后也要重置isTransitioning
+        setIsTransitioning(false);
       }
     }, 600); // 等待过渡动画完成
 
