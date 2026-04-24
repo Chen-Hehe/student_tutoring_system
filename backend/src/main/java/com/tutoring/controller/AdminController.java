@@ -44,12 +44,12 @@ public class AdminController {
     public Result<Map<String, Object>> getStatistics() {
         try {
             System.out.println("获取统计数据...");
-            System.out.println("userRepository: " + userRepository);
-            long teacherCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 1).eq(User::getDeleted, 0));
+            // 角色定义: 1:教师，2:学生，3:家长，4:管理员
+            long teacherCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 1));
             System.out.println("教师数量: " + teacherCount);
-            long studentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 2).eq(User::getDeleted, 0));
+            long studentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 2));
             System.out.println("学生数量: " + studentCount);
-            long parentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 3).eq(User::getDeleted, 0));
+            long parentCount = userRepository.selectCount(new LambdaQueryWrapper<User>().eq(User::getRole, 3));
             System.out.println("家长数量: " + parentCount);
             long chatCount = 0;
             
@@ -59,7 +59,6 @@ public class AdminController {
             data.put("parentCount", parentCount);
             data.put("chatCount", chatCount);
             
-            System.out.println("统计数据: " + data);
             return Result.success(data);
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +75,6 @@ public class AdminController {
             int offset = (page - 1) * size;
             
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(User::getDeleted, 0);
             
             if (role != null && !role.isEmpty()) {
                 Integer roleNum = convertRoleToNumber(role);
@@ -109,6 +107,7 @@ public class AdminController {
             
             return Result.success(data);
         } catch (Exception e) {
+            e.printStackTrace();
             return Result.error(500, "获取用户列表失败: " + e.getMessage());
         }
     }
@@ -117,14 +116,15 @@ public class AdminController {
         if (role == null) {
             return null;
         }
+        // 角色定义: 1:教师，2:学生，3:家长，4:管理员
         switch (role.toLowerCase()) {
-            case "admin":
-                return 1;
             case "teacher":
-                return 2;
+                return 1;
             case "student":
-                return 3;
+                return 2;
             case "parent":
+                return 3;
+            case "admin":
                 return 4;
             default:
                 return null;
@@ -135,6 +135,7 @@ public class AdminController {
         if (role == null) {
             return "未知";
         }
+        // 角色定义: 1:教师，2:学生，3:家长，4:管理员
         switch (role) {
             case 1:
                 return "teacher";
@@ -181,8 +182,12 @@ public class AdminController {
     }
     
     @PostMapping("/users/disable")
-    public Result<Boolean> disableUser(@RequestParam Long id) {
+    public Result<Boolean> disableUser(@RequestBody Map<String, Object> body) {
         try {
+            if (body == null || body.get("id") == null) {
+                return Result.error(400, "参数错误: ID 不能为空");
+            }
+            Long id = Long.valueOf(body.get("id").toString());
             User user = userRepository.selectById(id);
             if (user == null) {
                 return Result.error(404, "用户不存在");

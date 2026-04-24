@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Card, Table, Button, Tag, Modal, Form, Input, Select, Rate, message, Drawer, Descriptions, Tabs } from 'antd'
-import { PlusOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons'
+import { PlusOutlined, EyeOutlined, EditOutlined, CustomerServiceOutlined } from '@ant-design/icons'
 import { psychologicalAPI } from '../services/psychologicalApi'
 import { matchAPI } from '../services/matchApi'
+import CounselorChatModal from '../components/CounselorChatModal'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -22,6 +23,7 @@ const Psychological = () => {
   const [selectedAssessment, setSelectedAssessment] = useState(null)
   const [assessmentDetails, setAssessmentDetails] = useState([])
   const [detailModalVisible, setDetailModalVisible] = useState(false)
+  const [counselorModalVisible, setCounselorModalVisible] = useState(false)
   const [form] = Form.useForm()
 
   useEffect(() => {
@@ -283,7 +285,7 @@ const Psychological = () => {
             backgroundColor: '#fff'
           }}
         >
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
             <Button 
               type="primary" 
               icon={<PlusOutlined />}
@@ -298,6 +300,17 @@ const Psychological = () => {
               }}
             >
               添加心理评估
+            </Button>
+            <Button 
+              type="default" 
+              icon={<CustomerServiceOutlined />}
+              onClick={() => setCounselorModalVisible(true)}
+              style={{
+                borderColor: '#2196F3',
+                color: '#2196F3'
+              }}
+            >
+              💙 沟通心理辅导员
             </Button>
           </div>
 
@@ -417,6 +430,12 @@ const Psychological = () => {
             </Form.Item>
           </Form>
         </Modal>
+
+        {/* 心理辅导员 AI 聊天弹窗 */}
+        <CounselorChatModal 
+          open={counselorModalVisible}
+          onClose={() => setCounselorModalVisible(false)}
+        />
 
         <Drawer
           title={`${selectedStudent?.name} - 心理状态详情`}
