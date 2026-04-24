@@ -1,4 +1,4 @@
-import { Card, Row, Col, Progress, Statistic, Table, Tag, Spin, Button, message } from 'antd'
+import { Card, Row, Col, Progress, Statistic, Table, Tag, Spin, Button, message, Modal, Form, Input, DatePicker, TimePicker } from 'antd'
 import { useSelector, useDispatch } from 'react-redux'
 import { useEffect, useState } from 'react'
 import {
@@ -8,8 +8,10 @@ import {
   ClockCircleOutlined,
   CheckOutlined,
   DeleteOutlined,
+  PlusOutlined,
 } from '@ant-design/icons'
 import api from '../services/api'
+import dayjs from 'dayjs'
 
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.auth.user)
@@ -19,6 +21,8 @@ const Dashboard = () => {
   const [psychologicalStatus, setPsychologicalStatus] = useState('')
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false)
+  const [addTaskForm] = Form.useForm()
 
   // 获取学生数据
   useEffect(() => {
@@ -112,6 +116,53 @@ const Dashboard = () => {
     } catch (error) {
       console.error('删除任务失败:', error)
       message.error('删除任务失败')
+    }
+  }
+
+  // 打开添加任务模态框
+  const handleOpenAddModal = () => {
+    addTaskForm.resetFields()
+    setIsAddModalVisible(true)
+  }
+
+  // 关闭添加任务模态框
+  const handleCloseAddModal = () => {
+    setIsAddModalVisible(false)
+  }
+
+  // 提交添加任务表单
+  const handleAddTask = async (values) => {
+    try {
+      const dueDate = dayjs(`${values.dueDate.format('YYYY-MM-DD')} ${values.time.format('HH:mm:ss')}`)
+      const taskData = {
+        studentId: currentUser.id,
+        title: values.title,
+        description: values.description || '',
+        dueDate: dueDate.format('YYYY-MM-DD HH:mm:ss'),
+        status: 'pending'
+      }
+      console.log('添加任务数据:', taskData)
+      const response = await api.post('/tasks', taskData)
+      console.log('添加任务响应:', response)
+      const task = response // 直接使用响应数据，因为响应拦截器已经返回了response.data
+      const newTask = {
+        key: task.id,
+        id: task.id,
+        title: task.title,
+        dueDate: new Date(task.dueDate).toLocaleString('zh-CN'),
+        status: task.status
+      }
+      const updatedTasks = [...tasks, newTask]
+      setTasks(updatedTasks)
+      // 重新计算学习进度
+      const progress = calculateLearningProgress(updatedTasks)
+      setLearningProgress(progress)
+      setIsAddModalVisible(false)
+      message.success('任务已添加')
+    } catch (error) {
+      console.error('添加任务失败:', error)
+      console.error('错误详情:', error.response)
+      message.error('添加任务失败')
     }
   }
 
@@ -289,7 +340,18 @@ const Dashboard = () => {
 
         {/* 待完成任务 */}
         <Card 
-          title={<span style={{ color: '#4CAF50', fontSize: '1.3em' }}>待完成任务</span>}
+          title={
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#4CAF50', fontSize: '1.3em' }}>待完成任务</span>
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />} 
+                onClick={handleOpenAddModal}
+              >
+                添加任务
+              </Button>
+            </div>
+          }
           style={{ 
             marginBottom: 16,
             boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
@@ -308,6 +370,52 @@ const Dashboard = () => {
             />
           </Spin>
         </Card>
+
+        {/* 添加任务模态框 */}
+        <Modal
+          title="添加任务"
+          open={isAddModalVisible}
+          onCancel={handleCloseAddModal}
+          footer={null}
+        >
+          <Form
+            form={addTaskForm}
+            onFinish={handleAddTask}
+            layout="vertical"
+          >
+            <Form.Item
+              name="title"
+              label="任务名称"
+              rules={[{ required: true, message: '请输入任务名称' }]}
+            >
+              <Input placeholder="请输入任务名称" />
+            </Form.Item>
+            <Form.Item
+              name="description"
+              label="任务描述"
+            >
+              <Input.TextArea placeholder="请输入任务描述" rows={3} />
+            </Form.Item>
+            <Form.Item
+              name="dueDate"
+              label="截止日期"
+              rules={[{ required: true, message: '请选择截止日期' }]}
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              name="time"
+              label="截止时间"
+              rules={[{ required: true, message: '请选择截止时间' }]}
+            >
+              <TimePicker style={{ width: '100%' }} format="HH:mm:ss" />
+            </Form.Item>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <Button onClick={handleCloseAddModal}>取消</Button>
+              <Button type="primary" htmlType="submit">添加</Button>
+            </div>
+          </Form>
+        </Modal>
 
         {/* 快捷操作 */}
         <Row gutter={[16, 16]}>

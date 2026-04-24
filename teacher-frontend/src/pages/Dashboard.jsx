@@ -35,11 +35,11 @@ const Dashboard = () => {
     setLoading(true)
     try {
       // 加载匹配列表
-      const result = await matchAPI.getTeacherMatches(currentUser.id)
+      const result = await matchAPI.getTeacherMatches()
       const matches = result.data || []
       
       // 加载统计数据
-      const statsResult = await matchAPI.getStatistics(currentUser.id)
+      const statsResult = await matchAPI.getStatistics()
       const statistics = statsResult.data || {}
       
       // 统计数据

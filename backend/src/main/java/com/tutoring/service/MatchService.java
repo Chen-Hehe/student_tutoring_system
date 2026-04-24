@@ -388,7 +388,7 @@ public class MatchService {
             // 检查是否已匹配
             LambdaQueryWrapper<TeacherStudentMatch> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(TeacherStudentMatch::getStudentId, student.getId())
-                   .eq(TeacherStudentMatch::getTeacherId, teacherId)
+                   .eq(TeacherStudentMatch::getTeacherId, teacher.getId())
                    .in(TeacherStudentMatch::getStatus, 2) // 已匹配
                    .eq(TeacherStudentMatch::getDeleted, 0);
             
