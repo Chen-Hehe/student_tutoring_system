@@ -1,57 +1,18 @@
 import { useState, useEffect } from 'react'
-import { Card, Row, Col, Progress, Avatar, Button, Modal, Input, message } from 'antd'
+import { Card, Row, Col, Progress, Avatar, Button, message } from 'antd'
 import { CustomerServiceOutlined } from '@ant-design/icons'
 import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 import CounselorChatModal from '../components/CounselorChatModal'
-const { TextArea } = Input
-const PsychologicalStatus = () => {
+const { PsychologicalStatus = () => {
   const currentUser = useSelector((state) => state.auth.user)
   const [selectedChild, setSelectedChild] = useState(null)
-  const [isContactModalVisible, setIsContactModalVisible] = useState(false)
-  const [selectedCounselor, setSelectedCounselor] = useState(null)
-  const [counselorMessages, setCounselorMessages] = useState({})
-  const [newMessage, setNewMessage] = useState('')
   const [children, setChildren] = useState([])
   const [statusData, setStatusData] = useState({})
   const [currentStatus, setCurrentStatus] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [counselors, setCounselors] = useState([])
   const [isAIModalVisible, setIsAIModalVisible] = useState(false)
 
-  useEffect(() => {
-    const fetchCounselors = async () => {
-      try {
-        const response = await parentAPI.getCounselors()
-        if (response && response.data && response.data.success && response.data.data) {
-          const counselorList = response.data.data.map(c => ({
-            id: c.id,
-            name: c.name,
-            title: c.subject || '心理辅导员',
-            avatar: c.name?.charAt(0) || '辅'
-          }))
-          setCounselors(counselorList)
-          const initialMessages = {}
-          counselorList.forEach(c => {
-            initialMessages[c.id] = [
-              {
-                id: 1,
-                sender: c.name,
-                content: `您好，${currentUser?.name || '家长'}！我是${c.name}，专注于儿童心理健康。请问有什么可以帮助您的？`,
-                time: new Date().toLocaleString('zh-CN'),
-                type: 'received'
-              }
-            ]
-          })
-          setCounselorMessages(initialMessages)
-        }
-      } catch (error) {
-        console.error('获取心理辅导员列表失败:', error)
-      }
-    }
-    fetchCounselors()
-  }, [currentUser])
-  
   // 获取孩子列表
   useEffect(() => {
     const fetchChildren = async () => {
@@ -148,34 +109,6 @@ const PsychologicalStatus = () => {
       default:
         return <span style={{ ...style, backgroundColor: '#d4edda', color: '#155724' }}>{text}</span>
     }
-  }
-  
-  const handleContactCounselor = (counselor) => {
-    setSelectedCounselor(counselor)
-    setIsContactModalVisible(true)
-  }
-  
-  const handleSendMessage = () => {
-    if (newMessage.trim() && selectedCounselor) {
-      const message = {
-        id: counselorMessages[selectedCounselor.id]?.length + 1 || 1,
-        sender: currentUser?.name || '家长',
-        content: newMessage,
-        time: new Date().toLocaleString('zh-CN'),
-        type: 'sent'
-      }
-      setCounselorMessages({
-        ...counselorMessages,
-        [selectedCounselor.id]: [...(counselorMessages[selectedCounselor.id] || []), message]
-      })
-      setNewMessage('')
-    }
-  }
-  
-  const handleCancelContact = () => {
-    setIsContactModalVisible(false)
-    setSelectedCounselor(null)
-    setNewMessage('')
   }
   
   return (
@@ -319,12 +252,11 @@ const PsychologicalStatus = () => {
             <div style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
               <h3 style={{ marginBottom: 15, color: '#333' }}>推荐心理辅导员</h3>
               
-              {/* AI 心理辅导员按钮 */}
+              {/* AI 心理辅导员 */}
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: 15, 
-                marginBottom: 15,
+                gap: 15,
                 padding: '15px',
                 backgroundColor: '#fff',
                 borderRadius: 8,
@@ -363,51 +295,6 @@ const PsychologicalStatus = () => {
                   💛 沟通
                 </Button>
               </div>
-              
-              {counselors.map(counselor => (
-                <div key={counselor.id} style={{ display: 'flex', alignItems: 'center', gap: 15, marginBottom: 15 }}>
-                  <Avatar 
-                    style={{ 
-                      width: 60, 
-                      height: 60, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#FFF3E0', 
-                      color: '#FF9800', 
-                      fontWeight: 'bold',
-                      fontSize: '1.5em'
-                    }}
-                  >
-                    {counselor.avatar}
-                  </Avatar>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ marginBottom: 5 }}>{counselor.name}</h4>
-                    <p style={{ color: '#666', fontSize: '0.9em' }}>{counselor.title}</p>
-                  </div>
-                  <Button 
-                    style={{ 
-                      backgroundColor: '#FF9800', 
-                      color: 'white', 
-                      fontWeight: 'bold',
-                      padding: '8px 16px',
-                      borderRadius: 5,
-                      fontSize: '14px',
-                      border: 'none',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#F57C00'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#FF9800'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
-                    onClick={() => handleContactCounselor(counselor)}
-                  >
-                    联系
-                  </Button>
-                </div>
-              ))}
             </div>
           </>
         ) : (
@@ -417,89 +304,6 @@ const PsychologicalStatus = () => {
         )}
       </Card>
       
-      {/* 联系心理辅导员模态框 */}
-      <Modal
-        title={`联系 ${selectedCounselor?.name}`}
-        open={isContactModalVisible}
-        onCancel={handleCancelContact}
-        footer={null}
-        style={{
-          borderRadius: 10,
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-        }}
-        width={600}
-      >
-        <div style={{ height: 400, overflowY: 'auto', marginBottom: 20 }}>
-          {selectedCounselor && counselorMessages[selectedCounselor.id].map(message => (
-            <div 
-              key={message.id}
-              style={{
-                marginBottom: 20,
-                padding: 15,
-                borderRadius: 10,
-                backgroundColor: message.type === 'sent' ? '#FFF3E0' : '#f0f8ff',
-                alignSelf: message.type === 'sent' ? 'flex-end' : 'flex-start',
-                borderBottomRightRadius: message.type === 'sent' ? 0 : 10,
-                borderBottomLeftRadius: message.type === 'sent' ? 10 : 0
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: '0.9em' }}>
-                <span style={{ fontWeight: 'bold', color: '#FF9800' }}>{message.sender}</span>
-                <span style={{ color: '#999' }}>{message.time}</span>
-              </div>
-              <div style={{ lineHeight: 1.5 }}>{message.content}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <TextArea 
-            placeholder="输入消息..."
-            style={{ 
-              flex: 1, 
-              border: '2px solid #e0e0e0', 
-              borderRadius: 8, 
-              resize: 'none',
-              minHeight: 100,
-              transition: 'all 0.3s ease'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#FF9800'
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 152, 0, 0.1)'
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#e0e0e0'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <Button 
-            style={{ 
-              backgroundColor: '#FF9800', 
-              color: 'white', 
-              fontWeight: 'bold',
-              alignSelf: 'flex-end',
-              padding: '8px 16px',
-              borderRadius: 5,
-              fontSize: '14px',
-              border: 'none',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#F57C00'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#FF9800'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-            onClick={handleSendMessage}
-          >
-            发送
-          </Button>
-        </div>
-      </Modal>
-
       {/* AI 心理辅导员聊天弹窗 */}
       <CounselorChatModal
         open={isAIModalVisible}
