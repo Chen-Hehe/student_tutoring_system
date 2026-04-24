@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 匹配统计接口（为避免 Maven 编译排除 MatchController，单独提供统计端点）
  */
 @RestController
-@RequestMapping("/api/matches")
+@RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
 public class MatchStatisticsController {
 
