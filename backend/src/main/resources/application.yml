@@ -68,3 +68,23 @@ logging:
   level:
     com.tutoring: debug
     org.springframework.web: info
+
+# AI Match Configuration
+ai:
+  match:
+    # 通义千问 API Key (用户提供的 key)
+    api-key: sk-2d01e7e8bba049da85bf4482b7424a57
+    # 模型名称
+    model: qwen-plus
+    # 请求超时时间 (秒)
+    timeout: 30
+    # 最大重试次数
+    max-retries: 3
+    # 是否启用 AI 匹配
+    enabled: true
+    # 混合匹配权重 - AI 评分占比 (0.6 = 60% AI + 40% 规则)
+    ai-weight: 0.6
+    # 最低推荐分数阈值
+    min-score: 60.0
+    # 每日最大调用次数
+    daily-limit: 1000

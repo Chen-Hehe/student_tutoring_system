@@ -5,14 +5,18 @@ import com.tutoring.dto.AIRecommendationResponse;
 import com.tutoring.dto.MatchRequest;
 import com.tutoring.dto.MatchResponse;
 import com.tutoring.dto.MatchStatisticsDTO;
+import com.tutoring.entity.AiMatch;
 import com.tutoring.entity.Student;
 import com.tutoring.entity.Teacher;
 import com.tutoring.entity.TeacherStudentMatch;
 import com.tutoring.entity.User;
+import com.tutoring.repository.AiMatchRepository;
 import com.tutoring.repository.StudentRepository;
 import com.tutoring.repository.TeacherRepository;
 import com.tutoring.repository.TeacherStudentMatchRepository;
 import com.tutoring.repository.UserRepository;
+import com.tutoring.service.AiMatchService.AiMatchResult;
+import com.tutoring.service.MatchAlgorithmService.MatchScoreResult;
 import com.tutoring.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +42,9 @@ public class MatchService {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final AiMatchRepository aiMatchRepository;
+    private final AiMatchService aiMatchService;
+    private final MatchAlgorithmService matchAlgorithmService;
     
     /**
      * 获取教师的匹配列表
@@ -352,7 +359,10 @@ public class MatchService {
     }
     
     /**
-     * 获取 AI 推荐的学生列表（教师视角）
+     * 获取 AI 推荐的学生列表（教师视角）- 方案 A
+     * 1. 使用混合匹配策略计算分数
+     * 2. 将 AI 推荐结果保存到 ai_matches 表
+     * 3. 返回推荐列表
      *
      * @param teacherId 教师 ID
      * @return 推荐学生列表
@@ -364,7 +374,9 @@ public class MatchService {
             throw new RuntimeException("教师不存在");
         }
         
-        // 获取所有未匹配的学生
+        User teacherUser = userRepository.selectById(teacher.getUserId());
+        
+        // 获取所有学生
         List<Student> allStudents = studentRepository.selectList(null);
         
         List<AIRecommendationResponse> recommendations = new ArrayList<>();
@@ -388,8 +400,9 @@ public class MatchService {
                 continue;
             }
             
-            // 计算匹配分数和原因
-            AIRecommendationResponse recommendation = calculateMatchScore(teacher, student, studentUser);
+            // 使用混合匹配策略计算分数并保存 AI 推荐
+            AIRecommendationResponse recommendation = calculateHybridMatchAndSave(
+                teacher, student, teacherUser, studentUser);
             if (recommendation != null) {
                 recommendations.add(recommendation);
             }
@@ -403,14 +416,108 @@ public class MatchService {
     }
     
     /**
-     * 计算匹配分数
-     *
-     * @param teacher 教师
-     * @param student 学生
-     * @param studentUser 学生用户
-     * @return AI 推荐响应
+     * 计算混合匹配分数并保存 AI 推荐（方案 A）
      */
-    private AIRecommendationResponse calculateMatchScore(Teacher teacher, Student student, User studentUser) {
+    private AIRecommendationResponse calculateHybridMatchAndSave(
+            Teacher teacher, Student student, User teacherUser, User studentUser) {
+        
+        try {
+            // 1. 规则匹配分数
+            MatchScoreResult ruleResult = matchAlgorithmService.calculateMatchScore(
+                teacher, student, teacherUser, studentUser);
+            
+            // 2. AI 匹配分析
+            AiMatchResult aiResult = aiMatchService.analyzeMatchByAI(
+                teacher, student, teacherUser, studentUser);
+            
+            // 3. 混合匹配分数
+            double hybridScore = aiMatchService.calculateHybridScore(
+                ruleResult.getTotalScore(), aiResult);
+            
+            // 4. 如果分数太低，不推荐
+            if (hybridScore < 60) {
+                return null;
+            }
+            
+            // 5. 保存 AI 推荐到 ai_matches 表（方案 A）
+            saveAiMatch(teacher.getId(), student.getId(), hybridScore, aiResult);
+            
+            // 6. 构建响应
+            AIRecommendationResponse response = new AIRecommendationResponse();
+            response.setStudentId(student.getId());
+            response.setStudentName(studentUser.getName());
+            response.setStudentGrade(student.getGrade());
+            response.setStudentSchool(student.getSchool());
+            response.setLearningNeeds(student.getLearningNeeds());
+            response.setSubject(teacher.getSubject());
+            response.setMatchScore(hybridScore);
+            
+            // 合并规则和 AI 的原因
+            List<String> allReasons = new ArrayList<>();
+            allReasons.addAll(ruleResult.getReasons());
+            allReasons.addAll(aiResult.getReasons());
+            response.setMatchReason(String.join("\uff1b", allReasons.subList(0, Math.min(5, allReasons.size()))));
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("计算混合匹配分数失败", e);
+            // 降级：只使用规则匹配
+            return calculateWithRuleOnly(teacher, student, teacherUser, studentUser);
+        }
+    }
+    
+    /**
+     * 保存 AI 推荐到 ai_matches 表
+     */
+    private void saveAiMatch(Long teacherId, Long studentId, double score, AiMatchResult aiResult) {
+        try {
+            // 检查是否已存在
+            long exists = aiMatchRepository.exists(teacherId, studentId);
+            
+            if (exists > 0) {
+                // 更新已有记录
+                LambdaQueryWrapper<AiMatch> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(AiMatch::getTeacherId, teacherId)
+                       .eq(AiMatch::getStudentId, studentId)
+                       .eq(AiMatch::getDeleted, 0);
+                AiMatch existing = aiMatchRepository.selectOne(wrapper);
+                if (existing != null) {
+                    existing.setMatchScore(score);
+                    existing.setMatchReason(String.join("\uff1b", aiResult.getReasons()));
+                    aiMatchRepository.updateById(existing);
+                    log.info("更新 AI 推荐：teacherId={}, studentId={}, score={}", teacherId, studentId, score);
+                    return;
+                }
+            }
+            
+            // 创建新记录
+            AiMatch aiMatch = new AiMatch();
+            aiMatch.setTeacherId(teacherId);
+            aiMatch.setStudentId(studentId);
+            aiMatch.setMatchScore(score);
+            aiMatch.setMatchReason(String.join("\uff1b", aiResult.getReasons()));
+            aiMatchRepository.insert(aiMatch);
+            
+            log.info("保存 AI 推荐：teacherId={}, studentId={}, score={}", teacherId, studentId, score);
+            
+        } catch (Exception e) {
+            log.error("保存 AI 推荐失败", e);
+        }
+    }
+    
+    /**
+     * 降级：只使用规则匹配
+     */
+    private AIRecommendationResponse calculateWithRuleOnly(
+            Teacher teacher, Student student, User teacherUser, User studentUser) {
+        MatchScoreResult ruleResult = matchAlgorithmService.calculateMatchScore(
+            teacher, student, teacherUser, studentUser);
+        
+        if (ruleResult.getTotalScore() < 60) {
+            return null;
+        }
+        
         AIRecommendationResponse response = new AIRecommendationResponse();
         response.setStudentId(student.getId());
         response.setStudentName(studentUser.getName());
@@ -418,32 +525,8 @@ public class MatchService {
         response.setStudentSchool(student.getSchool());
         response.setLearningNeeds(student.getLearningNeeds());
         response.setSubject(teacher.getSubject());
-        
-        // 简单匹配算法：基于科目匹配
-        double score = 50.0; // 基础分数
-        StringBuilder reason = new StringBuilder();
-        
-        // 科目匹配（如果有学习需求）
-        if (student.getLearningNeeds() != null && !student.getLearningNeeds().isEmpty()) {
-            if (student.getLearningNeeds().contains(teacher.getSubject())) {
-                score += 30;
-                reason.append("科目匹配。");
-            }
-        }
-        
-        // 年级匹配（简化处理）
-        if (teacher.getExperience() != null && teacher.getExperience().contains(student.getGrade())) {
-            score += 20;
-            reason.append("教师有该年级教学经验。");
-        }
-        
-        // 如果分数太低，不推荐
-        if (score < 60) {
-            return null;
-        }
-        
-        response.setMatchScore(Math.min(score, 100));
-        response.setMatchReason(reason.toString().isEmpty() ? "基础匹配" : reason.toString());
+        response.setMatchScore(ruleResult.getTotalScore());
+        response.setMatchReason(String.join("\uff1b", ruleResult.getReasons()));
         
         return response;
     }
