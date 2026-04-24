@@ -1,7 +1,9 @@
 package com.tutoring.controller;
 
 import com.tutoring.entity.Task;
+import com.tutoring.entity.Student;
 import com.tutoring.repository.TaskRepository;
+import com.tutoring.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,19 +17,36 @@ public class TaskController {
 
     @Autowired
     private TaskRepository taskRepository;
+    
+    @Autowired
+    private StudentRepository studentRepository;
 
     // 获取学生的所有任务
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<Task>> getTasksByStudentId(@PathVariable Long studentId) {
-        List<Task> tasks = taskRepository.findByStudentId(studentId);
+        // 根据学生ID查询学生信息，获取用户ID
+        Student student = studentRepository.selectById(studentId);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Long userId = student.getUserId();
+        List<Task> tasks = taskRepository.findByStudentId(userId);
         return ResponseEntity.ok(tasks);
     }
 
     // 创建新任务
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        taskRepository.insert(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(task);
+        System.out.println("收到添加任务请求: " + task);
+        try {
+            taskRepository.insert(task);
+            System.out.println("任务添加成功: " + task);
+            return ResponseEntity.status(HttpStatus.CREATED).body(task);
+        } catch (Exception e) {
+            System.out.println("任务添加失败: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // 更新任务状态

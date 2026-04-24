@@ -1,20 +1,21 @@
 package com.tutoring.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.dto.MatchResponse;
 import com.tutoring.dto.Result;
 import com.tutoring.entity.Teacher;
 import com.tutoring.repository.TeacherRepository;
 import com.tutoring.service.MatchService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-
-import java.util.List;
 
 /**
  * 教师匹配管理控制器
@@ -63,7 +64,7 @@ public class TeacherMatchController {
                 
                 // 根据教师ID获取匹配列表
                 log.info("根据教师ID获取匹配列表，teacherId: {}", teacher.getId());
-                List<MatchResponse> matches = matchService.getTeacherMatches(teacher.getId());
+                List<MatchResponse> matches = matchService.getTeacherMatches(userId);
                 log.info("获取到匹配列表数量: {}", matches.size());
                 
                 return Result.success(matches);

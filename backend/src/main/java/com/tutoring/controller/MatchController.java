@@ -31,13 +31,13 @@ public class MatchController {
     /**
      * 获取教师的匹配列表（通过路径参数）
      *
-     * @param teacherId 教师 ID
+     * @param userId 用户 ID
      * @return 匹配列表
      */
-    @GetMapping("/teacher/{teacherId}")
-    public Result<List<MatchResponse>> getTeacherMatches(@PathVariable Long teacherId) {
+    @GetMapping("/teacher/{userId}")
+    public Result<List<MatchResponse>> getTeacherMatches(@PathVariable Long userId) {
         try {
-            List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
+            List<MatchResponse> matches = matchService.getTeacherMatches(userId);
             return Result.success(matches);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());

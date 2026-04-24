@@ -49,22 +49,23 @@ public class MatchService {
     /**
      * 获取教师的匹配列表
      *
-     * @param teacherId 教师 ID（实际上是userId，需要转换为teacherId）
+     * @param userId 用户 ID
      * @return 匹配列表
      */
-    public List<MatchResponse> getTeacherMatches(Long teacherId) {
+    public List<MatchResponse> getTeacherMatches(Long userId) {
         try {
             // 将userId转换为teacherId
             LambdaQueryWrapper<Teacher> teacherWrapper = new LambdaQueryWrapper<>();
-            teacherWrapper.eq(Teacher::getUserId, teacherId);
+            teacherWrapper.eq(Teacher::getUserId, userId);
             Teacher teacher = teacherRepository.selectOne(teacherWrapper);
             
-            Long actualTeacherId = teacherId;
-            if (teacher != null) {
-                actualTeacherId = teacher.getId();
+            if (teacher == null) {
+                log.error("教师不存在，userId={}", userId);
+                return new ArrayList<>();
             }
             
-            List<TeacherStudentMatch> matches = matchRepository.selectByTeacherId(actualTeacherId);
+            Long teacherId = teacher.getId();
+            List<TeacherStudentMatch> matches = matchRepository.selectByTeacherId(teacherId);
             return matches.stream()
                     .map(this::convertToMatchResponse)
                     .collect(Collectors.toList());
@@ -364,12 +365,14 @@ public class MatchService {
      * 2. 将 AI 推荐结果保存到 ai_matches 表
      * 3. 返回推荐列表
      *
-     * @param teacherId 教师 ID
+     * @param userId 用户 ID
      * @return 推荐学生列表
      */
-    public List<AIRecommendationResponse> getTeacherRecommendations(Long teacherId) {
-        // 获取教师信息
-        Teacher teacher = teacherRepository.selectById(teacherId);
+    public List<AIRecommendationResponse> getTeacherRecommendations(Long userId) {
+        // 将userId转换为teacherId
+        LambdaQueryWrapper<Teacher> teacherWrapper = new LambdaQueryWrapper<>();
+        teacherWrapper.eq(Teacher::getUserId, userId);
+        Teacher teacher = teacherRepository.selectOne(teacherWrapper);
         if (teacher == null) {
             throw new RuntimeException("教师不存在");
         }
@@ -385,7 +388,7 @@ public class MatchService {
             // 检查是否已匹配
             LambdaQueryWrapper<TeacherStudentMatch> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(TeacherStudentMatch::getStudentId, student.getId())
-                   .eq(TeacherStudentMatch::getTeacherId, teacherId)
+                   .eq(TeacherStudentMatch::getTeacherId, teacher.getId())
                    .in(TeacherStudentMatch::getStatus, 2) // 已匹配
                    .eq(TeacherStudentMatch::getDeleted, 0);
             

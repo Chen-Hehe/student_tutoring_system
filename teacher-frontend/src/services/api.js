@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API 基础 URL
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
 // 创建 axios 实例
 const api = axios.create({
@@ -37,9 +37,12 @@ api.interceptors.request.use(
 // 响应拦截器 - 处理错误
 api.interceptors.response.use(
   (response) => {
-    // 如果响应码不是 200，抛出错误
-    if (response.data && response.data.code !== 200) {
-      return Promise.reject(new Error(response.data.message || '请求失败'))
+    // 对于 TaskController 返回的 List<Task>，直接返回 response.data
+    // 对于其他 API 返回的带有 code 字段的响应，检查 code 是否等于 200
+    if (response.data && typeof response.data === 'object' && 'code' in response.data) {
+      if (response.data.code !== 200) {
+        return Promise.reject(new Error(response.data.message || '请求失败'))
+      }
     }
     return response.data
   },

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -28,14 +28,14 @@ public class Task implements Serializable {
     private String description;
     
     @TableField("due_date")
-    private Date dueDate;
+    private LocalDateTime dueDate;
     
     @TableField("status")
     private String status; // pending, completed
     
     @TableField(value = "created_at", fill = FieldFill.INSERT)
-    private Date createdAt;
+    private LocalDateTime createdAt;
     
     @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 }
