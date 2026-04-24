@@ -266,4 +266,32 @@ public class AiMatchService {
             }
         }
     }
+    
+    /**
+     * 测试 API 调用（用于配置测试）
+     */
+    public String callDashScopeAPIForTest(String prompt) throws Exception {
+        Generation gen = new Generation();
+        
+        List<Message> messages = new ArrayList<>();
+        messages.add(Message.builder()
+            .role(Role.USER.getValue())
+            .content(prompt)
+            .build());
+        
+        GenerationParam param = GenerationParam.builder()
+            .apiKey(aiMatchConfig.getApiKey())
+            .model(aiMatchConfig.getModel())
+            .messages(messages)
+            .resultFormat(GenerationParam.ResultFormat.MESSAGE)
+            .build();
+        
+        GenerationResult result = gen.call(param);
+        
+        if (result == null || result.getOutput() == null) {
+            throw new RuntimeException("API 调用失败：响应为空");
+        }
+        
+        return result.getOutput().getChoices().get(0).getMessage().getContent();
+    }
 }
