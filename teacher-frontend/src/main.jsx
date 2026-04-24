@@ -22,10 +22,14 @@ const UrlParamsHandler = ({ children }) => {
     
     if (token && userStr) {
       try {
-        const user = JSON.parse(decodeURIComponent(userStr))
+        let user = JSON.parse(decodeURIComponent(userStr))
+        // 确保id是数字类型
+        if (user.id) {
+          user.id = Number(user.id)
+        }
         // 存储到 localStorage
         localStorage.setItem('token', token)
-        localStorage.setItem('user', userStr)
+        localStorage.setItem('user', JSON.stringify(user))
         // 更新 Redux store
         dispatch(loginSuccess({ token, user }))
         // 移除 URL 参数
@@ -40,7 +44,11 @@ const UrlParamsHandler = ({ children }) => {
       
       if (storedToken && storedUserStr) {
         try {
-          const user = JSON.parse(storedUserStr)
+          let user = JSON.parse(storedUserStr)
+          // 确保id是数字类型
+          if (user.id) {
+            user.id = Number(user.id)
+          }
           dispatch(restoreAuth({ token: storedToken, user }))
           console.log('已从 localStorage 恢复登录状态:', user.username)
         } catch (error) {

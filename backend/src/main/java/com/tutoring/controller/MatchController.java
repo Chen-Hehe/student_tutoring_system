@@ -27,13 +27,13 @@ public class MatchController {
     /**
      * 获取教师的匹配列表（通过路径参数）
      *
-     * @param teacherId 教师 ID
+     * @param userId 用户 ID
      * @return 匹配列表
      */
-    @GetMapping("/teacher/{teacherId}")
-    public Result<List<MatchResponse>> getTeacherMatches(@PathVariable Long teacherId) {
+    @GetMapping("/teacher/{userId}")
+    public Result<List<MatchResponse>> getTeacherMatches(@PathVariable Long userId) {
         try {
-            List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
+            List<MatchResponse> matches = matchService.getTeacherMatches(userId);
             return Result.success(matches);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
@@ -41,20 +41,18 @@ public class MatchController {
     }
     
     /**
-     * 获取教师的匹配列表（通过请求属性）
+     * 获取教师的匹配列表（通过查询参数）
      *
-     * @param request 请求对象
+     * @param userId 用户 ID
      * @return 匹配列表
      */
     @GetMapping("/teacher")
-    public Result<List<MatchResponse>> getTeacherMatches(HttpServletRequest request) {
+    public Result<List<MatchResponse>> getTeacherMatches(@RequestParam(required = false) Long userId) {
         try {
-            Object teacherIdObj = request.getAttribute("X-User-Id");
-            if (teacherIdObj == null) {
-                return Result.error(400, "教师ID不能为空");
+            if (userId == null) {
+                return Result.error(400, "用户ID不能为空");
             }
-            Long teacherId = Long.parseLong(teacherIdObj.toString());
-            List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
+            List<MatchResponse> matches = matchService.getTeacherMatches(userId);
             return Result.success(matches);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
@@ -206,13 +204,13 @@ public class MatchController {
     /**
      * 获取 AI 推荐的学生列表（教师视角）
      *
-     * @param teacherId 教师 ID
+     * @param userId 用户 ID
      * @return 推荐学生列表
      */
-    @GetMapping("/recommendations/teacher/{teacherId}")
-    public Result<List<AIRecommendationResponse>> getTeacherRecommendations(@PathVariable Long teacherId) {
+    @GetMapping("/recommendations/teacher/{userId}")
+    public Result<List<AIRecommendationResponse>> getTeacherRecommendations(@PathVariable Long userId) {
         try {
-            List<AIRecommendationResponse> recommendations = matchService.getTeacherRecommendations(teacherId);
+            List<AIRecommendationResponse> recommendations = matchService.getTeacherRecommendations(userId);
             return Result.success(recommendations);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());

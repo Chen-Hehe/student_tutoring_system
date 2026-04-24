@@ -33,6 +33,10 @@ const Login = () => {
       })
 
       if (response.code === 200) {
+        // 确保user.id是数字类型
+        if (response.data.user && response.data.user.id) {
+          response.data.user.id = Number(response.data.user.id)
+        }
         dispatch(loginSuccess(response.data))
         message.success('登录成功')
         navigate('/dashboard')
