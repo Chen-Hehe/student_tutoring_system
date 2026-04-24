@@ -206,48 +206,86 @@ const PsychologicalStatus = () => {
         ) : currentStatus ? (
           <>
             <Row gutter={[20, 20]} style={{ marginBottom: 30 }}>
-              {Object.entries(currentStatus.statuses).map(([title, status]) => (
-                <Col xs={24} md={6} key={title}>
-                  <div style={{ 
-                    backgroundColor: '#f9f9f9',
-                    padding: 20,
-                    borderRadius: 10,
-                    textAlign: 'center'
-                  }}>
-                    <h3 style={{ marginBottom: 10, color: '#555' }}>{title}</h3>
-                    <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FF9800' }}>{status.value}</div>
-                    {getStatusBadge(status.level, status.level === 'good' ? '正常' : status.level === 'warning' ? '注意' : '危险')}
-                  </div>
-                </Col>
-              ))}
+              {Object.entries(currentStatus.statuses).map(([title, status]) => {
+                // 对于学习压力，需要特殊处理
+                let displayValue = status.value;
+                let displayLevel = status.level;
+                
+                if (title === '学习压力') {
+                  // 根据百分比重新计算显示值和级别
+                  const percentage = status.percentage;
+                  if (percentage >= 80) {
+                    displayValue = '优秀';
+                    displayLevel = 'good';
+                  } else if (percentage >= 60) {
+                    displayValue = '良好';
+                    displayLevel = 'good';
+                  } else if (percentage >= 40) {
+                    displayValue = '中等';
+                    displayLevel = 'warning';
+                  } else if (percentage >= 20) {
+                    displayValue = '轻度';
+                    displayLevel = 'warning';
+                  } else {
+                    displayValue = '重度';
+                    displayLevel = 'danger';
+                  }
+                }
+                
+                return (
+                  <Col xs={24} md={6} key={title}>
+                    <div style={{ 
+                      backgroundColor: '#f9f9f9',
+                      padding: 20,
+                      borderRadius: 10,
+                      textAlign: 'center'
+                    }}>
+                      <h3 style={{ marginBottom: 10, color: '#555' }}>{title}</h3>
+                      <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#FF9800' }}>{displayValue}</div>
+                      {getStatusBadge(displayLevel, displayLevel === 'good' ? '正常' : displayLevel === 'warning' ? '注意' : '危险')}
+                    </div>
+                  </Col>
+                );
+              })}
             </Row>
             
             <div style={{ marginBottom: 30 }}>
               <h3 style={{ marginBottom: 15, color: '#333' }}>详细评估</h3>
-              {Object.entries(currentStatus.assessments).map(([title, assessment]) => (
-                <div key={title} style={{ marginBottom: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={{ fontWeight: 'bold' }}>{title}</span>
-                    <span style={{ fontWeight: 'bold' }}>{assessment.percentage}%</span>
+              {Object.entries(currentStatus.assessments).map(([title, assessment]) => {
+                // 学习压力的百分比需要反转
+                let displayPercentage = assessment.percentage;
+                let displayWidth = `${assessment.percentage}%`;
+                
+                if (title === '学习压力') {
+                  displayPercentage = 100 - assessment.percentage;
+                  displayWidth = `${displayPercentage}%`;
+                }
+                
+                return (
+                  <div key={title} style={{ marginBottom: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                      <span style={{ fontWeight: 'bold' }}>{title}</span>
+                      <span style={{ fontWeight: 'bold' }}>{displayPercentage}%</span>
+                    </div>
+                    <div style={{ 
+                      width: '100%', 
+                      height: 10, 
+                      backgroundColor: '#e0e0e0', 
+                      borderRadius: 5, 
+                      overflow: 'hidden'
+                    }}>
+                      <div 
+                        style={{ 
+                          height: '100%', 
+                          width: displayWidth, 
+                          backgroundColor: getStatusColor(assessment.level), 
+                          borderRadius: 5
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div style={{ 
-                    width: '100%', 
-                    height: 10, 
-                    backgroundColor: '#e0e0e0', 
-                    borderRadius: 5, 
-                    overflow: 'hidden'
-                  }}>
-                    <div 
-                      style={{ 
-                        height: '100%', 
-                        width: `${assessment.percentage}%`, 
-                        backgroundColor: getStatusColor(assessment.level), 
-                        borderRadius: 5
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <div style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>

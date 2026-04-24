@@ -529,21 +529,24 @@ public class ParentController {
                         }
                         break;
                     case "学习压力":
-                        stressStatus.setPercentage(percentage);
-                        stressStatus.setLevel(level);
-                        // 根据百分比设置评估值
-                        if (percentage >= 80) {
-                            stressStatus.setValue("重度");
-                            stressStatus.setLevel("danger");
-                        } else if (percentage >= 60) {
+                        // 学习压力逻辑反转：百分比越低表示压力越小，等级越高
+                        stressStatus.setPercentage(100 - percentage); // 反转百分比
+                        // 根据反转后的百分比设置评估值
+                        if (percentage <= 20) {
+                            stressStatus.setValue("优秀");
+                            stressStatus.setLevel("good");
+                        } else if (percentage <= 40) {
+                            stressStatus.setValue("良好");
+                            stressStatus.setLevel("good");
+                        } else if (percentage <= 60) {
                             stressStatus.setValue("中等");
                             stressStatus.setLevel("warning");
-                        } else if (percentage >= 40) {
+                        } else if (percentage <= 80) {
                             stressStatus.setValue("轻度");
-                            stressStatus.setLevel("good");
+                            stressStatus.setLevel("warning");
                         } else {
-                            stressStatus.setValue("无");
-                            stressStatus.setLevel("good");
+                            stressStatus.setValue("重度");
+                            stressStatus.setLevel("danger");
                         }
                         break;
                     case "自我认知":
