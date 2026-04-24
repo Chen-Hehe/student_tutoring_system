@@ -37,12 +37,14 @@ public class SecurityConfig {
             
             // 配置请求授权
             .authorizeHttpRequests(auth -> auth
+                // 允许访问静态资源
+                .requestMatchers("/*.html", "/*.js", "/*.css", "/*.ico", "/assets/**").permitAll()
                 // 允许访问认证接口
                 .requestMatchers("/api/auth/**").permitAll()
                 // 允许访问管理员接口
                 .requestMatchers("/api/admin/**").permitAll()
                 // 允许访问匹配接口
-                .requestMatchers("/api/matches/**").permitAll()
+                .requestMatchers("/api/matches/**", "/api/teacher-matches/**").permitAll()
                 // 允许访问聊天接口
                 .requestMatchers("/api/chat/**").permitAll()
                 // 允许访问教学资源接口

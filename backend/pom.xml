@@ -22,6 +22,7 @@
         <java.version>17</java.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <jwt.version>0.12.3</jwt.version>
+        <dashscope.version>2.15.0</dashscope.version>
     </properties>
     
     <dependencies>
@@ -106,6 +107,13 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.26</version>
+        </dependency>
+        
+        <!-- 通义千问 DashScope SDK -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>${dashscope.version}</version>
         </dependency>
         
         <!-- Test -->
