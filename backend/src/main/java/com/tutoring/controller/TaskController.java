@@ -1,7 +1,9 @@
 package com.tutoring.controller;
 
 import com.tutoring.entity.Task;
+import com.tutoring.entity.Student;
 import com.tutoring.repository.TaskRepository;
+import com.tutoring.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +17,19 @@ public class TaskController {
 
     @Autowired
     private TaskRepository taskRepository;
+    
+    @Autowired
+    private StudentRepository studentRepository;
 
     // 获取学生的所有任务
-    @GetMapping("/student/{userId}")
-    public ResponseEntity<List<Task>> getTasksByStudentId(@PathVariable Long userId) {
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<Task>> getTasksByStudentId(@PathVariable Long studentId) {
+        // 根据学生ID查询学生信息，获取用户ID
+        Student student = studentRepository.selectById(studentId);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Long userId = student.getUserId();
         List<Task> tasks = taskRepository.findByStudentId(userId);
         return ResponseEntity.ok(tasks);
     }
