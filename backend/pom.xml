@@ -156,8 +156,8 @@
 
                         <!-- 依赖缺失实体的 Mapper -->
                         <exclude>com/tutoring/mapper/TeacherCommunicationMapper.java</exclude>
-                        <exclude>com/tutoring/mapper/PsychologicalAssessmentMapper.java</exclude>
-                        <exclude>com/tutoring/mapper/PsychologicalAssessmentDetailMapper.java</exclude>
+                        <!-- <exclude>com/tutoring/mapper/PsychologicalAssessmentMapper.java</exclude> -->
+                        <!-- <exclude>com/tutoring/mapper/PsychologicalAssessmentDetailMapper.java</exclude> -->
                     </excludes>
                     <annotationProcessorPaths>
                         <path>
