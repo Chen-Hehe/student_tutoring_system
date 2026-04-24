@@ -33,6 +33,10 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+  
+  mvc:
+    static-path-pattern: /**
+    add-mappings: true
 
 # MyBatis Plus Configuration
 mybatis-plus:
@@ -70,11 +74,7 @@ logging:
     org.springframework.web: info
     org.springframework.security: debug
 
-# Spring MVC Configuration
-spring:
-  mvc:
-    static-path-pattern: /**
-    add-mappings: true
+# Spring MVC Configuration (merged into spring section above)
 
 # AI Match Configuration
 ai:
