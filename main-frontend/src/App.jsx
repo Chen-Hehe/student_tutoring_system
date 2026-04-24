@@ -57,6 +57,9 @@ const Home = () => {
       } else if (displayIndex < 0) {
         setIsTransitioning(false);
         setDisplayIndex(announcements.length - 1);
+      } else {
+        // 正常过渡完成后也要重置isTransitioning
+        setIsTransitioning(false);
       }
     }, 600); // 等待过渡动画完成
 
@@ -296,6 +299,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('teacher');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // 角色映射
   const roleMap = {
@@ -308,6 +312,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
     
     try {
       const roleId = roleMap[selectedRole];
@@ -355,72 +360,131 @@ const Login = () => {
       } else {
         console.error('请求配置出错:', error.message);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>登录乡村助学平台</h2>
-      {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-      <form onSubmit={handleLogin}>
-        <div className="form-group">
-          <label>用户名</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo">
+            <span className="logo-icon">🌱</span>
+            <h2>登录乡村助学平台</h2>
+          </div>
+          <p className="auth-subtitle">欢迎回来，让我们一起为乡村教育贡献力量</p>
         </div>
-        <div className="form-group">
-          <label>密码</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>选择角色</label>
-          <div className="role-selector">
-            <div
-              className={`role-option ${selectedRole === 'teacher' ? 'selected' : ''}`}
-              onClick={() => setSelectedRole('teacher')}
-            >
-              <h3>教育教师</h3>
-              <p>提供教学辅导</p>
-            </div>
-            <div
-              className={`role-option ${selectedRole === 'student' ? 'selected' : ''}`}
-              onClick={() => setSelectedRole('student')}
-            >
-              <h3>儿童/学生</h3>
-              <p>接受教育辅导</p>
-            </div>
-            <div
-              className={`role-option ${selectedRole === 'parent' ? 'selected' : ''}`}
-              onClick={() => setSelectedRole('parent')}
-            >
-              <h3>家长/监护人</h3>
-              <p>了解孩子情况</p>
-            </div>
-            <div
-              className={`role-option ${selectedRole === 'admin' ? 'selected' : ''}`}
-              onClick={() => setSelectedRole('admin')}
-            >
-              <h3>管理员</h3>
-              <p>管理系统</p>
+        
+        {error && (
+          <div className="auth-error">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
+        
+        <form onSubmit={handleLogin} className="auth-form">
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">👤</span>
+              用户名
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="form-input"
+              placeholder="请输入用户名"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">🔒</span>
+              密码
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="form-input"
+              placeholder="请输入密码"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">👥</span>
+              选择角色
+            </label>
+            <div className="role-selector">
+              <div
+                className={`role-option ${selectedRole === 'teacher' ? 'selected' : ''}`}
+                onClick={() => setSelectedRole('teacher')}
+              >
+                <div className="role-icon">👨‍🏫</div>
+                <h3>教育教师</h3>
+                <p>提供教学辅导</p>
+              </div>
+              <div
+                className={`role-option ${selectedRole === 'student' ? 'selected' : ''}`}
+                onClick={() => setSelectedRole('student')}
+              >
+                <div className="role-icon">👧</div>
+                <h3>儿童/学生</h3>
+                <p>接受教育辅导</p>
+              </div>
+              <div
+                className={`role-option ${selectedRole === 'parent' ? 'selected' : ''}`}
+                onClick={() => setSelectedRole('parent')}
+              >
+                <div className="role-icon">👨‍👩‍👧</div>
+                <h3>家长/监护人</h3>
+                <p>了解孩子情况</p>
+              </div>
+              <div
+                className={`role-option ${selectedRole === 'admin' ? 'selected' : ''}`}
+                onClick={() => setSelectedRole('admin')}
+              >
+                <div className="role-icon">👨‍💼</div>
+                <h3>管理员</h3>
+                <p>管理系统</p>
+              </div>
             </div>
           </div>
-        </div>
-        <button type="submit" className="btn-primary">登录</button>
-        <div className="form-links">
-          <Link to="/register">注册新账号</Link>
-          <Link to="/forgot-password">忘记密码</Link>
-          <Link to="/">返回首页</Link>
-        </div>
-      </form>
+          <button 
+            type="submit" 
+            className="btn-submit"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="loader"></div>
+                登录中...
+              </>
+            ) : (
+              <>
+                <span>🚀</span>
+                登录
+              </>
+            )}
+          </button>
+          <div className="form-links">
+            <Link to="/register" className="link-item">
+              <span>✨</span>
+              注册新账号
+            </Link>
+            <Link to="/forgot-password" className="link-item">
+              <span>🔑</span>
+              忘记密码
+            </Link>
+            <Link to="/" className="link-item">
+              <span>🏠</span>
+              返回首页
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
@@ -438,6 +502,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -452,9 +517,11 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError('两次输入的密码不一致');
+      setIsLoading(false);
       return;
     }
 
@@ -482,110 +549,191 @@ const Register = () => {
     } catch (error) {
       setError('注册失败，请检查输入信息');
       console.error('注册失败:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>注册乡村助学平台</h2>
-      {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-      {success && <div style={{ color: 'green', marginBottom: '1rem', textAlign: 'center' }}>{success}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>用户名</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo">
+            <span className="logo-icon">🌱</span>
+            <h2>注册乡村助学平台</h2>
+          </div>
+          <p className="auth-subtitle">加入我们，一起为乡村教育贡献力量</p>
         </div>
-        <div className="form-group">
-          <label>密码</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>确认密码</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>姓名</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>邮箱</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>手机号</label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>选择角色</label>
-          <div className="role-selector">
-            <div
-              className={`role-option ${formData.role === 1 ? 'selected' : ''}`}
-              onClick={() => handleRoleChange(1)}
-            >
-              <h3>教育教师</h3>
-            </div>
-            <div
-              className={`role-option ${formData.role === 2 ? 'selected' : ''}`}
-              onClick={() => handleRoleChange(2)}
-            >
-              <h3>儿童/学生</h3>
-            </div>
-            <div
-              className={`role-option ${formData.role === 3 ? 'selected' : ''}`}
-              onClick={() => handleRoleChange(3)}
-            >
-              <h3>家长/监护人</h3>
-            </div>
-            <div
-              className={`role-option ${formData.role === 4 ? 'selected' : ''}`}
-              onClick={() => handleRoleChange(4)}
-            >
-              <h3>管理员</h3>
+        
+        {error && (
+          <div className="auth-error">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
+        {success && (
+          <div className="auth-success">
+            <span>✅</span>
+            <span>{success}</span>
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">👤</span>
+              用户名
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请输入用户名"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">🔒</span>
+              密码
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请输入密码"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">🔒</span>
+              确认密码
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请再次输入密码"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">📝</span>
+              姓名
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请输入您的姓名"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">📧</span>
+              邮箱
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请输入您的邮箱"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">📱</span>
+              手机号
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className="form-input"
+              placeholder="请输入您的手机号"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              <span className="label-icon">👥</span>
+              选择角色
+            </label>
+            <div className="role-selector">
+              <div
+                className={`role-option ${formData.role === 1 ? 'selected' : ''}`}
+                onClick={() => handleRoleChange(1)}
+              >
+                <div className="role-icon">👨‍🏫</div>
+                <h3>教育教师</h3>
+              </div>
+              <div
+                className={`role-option ${formData.role === 2 ? 'selected' : ''}`}
+                onClick={() => handleRoleChange(2)}
+              >
+                <div className="role-icon">👧</div>
+                <h3>儿童/学生</h3>
+              </div>
+              <div
+                className={`role-option ${formData.role === 3 ? 'selected' : ''}`}
+                onClick={() => handleRoleChange(3)}
+              >
+                <div className="role-icon">👨‍👩‍👧</div>
+                <h3>家长/监护人</h3>
+              </div>
+              <div
+                className={`role-option ${formData.role === 4 ? 'selected' : ''}`}
+                onClick={() => handleRoleChange(4)}
+              >
+                <div className="role-icon">👨‍💼</div>
+                <h3>管理员</h3>
+              </div>
             </div>
           </div>
-        </div>
-        <button type="submit" className="btn-primary">注册</button>
-        <div className="form-links">
-          <Link to="/login">已有账号，去登录</Link>
-          <Link to="/">返回首页</Link>
-        </div>
-      </form>
+          <button 
+            type="submit" 
+            className="btn-submit"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="loader"></div>
+                注册中...
+              </>
+            ) : (
+              <>
+                <span>✨</span>
+                注册
+              </>
+            )}
+          </button>
+          <div className="form-links">
+            <Link to="/login" className="link-item">
+              <span>🔑</span>
+              已有账号，去登录
+            </Link>
+            <Link to="/" className="link-item">
+              <span>🏠</span>
+              返回首页
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
