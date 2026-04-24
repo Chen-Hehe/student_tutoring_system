@@ -68,6 +68,13 @@ logging:
   level:
     com.tutoring: debug
     org.springframework.web: info
+    org.springframework.security: debug
+
+# Spring MVC Configuration
+spring:
+  mvc:
+    static-path-pattern: /**
+    add-mappings: true
 
 # AI Match Configuration
 ai:
