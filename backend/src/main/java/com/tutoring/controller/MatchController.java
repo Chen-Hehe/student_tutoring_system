@@ -1,10 +1,13 @@
 package com.tutoring.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tutoring.dto.MatchRequest;
 import com.tutoring.dto.MatchResponse;
 import com.tutoring.dto.AIRecommendationResponse;
 import com.tutoring.dto.MatchStatisticsDTO;
 import com.tutoring.dto.Result;
+import com.tutoring.entity.Teacher;
+import com.tutoring.repository.TeacherRepository;
 import com.tutoring.service.MatchService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,11 +21,12 @@ import java.util.Map;
  * 匹配管理控制器
  */
 @RestController
-@RequestMapping("/api/matches")
+@RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
 public class MatchController {
     
     private final MatchService matchService;
+    private final TeacherRepository teacherRepository;
     
     /**
      * 获取教师的匹配列表（通过路径参数）
@@ -41,18 +45,20 @@ public class MatchController {
     }
     
     /**
-     * 获取教师的匹配列表（通过查询参数）
+     * 获取教师的匹配列表（通过请求属性）
      *
-     * @param userId 用户 ID
+     * @param request 请求对象
      * @return 匹配列表
      */
     @GetMapping("/teacher")
-    public Result<List<MatchResponse>> getTeacherMatches(@RequestParam(required = false) Long userId) {
+    public Result<List<MatchResponse>> getTeacherMatches(HttpServletRequest request) {
         try {
-            if (userId == null) {
-                return Result.error(400, "用户ID不能为空");
+            Object teacherIdObj = request.getAttribute("X-User-Id");
+            if (teacherIdObj == null) {
+                return Result.error(400, "教师ID不能为空");
             }
-            List<MatchResponse> matches = matchService.getTeacherMatches(userId);
+            Long teacherId = Long.parseLong(teacherIdObj.toString());
+            List<MatchResponse> matches = matchService.getTeacherMatches(teacherId);
             return Result.success(matches);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
@@ -204,13 +210,28 @@ public class MatchController {
     /**
      * 获取 AI 推荐的学生列表（教师视角）
      *
-     * @param userId 用户 ID
+     * @param userId 用户 ID (从 Token 中解析)
      * @return 推荐学生列表
      */
-    @GetMapping("/recommendations/teacher/{userId}")
-    public Result<List<AIRecommendationResponse>> getTeacherRecommendations(@PathVariable Long userId) {
+    @GetMapping("/recommendations/teacher")
+    public Result<List<AIRecommendationResponse>> getTeacherRecommendations(
+            @RequestAttribute(value = "X-User-Id", required = false) Long userId) {
         try {
-            List<AIRecommendationResponse> recommendations = matchService.getTeacherRecommendations(userId);
+            // 如果未提供用户 ID，使用默认值 1001（教师账号）
+            if (userId == null) {
+                userId = 1001L;
+            }
+            
+            // 根据用户 ID 获取教师信息
+            List<Teacher> teachers = teacherRepository.selectList(
+                new LambdaQueryWrapper<Teacher>().eq(Teacher::getUserId, userId));
+            
+            if (teachers.isEmpty()) {
+                return Result.error(404, "教师信息不存在");
+            }
+            
+            Teacher teacher = teachers.get(0);
+            List<AIRecommendationResponse> recommendations = matchService.getTeacherRecommendations(teacher.getId());
             return Result.success(recommendations);
         } catch (RuntimeException e) {
             return Result.error(500, e.getMessage());
