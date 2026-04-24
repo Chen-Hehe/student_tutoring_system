@@ -18,7 +18,7 @@ import java.util.Map;
  * 匹配管理控制器
  */
 @RestController
-@RequestMapping("/api/matches")
+@RequestMapping("/api/v1/matches")
 @RequiredArgsConstructor
 public class MatchController {
     

@@ -5,7 +5,7 @@ import request from '../utils/request'
  */
 export function getStudentMatches(studentId) {
   return request({
-    url: `/api/matches/student/${studentId}`,
+    url: `/api/v1/matches/student/${studentId}`,
     method: 'get'
   })
 }
@@ -26,7 +26,7 @@ export function createMatchRequest(data) {
  */
 export function acceptMatch(matchId, userId, userType = 'student') {
   return request({
-    url: `/api/matches/${matchId}/accept`,
+    url: `/api/v1/matches/${matchId}/accept`,
     method: 'post',
     data: {
       userId,
@@ -40,7 +40,7 @@ export function acceptMatch(matchId, userId, userType = 'student') {
  */
 export function rejectMatch(matchId, userId, userType = 'student') {
   return request({
-    url: `/api/matches/${matchId}/reject`,
+    url: `/api/v1/matches/${matchId}/reject`,
     method: 'post',
     data: {
       userId,
@@ -54,7 +54,7 @@ export function rejectMatch(matchId, userId, userType = 'student') {
  */
 export function cancelMatchRequest(matchId) {
   return request({
-    url: `/api/matches/${matchId}/cancel`,
+    url: `/api/v1/matches/${matchId}/cancel`,
     method: 'post'
   })
 }
@@ -74,7 +74,7 @@ export function getTeacherRecommendations(studentId) {
  */
 export function acceptAIRecommendation(teacherId, studentId, message = '') {
   return request({
-    url: '/api/matches',
+    url: '/api/v1/matches',
     method: 'post',
     data: {
       teacherId,
