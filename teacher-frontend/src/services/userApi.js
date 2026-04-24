@@ -14,7 +14,7 @@ export const userAPI = {
     if (role !== undefined && role !== null) {
       params.role = role
     }
-    return api.get('/api/auth/users/list', { params })
+    return api.get('/auth/users/list', { params })
   }
 }
 

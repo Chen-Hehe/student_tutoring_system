@@ -8,14 +8,14 @@ export const matchAPI = {
    * 获取教师的匹配列表
    */
   getTeacherMatches: () => {
-    return api.get('/api/matches/teacher')
+    return api.get('/matches/teacher')
   },
 
   /**
    * 获取 AI 推荐的学生列表
    */
   getTeacherRecommendations: () => {
-    return api.get('/api/matches/recommendations/teacher')
+    return api.get('/matches/recommendations/teacher')
   },
 
   /**
@@ -57,6 +57,6 @@ export const matchAPI = {
    * 获取匹配统计数据
    */
   getStatistics: () => {
-    return api.get('/api/matches/statistics')
+    return api.get('/matches/statistics')
   }
 }

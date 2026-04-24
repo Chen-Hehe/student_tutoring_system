@@ -54,3 +54,4 @@ backend/target/
 docs/
 backend/uploads/resources/
 test/
+backend/src/main/resources/application.yml
