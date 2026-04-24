@@ -1,18 +1,119 @@
-import { Card, Row, Col, Progress, Statistic, Table, Tag, Spin } from 'antd'
-import { useSelector } from 'react-redux'
+import { Card, Row, Col, Progress, Statistic, Table, Tag, Spin, Button, message } from 'antd'
+import { useSelector, useDispatch } from 'react-redux'
+import { useEffect, useState } from 'react'
 import {
   BookOutlined,
   UsergroupAddOutlined,
   HeartOutlined,
   ClockCircleOutlined,
+  CheckOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
+import api from '../services/api'
 
 const Dashboard = () => {
   const currentUser = useSelector((state) => state.auth.user)
-  const learningProgress = 65
-  const activeCourses = 3
-  const upcomingCourses = 2
-  const psychologicalStatus = '良好'
+  const [learningProgress, setLearningProgress] = useState(0)
+  const [activeCourses, setActiveCourses] = useState(0)
+  const [upcomingCourses, setUpcomingCourses] = useState(0)
+  const [psychologicalStatus, setPsychologicalStatus] = useState('')
+  const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // 获取学生数据
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchStudentData()
+      fetchTasks()
+    }
+  }, [currentUser])
+
+  // 模拟获取学生学习数据
+  const fetchStudentData = async () => {
+    try {
+      // 这里应该调用真实的API获取数据
+      // 暂时使用模拟数据
+      setActiveCourses(3)
+      setUpcomingCourses(2)
+      setPsychologicalStatus('良好')
+    } catch (error) {
+      console.error('获取学生数据失败:', error)
+    }
+  }
+
+  // 计算学习进度（基于任务完成情况）
+  const calculateLearningProgress = (tasks) => {
+    if (tasks.length === 0) return 0
+    const completedTasks = tasks.filter(task => task.status === 'completed').length
+    return Math.round((completedTasks / tasks.length) * 100)
+  }
+
+  // 获取任务数据
+  const fetchTasks = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get(`/tasks/student/${currentUser.id}`)
+      const formattedTasks = response.map(task => ({
+        key: task.id,
+        id: task.id,
+        title: task.title,
+        dueDate: new Date(task.dueDate).toLocaleString('zh-CN'),
+        status: task.status
+      }))
+      setTasks(formattedTasks)
+      // 根据任务完成情况计算学习进度
+      const progress = calculateLearningProgress(formattedTasks)
+      setLearningProgress(progress)
+    } catch (error) {
+      console.error('获取任务数据失败:', error)
+      // 如果API调用失败，使用模拟数据
+      const mockTasks = [
+        { key: '1', id: 1, title: '完成数学作业', dueDate: '2026-04-01', status: 'pending' },
+        { key: '2', id: 2, title: '阅读英语课文', dueDate: '2026-03-30', status: 'completed' },
+        { key: '3', id: 3, title: '参加线上辅导', dueDate: '2026-03-31 14:00', status: 'pending' },
+      ]
+      setTasks(mockTasks)
+      // 根据模拟任务计算学习进度
+      const progress = calculateLearningProgress(mockTasks)
+      setLearningProgress(progress)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 完成任务
+  const handleCompleteTask = async (taskId) => {
+    try {
+      await api.put(`/tasks/${taskId}`, { status: 'completed' })
+      const updatedTasks = tasks.map(task => 
+        task.id === taskId ? { ...task, status: 'completed' } : task
+      )
+      setTasks(updatedTasks)
+      // 重新计算学习进度
+      const progress = calculateLearningProgress(updatedTasks)
+      setLearningProgress(progress)
+      message.success('任务已完成')
+    } catch (error) {
+      console.error('完成任务失败:', error)
+      message.error('完成任务失败')
+    }
+  }
+
+  // 删除任务
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await api.delete(`/tasks/${taskId}`)
+      const updatedTasks = tasks.filter(task => task.id !== taskId)
+      setTasks(updatedTasks)
+      // 重新计算学习进度
+      const progress = calculateLearningProgress(updatedTasks)
+      setLearningProgress(progress)
+      message.success('任务已删除')
+    } catch (error) {
+      console.error('删除任务失败:', error)
+      message.error('删除任务失败')
+    }
+  }
 
   const taskColumns = [
     {
@@ -35,12 +136,32 @@ const Dashboard = () => {
         return <Tag style={{ backgroundColor: color, border: 'none', color: '#fff' }}>{text}</Tag>
       },
     },
-  ]
-
-  const tasks = [
-    { key: '1', title: '完成数学作业', dueDate: '2026-04-01', status: 'pending' },
-    { key: '2', title: '阅读英语课文', dueDate: '2026-03-30', status: 'completed' },
-    { key: '3', title: '参加线上辅导', dueDate: '2026-03-31 14:00', status: 'pending' },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_, record) => (
+        <div style={{ display: 'flex', gap: 8 }}>
+          {record.status === 'pending' && (
+            <Button 
+              type="primary" 
+              size="small" 
+              icon={<CheckOutlined />} 
+              onClick={() => handleCompleteTask(record.id)}
+            >
+              完成
+            </Button>
+          )}
+          <Button 
+            danger 
+            size="small" 
+            icon={<DeleteOutlined />} 
+            onClick={() => handleDeleteTask(record.id)}
+          >
+            删除
+          </Button>
+        </div>
+      ),
+    },
   ]
 
   const cardStyle = {
@@ -177,12 +298,15 @@ const Dashboard = () => {
             backgroundColor: '#fff'
           }}
         >
-          <Table 
-            columns={taskColumns} 
-            dataSource={tasks} 
-            pagination={false}
-            size="small"
-          />
+          <Spin spinning={loading} tip="加载任务中...">
+            <Table 
+              columns={taskColumns} 
+              dataSource={tasks} 
+              pagination={false}
+              size="small"
+              locale={{ emptyText: '暂无任务' }}
+            />
+          </Spin>
         </Card>
 
         {/* 快捷操作 */}
