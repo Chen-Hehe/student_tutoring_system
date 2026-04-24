@@ -4,7 +4,8 @@ import { CustomerServiceOutlined } from '@ant-design/icons'
 import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
 import CounselorChatModal from '../components/CounselorChatModal'
-const { PsychologicalStatus = () => {
+
+const PsychologicalStatus = () => {
   const currentUser = useSelector((state) => state.auth.user)
   const [selectedChild, setSelectedChild] = useState(null)
   const [children, setChildren] = useState([])
