@@ -228,7 +228,6 @@ const AIRecommendation = () => {
           </>
         )}
       </div>
-      </div>
     </div>
   )
 }
