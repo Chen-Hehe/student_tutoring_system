@@ -26,30 +26,30 @@ public class TaskController {
     // 创建新任务
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        Task savedTask = taskRepository.save(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
+        taskRepository.insert(task);
+        return ResponseEntity.status(HttpStatus.CREATED).body(task);
     }
 
     // 更新任务状态
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTaskStatus(@PathVariable Long id, @RequestBody Task task) {
-        Task existingTask = taskRepository.findById(id).orElse(null);
+        Task existingTask = taskRepository.selectById(id);
         if (existingTask == null) {
             return ResponseEntity.notFound().build();
         }
         existingTask.setStatus(task.getStatus());
-        Task updatedTask = taskRepository.save(existingTask);
-        return ResponseEntity.ok(updatedTask);
+        taskRepository.updateById(existingTask);
+        return ResponseEntity.ok(existingTask);
     }
 
     // 删除任务
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        Task existingTask = taskRepository.findById(id).orElse(null);
+        Task existingTask = taskRepository.selectById(id);
         if (existingTask == null) {
             return ResponseEntity.notFound().build();
         }
-        taskRepository.delete(existingTask);
+        taskRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

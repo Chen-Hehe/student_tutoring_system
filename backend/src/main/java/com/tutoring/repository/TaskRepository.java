@@ -1,12 +1,16 @@
 package com.tutoring.repository;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tutoring.entity.Task;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-@Repository
-public interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> findByStudentId(Long studentId);
+@Mapper
+public interface TaskRepository extends BaseMapper<Task> {
+    
+    @Select("SELECT * FROM tasks WHERE student_id = #{studentId}")
+    List<Task> findByStudentId(@Param("studentId") Long studentId);
 }
