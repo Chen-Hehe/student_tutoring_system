@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Card, Row, Col, Progress, Avatar, Button, Modal, Input, message } from 'antd'
+import { CustomerServiceOutlined } from '@ant-design/icons'
 import { useSelector } from 'react-redux'
 import { parentAPI } from '../services/parentApi'
+import CounselorChatModal from '../components/CounselorChatModal'
 const { TextArea } = Input
 const PsychologicalStatus = () => {
   const currentUser = useSelector((state) => state.auth.user)
@@ -15,6 +17,7 @@ const PsychologicalStatus = () => {
   const [currentStatus, setCurrentStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [counselors, setCounselors] = useState([])
+  const [isAIModalVisible, setIsAIModalVisible] = useState(false)
 
   useEffect(() => {
     const fetchCounselors = async () => {
@@ -315,6 +318,52 @@ const PsychologicalStatus = () => {
             
             <div style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
               <h3 style={{ marginBottom: 15, color: '#333' }}>推荐心理辅导员</h3>
+              
+              {/* AI 心理辅导员按钮 */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 15, 
+                marginBottom: 15,
+                padding: '15px',
+                backgroundColor: '#fff',
+                borderRadius: 8,
+                border: '2px solid #FF9800'
+              }}>
+                <Avatar 
+                  style={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    backgroundColor: '#FF9800', 
+                    color: 'white', 
+                    fontWeight: 'bold',
+                    fontSize: '1.5em'
+                  }}
+                >
+                  🤖
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ marginBottom: 5 }}>AI 心理辅导员</h4>
+                  <p style={{ color: '#666', fontSize: '0.9em' }}>7×24 小时在线，即时解答您的育儿困惑</p>
+                </div>
+                <Button 
+                  type="primary"
+                  icon={<CustomerServiceOutlined />}
+                  style={{ 
+                    backgroundColor: '#FF9800', 
+                    borderColor: '#FF9800',
+                    fontWeight: 'bold',
+                    padding: '8px 16px',
+                    borderRadius: 5,
+                    fontSize: '14px'
+                  }}
+                  onClick={() => setIsAIModalVisible(true)}
+                >
+                  💛 沟通
+                </Button>
+              </div>
+              
               {counselors.map(counselor => (
                 <div key={counselor.id} style={{ display: 'flex', alignItems: 'center', gap: 15, marginBottom: 15 }}>
                   <Avatar 
@@ -450,7 +499,14 @@ const PsychologicalStatus = () => {
           </Button>
         </div>
       </Modal>
+
+      {/* AI 心理辅导员聊天弹窗 */}
+      <CounselorChatModal
+        open={isAIModalVisible}
+        onClose={() => setIsAIModalVisible(false)}
+      />
     </div>
   )
 }
+
 export default PsychologicalStatus
