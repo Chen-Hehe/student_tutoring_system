@@ -1,17 +1,17 @@
 /*
- Navicat Premium Data Transfer
+ Navicat Premium Dump SQL
 
- Source Server         : localhost_3306
+ Source Server         : root
  Source Server Type    : MySQL
- Source Server Version : 80044 (8.0.44)
+ Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
  Source Schema         : tutoring
 
  Target Server Type    : MySQL
- Target Server Version : 80044 (8.0.44)
+ Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 23/04/2026 23:44:59
+ Date: 24/04/2026 10:34:34
 */
 
 SET NAMES utf8mb4;
@@ -34,7 +34,7 @@ CREATE TABLE `ai_matches`  (
   INDEX `idx_teacher_id`(`teacher_id` ASC) USING BTREE,
   CONSTRAINT `ai_matches_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `ai_matches_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI ?????' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'AI ?????' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ai_matches
@@ -56,7 +56,7 @@ CREATE TABLE `announcements`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` int NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of announcements
@@ -229,6 +229,7 @@ INSERT INTO `chat_records` VALUES (2046984556707291137, 2001, 1001, '008', 1, NU
 INSERT INTO `chat_records` VALUES (2046984570670129153, 1001, 2001, '009', 1, NULL, '2026-04-23 00:08:47', 1, 0, NULL, NULL);
 INSERT INTO `chat_records` VALUES (2047168356897120258, 2001, 1001, '老师在吗', 1, NULL, '2026-04-23 12:19:05', 1, 0, '2026-04-23 12:21:45', 2001);
 INSERT INTO `chat_records` VALUES (2047169234790113282, 1001, 2001, '你发啥啊', 1, NULL, '2026-04-23 12:22:35', 1, 0, NULL, NULL);
+INSERT INTO `chat_records` VALUES (2047485360355254274, 1001, 2001, '????', 1, NULL, '2026-04-24 09:18:45', 0, 0, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for grade_records
@@ -245,7 +246,7 @@ CREATE TABLE `grade_records`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `report_id`(`report_id` ASC) USING BTREE,
   CONSTRAINT `grade_records_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `learning_reports` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of grade_records
@@ -276,7 +277,7 @@ CREATE TABLE `learning_materials`  (
   `deleted` tinyint NULL DEFAULT 0,
   `tags` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of learning_materials
@@ -310,7 +311,7 @@ CREATE TABLE `learning_progress`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `report_id`(`report_id` ASC) USING BTREE,
   CONSTRAINT `learning_progress_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `learning_reports` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of learning_progress
@@ -339,7 +340,7 @@ CREATE TABLE `learning_reports`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `student_id`(`student_id` ASC) USING BTREE,
   CONSTRAINT `learning_reports_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of learning_reports
@@ -368,7 +369,7 @@ CREATE TABLE `learning_resources`  (
   INDEX `idx_uploader_id`(`uploader_id` ASC) USING BTREE,
   INDEX `idx_category`(`category` ASC) USING BTREE,
   INDEX `idx_created_at`(`created_at` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '?????' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of learning_resources
@@ -398,7 +399,7 @@ CREATE TABLE `parent_student_relations`  (
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted` int NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of parent_student_relations
@@ -420,7 +421,7 @@ CREATE TABLE `parents`  (
   `user_id` bigint NULL DEFAULT NULL,
   `deleted` int NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of parents
@@ -449,7 +450,7 @@ CREATE TABLE `psychological_assessment_details`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `assessment_id`(`assessment_id` ASC) USING BTREE,
   CONSTRAINT `psychological_assessment_details_ibfk_1` FOREIGN KEY (`assessment_id`) REFERENCES `psychological_assessments` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 29 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of psychological_assessment_details
@@ -493,7 +494,7 @@ CREATE TABLE `psychological_assessments`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `student_id`(`student_id` ASC) USING BTREE,
   CONSTRAINT `psychological_assessments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of psychological_assessments
@@ -531,7 +532,7 @@ CREATE TABLE `psychological_statuses`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `student_id`(`student_id` ASC) USING BTREE,
   CONSTRAINT `psychological_statuses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of psychological_statuses
@@ -563,7 +564,7 @@ CREATE TABLE `students`  (
   `psychological_status` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `deleted` int NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of students
@@ -578,6 +579,31 @@ INSERT INTO `students` VALUES (200002, 2039590681416687617, 14, 'Grade 8', 'Shan
 INSERT INTO `students` VALUES (200003, 2039590682008084481, 16, 'Grade 10', 'Guangzhou Yucai High School', 'Tianhe District, Guangzhou', 'Needs Chinese composition and math tutoring', 'Active, needs focus improvement', 0);
 INSERT INTO `students` VALUES (200004, 2039590682595287042, 13, 'Grade 7', 'Shenzhen Nanshan Foreign Language School', 'Nanshan District, Shenzhen', 'All subjects tutoring, especially English basics', 'Quiet and well-behaved, studies seriously', 0);
 INSERT INTO `students` VALUES (200005, 2039590683048271874, 15, 'Grade 9', 'Hangzhou No.2 High School', 'Xihu District, Hangzhou', 'Needs math and physics competition coaching', 'Smart and eager to learn, has competition talent', 0);
+
+-- ----------------------------
+-- Table structure for tasks
+-- ----------------------------
+DROP TABLE IF EXISTS `tasks`;
+CREATE TABLE `tasks`  (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `student_id` bigint NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  `due_date` datetime NOT NULL,
+  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tasks
+-- ----------------------------
+INSERT INTO `tasks` VALUES (1, 1, '完成数学作业', '完成第三章练习', '2026-04-01 23:59:59', 'pending', '2026-04-24 10:14:24', '2026-04-24 10:14:24');
+INSERT INTO `tasks` VALUES (2, 1, '阅读英语课文', '阅读Unit 5课文', '2026-03-30 23:59:59', 'completed', '2026-04-24 10:14:24', '2026-04-24 10:14:24');
+INSERT INTO `tasks` VALUES (3, 1, '参加线上辅导', '数学线上辅导课程', '2026-03-31 14:00:00', 'pending', '2026-04-24 10:14:24', '2026-04-24 10:14:24');
+INSERT INTO `tasks` VALUES (4, 2, '完成物理实验报告', '提交实验三的报告', '2026-04-02 23:59:59', 'pending', '2026-04-24 10:14:24', '2026-04-24 10:14:24');
+INSERT INTO `tasks` VALUES (5, 2, '复习历史知识点', '复习近代史重要事件', '2026-03-29 23:59:59', 'completed', '2026-04-24 10:14:24', '2026-04-24 10:14:24');
 
 -- ----------------------------
 -- Table structure for teacher_communications
@@ -600,7 +626,7 @@ CREATE TABLE `teacher_communications`  (
   CONSTRAINT `teacher_communications_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parents` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `teacher_communications_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `teacher_communications_ibfk_3` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of teacher_communications
@@ -635,7 +661,7 @@ CREATE TABLE `teacher_student_matches`  (
   INDEX `idx_status`(`status` ASC) USING BTREE,
   CONSTRAINT `teacher_student_matches_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `teacher_student_matches_ibfk_2` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '?????' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '?????' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of teacher_student_matches
@@ -666,7 +692,7 @@ CREATE TABLE `teachers`  (
   `availability` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `deleted` int NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of teachers
